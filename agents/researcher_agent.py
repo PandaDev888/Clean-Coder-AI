@@ -86,7 +86,7 @@ def after_agent_condition(state):
 
 
 class Researcher():
-    def __init__(self, work_dir):
+    def __init__(self, work_dir, docrag="off"):
         see_file = prepare_see_file_tool(work_dir)
         list_dir = prepare_list_dir_tool(work_dir)
         self.tools = [see_file, list_dir, final_response_researcher]
