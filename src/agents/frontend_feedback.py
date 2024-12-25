@@ -79,13 +79,9 @@ class ScreenshotCodingV2(BaseModel):
         default=None,
         description="If you have missing info about some endpoint/selector/other important element name, ask about it here. If everything clear, questions are not needed."
     )
-    screenshot_code: [str] = Field(description="""
+    screenshot_code: str = Field(description="""
     Provide here your playwright code for a screenshot or write "No screenshot needed".
     """)
-    halucinated_items: Optional[str] = Field(
-        default=None,
-        description="write here names of selectors/endpoints etc. you imagined in your code as you had no true reference informations. We'll try to find proper names for them"
-    )
 
 task = """Create Page for Intern Profile Editing
 1. Implement a new page in the frontend where interns can update their profile information.
@@ -327,10 +323,10 @@ def write_screenshot_codes(task, plan, work_dir):
     screenshots_descriptions_formatted = str(screenshot_descriptions)
 
     # fulfill the missing information
-    if questions:
-        file_answerer = ResearchFileAnswerer(work_dir=work_dir)
-        answers = file_answerer.research_and_answer(questions)
-        screenshots_descriptions_formatted += f"\nAdditional info:\n{str(answers)}"
+    # if questions:
+    #     file_answerer = ResearchFileAnswerer(work_dir=work_dir)
+    #     answers = file_answerer.research_and_answer(questions)
+    #     screenshots_descriptions_formatted += f"\nAdditional info:\n{str(answers)}"
 
     codes_prompt = prompt_template.format(story=story, plan=plan, screenshots=screenshots_descriptions_formatted)
 
@@ -369,17 +365,12 @@ def write_screenshot_codes_v2(task, plan, work_dir):
     llm_ff = llm.with_structured_output(ScreenshotCodingV2).with_config({"run_name": "VFeedback"})
     response = llm_ff.invoke(prompt)
 
-    screenshot_descriptions = response.screenshot_descriptions
-    # if not screenshot_descriptions:
-    #     return None, None
-    #
     questions = response.questions
     # fulfill the missing information
     if questions:
         file_answerer = ResearchFileAnswerer(work_dir=work_dir)
         answers = file_answerer.research_and_answer(questions)
 
-    playwright_codes = response.screenshot_codes
     playwright_start = """
 from playwright.sync_api import sync_playwright
 
@@ -395,12 +386,10 @@ except Exception as e:
 browser.close()
 p.stop()
 """
-    playwright_codes_list = []
-    for playwright_code in playwright_codes:
-        indented_playwright_code = textwrap.indent(playwright_code, '    ')
-        code = playwright_start + indented_playwright_code + playwright_end
-        playwright_codes_list.append(code)
-    return playwright_codes_list, screenshot_descriptions
+
+    indented_playwright_code = textwrap.indent(response.screenshot_code, '    ')
+    code = playwright_start + indented_playwright_code + playwright_end
+    return code
 
 
 def execute_screenshot_codes(playwright_codes_list, screenshot_descriptions):
