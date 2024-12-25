@@ -405,7 +405,7 @@ browser.close()
 p.stop()
 """
     playwright_codes_list = []
-    for playwright_code in playwright_codes.screenshot_codes:
+    for playwright_code in playwright_codes:
         indented_playwright_code = textwrap.indent(playwright_code, '    ')
         code = playwright_start + indented_playwright_code + playwright_end
         playwright_codes_list.append(code)
