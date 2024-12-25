@@ -35,6 +35,8 @@ with open(f"{parent_dir}/prompts/frontend_feedback_code_writing.prompt", "r") as
     prompt_template = f.read()
 with open(f"{parent_dir}/prompts/frontend_feedback_scenarios_planning.prompt", "r") as f:
     scenarios_planning_prompt_template = f.read()
+with open(f"{parent_dir}/prompts/frontend_feedback.prompt", "r") as f:
+    frontend_feedback_prompt_template = f.read()
 
 
 class ScreenshotDescriptionsStructure(BaseModel):
@@ -67,6 +69,32 @@ Provide here your playwright codes for each screenshot.
         description="write here names of selectors/endpoints etc. you imagined as you had no true reference informations."
     )
 
+
+class ScreenshotCodingV2(BaseModel):
+    """Output structure"""
+    analysis: str = Field(description="""
+    1. Summarize the task given to the programmer
+    2. Break down the programmer's plan into key steps
+    3. Identify which steps potentially affect the frontend
+    4. List potential frontend elements that might be changed
+    5. Determine the minimum number of screenshots needed to verify the changes
+    6. Think if we can get rid of some of them
+    [Explain your thought process for each step]
+    """)
+    questions: Optional[str] = Field(
+        default=None,
+        description="[List questions you have about missing information here.]"
+    )
+    screenshot_descriptions: Optional[List[str]] = Field(default=None, description="""
+    ['Clear instruction for the first screenshot', 'Clear instruction for the second screenshot, if needed', ...]
+    """)
+    screenshot_codes: Optional[List[str]] = Field(default=None, description="""
+    Provide here your playwright codes for each screenshot.
+    """)
+    halucinated_items: Optional[str] = Field(
+        default=None,
+        description="write here names of selectors/endpoints etc. you imagined in your code as you had no true reference informations. We'll try to find proper names for them"
+    )
 
 task = """Create Page for Intern Profile Editing
 1. Implement a new page in the frontend where interns can update their profile information.
@@ -339,6 +367,51 @@ p.stop()
     return playwright_codes_list, screenshot_descriptions
 
 
+def write_screenshot_codes_v2(task, plan, work_dir):
+    story = read_frontend_feedback_story()
+    story = story.format(frontend_port=os.environ["FRONTEND_PORT"])
+    prompt = frontend_feedback_prompt_template.format(
+        task=task,
+        plan=plan,
+        story=story,
+    )
+    llm_ff = llm.with_structured_output(ScreenshotCodingV2).with_config({"run_name": "VFeedback"})
+    response = llm_ff.invoke(prompt)
+
+    screenshot_descriptions = response.screenshot_descriptions
+    # if not screenshot_descriptions:
+    #     return None, None
+    #
+    questions = response.questions
+    # fulfill the missing information
+    if questions:
+        file_answerer = ResearchFileAnswerer(work_dir=work_dir)
+        answers = file_answerer.research_and_answer(questions)
+
+    playwright_codes = response.screenshot_codes
+    playwright_start = """
+from playwright.sync_api import sync_playwright
+
+p = sync_playwright().start()
+browser = p.chromium.launch(headless=False)
+page = browser.new_page()
+try:
+"""
+    playwright_end = """
+    output = page.screenshot()
+except Exception as e:
+    output = f"{type(e).__name__}: {e}"
+browser.close()
+p.stop()
+"""
+    playwright_codes_list = []
+    for playwright_code in playwright_codes.screenshot_codes:
+        indented_playwright_code = textwrap.indent(playwright_code, '    ')
+        code = playwright_start + indented_playwright_code + playwright_end
+        playwright_codes_list.append(code)
+    return playwright_codes_list, screenshot_descriptions
+
+
 def execute_screenshot_codes(playwright_codes_list, screenshot_descriptions):
     output_message_content = []
 
@@ -367,4 +440,4 @@ def execute_screenshot_codes(playwright_codes_list, screenshot_descriptions):
 
 
 if __name__ == "__main__":
-    write_screenshot_codes(task, plan, work_dir="nothing")
+    write_screenshot_codes_v2(task, plan, work_dir="nothing")
