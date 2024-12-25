@@ -18,9 +18,12 @@ load_dotenv(find_dotenv())
 
 llms_planners = []
 if os.getenv("OPENAI_API_KEY"):
-    llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
+    llms_planners.append(ChatOpenAI(model="gpt-4o", temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
+# if os.getenv("OPENAI_API_KEY"):
+#     # temperature=1 is walkaround as o1 not accepts any temperature
+#     llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
 if os.getenv("OPENROUTER_API_KEY"):
-    llms_planners.append(llm_open_router("openai/o1").with_config({"run_name": "Planer"}))
+    llms_planners.append(llm_open_router("openai/gpt-4o").with_config({"run_name": "Planer"}))
 if os.getenv("ANTHROPIC_API_KEY"):
     llms_planners.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
 if os.getenv("OLLAMA_MODEL"):
