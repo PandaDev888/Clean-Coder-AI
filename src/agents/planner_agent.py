@@ -1,6 +1,6 @@
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
-from typing import TypedDict, Annotated, Sequence
+from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
