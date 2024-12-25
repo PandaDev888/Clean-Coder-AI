@@ -392,29 +392,24 @@ p.stop()
     return code
 
 
-def execute_screenshot_codes(playwright_codes_list, screenshot_descriptions):
-    output_message_content = []
+def execute_screenshot_codes(playwright_code):
+    code_execution_variables = {}
+    exec(playwright_code, {}, code_execution_variables)
+    screenshot_bytes = code_execution_variables["output"]
+    if isinstance(screenshot_bytes, str):
+        # in case of error instead of screenshot_bytes
+        output_message_content = ([{"type": "text", "text": screenshot_bytes}])
+        return HumanMessage(content=output_message_content, contains_screenshots=True)
 
-    for i, code in enumerate(playwright_codes_list):
-        screenshot_description = screenshot_descriptions[i]
-        code_execution_variables = {}
-        exec(code, {}, code_execution_variables)
-        screenshot_bytes = code_execution_variables["output"]
-        if isinstance(screenshot_bytes, str):
-            # in case of error instead of screenshot_bytes
-            output_message_content.extend([{"type": "text", "text": screenshot_description}, {"type": "text", "text": screenshot_bytes}])
-            continue
-
-        screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
-        output_message_content.extend([
-            {"type": "text", "text": f"See the screenshot with description:{screenshot_description}"},
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/png;base64,{screenshot_base64}",
-                },
+    screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+    output_message_content = ([
+        {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/png;base64,{screenshot_base64}",
             },
-        ])
+        },
+    ])
 
     return HumanMessage(content=output_message_content, contains_screenshots=True)
 
