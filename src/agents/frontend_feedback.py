@@ -62,6 +62,10 @@ class ScreenshotCodesStructure(BaseModel):
     screenshot_codes: List[str] = Field(description="""
 Provide here your playwright codes for each screenshot.
 """)
+    questions: Optional[str] = Field(
+        default=None,
+        description="write here names of selectors/endpoints etc. you imagined as you had no true reference informations."
+    )
 
 
 task = """Create Page for Intern Profile Editing
@@ -363,6 +367,4 @@ def execute_screenshot_codes(playwright_codes_list, screenshot_descriptions):
 
 
 if __name__ == "__main__":
-    codes = []
-
-    execute_screenshot_codes(codes, ["scr1", "scr2"])
+    write_screenshot_codes(task, plan, work_dir="nothing")
