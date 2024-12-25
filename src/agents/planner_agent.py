@@ -18,7 +18,7 @@ load_dotenv(find_dotenv())
 
 llms_planners = []
 if os.getenv("OPENAI_API_KEY"):
-    llms_planners.append(ChatOpenAI(model="o1", temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
+    llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
 if os.getenv("OPENROUTER_API_KEY"):
     llms_planners.append(llm_open_router("openai/o1").with_config({"run_name": "Planer"}))
 if os.getenv("ANTHROPIC_API_KEY"):
