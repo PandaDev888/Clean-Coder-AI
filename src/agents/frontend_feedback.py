@@ -73,23 +73,14 @@ Provide here your playwright codes for each screenshot.
 class ScreenshotCodingV2(BaseModel):
     """Output structure"""
     analysis: str = Field(description="""
-    1. Summarize the task given to the programmer
-    2. Break down the programmer's plan into key steps
-    3. Identify which steps potentially affect the frontend
-    4. List potential frontend elements that might be changed
-    5. Determine the minimum number of screenshots needed to verify the changes
-    6. Think if we can get rid of some of them
-    [Explain your thought process for each step]
+    Think which frontend page needed to be sought in order to provide programmer with valuable feedback (if any).
     """)
     questions: Optional[str] = Field(
         default=None,
-        description="[List questions you have about missing information here.]"
+        description="If you have missing info about some endpoint/selector/other important element name, ask about it here. If everything clear, questions are not needed."
     )
-    screenshot_descriptions: Optional[List[str]] = Field(default=None, description="""
-    ['Clear instruction for the first screenshot', 'Clear instruction for the second screenshot, if needed', ...]
-    """)
-    screenshot_codes: Optional[List[str]] = Field(default=None, description="""
-    Provide here your playwright codes for each screenshot.
+    screenshot_code: [str] = Field(description="""
+    Provide here your playwright code for a screenshot or write "No screenshot needed".
     """)
     halucinated_items: Optional[str] = Field(
         default=None,
