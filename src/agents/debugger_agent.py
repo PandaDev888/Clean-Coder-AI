@@ -14,7 +14,7 @@ from src.utilities.util_functions import (
     check_application_logs,
     exchange_file_contents,
     bad_tool_call_looped,
-    read_project_rules,
+    read_coderrules,
     convert_images,
 )
 from src.utilities.llms import init_llms
@@ -52,7 +52,7 @@ class Debugger():
         self.tools = prepare_tools(work_dir)
         self.llms = init_llms(self.tools, "Debugger")
         self.system_message = SystemMessage(
-            content=system_prompt_template.format(project_rules=read_project_rules())
+            content=system_prompt_template.format(project_rules=read_coderrules())
         )
         self.files = files
         self.images = convert_images(image_paths)
@@ -149,8 +149,8 @@ class Debugger():
             self.system_message,
             HumanMessage(content=f"Task: {task}\n\n######\n\nPlan which developer implemented already:\n\n{plan}"),
             HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True),
-            HumanMessage(content=self.images)
-            HumanMessage(content=f"Human feedback: {self.human_feedback}")
+            HumanMessage(content=self.images),
+            HumanMessage(content=f"Human feedback: {self.human_feedback}"),
         ]}
         if self.visual_feedback:
             inputs["messages"].append(self.visual_feedback)

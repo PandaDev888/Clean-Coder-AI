@@ -5,7 +5,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AI
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
-from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_project_rules
+from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 import os
@@ -18,10 +18,10 @@ load_dotenv(find_dotenv())
 
 llms_planners = []
 if os.getenv("OPENAI_API_KEY"):
+    # temperature=1 is walkaround as o1 not accepts any temperature
+    llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
+if os.getenv("OPENAI_API_KEY"):
     llms_planners.append(ChatOpenAI(model="gpt-4o", temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
-# if os.getenv("OPENAI_API_KEY"):
-#     # temperature=1 is walkaround as o1 not accepts any temperature
-#     llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
 if os.getenv("OPENROUTER_API_KEY"):
     llms_planners.append(llm_open_router("openai/gpt-4o").with_config({"run_name": "Planer"}))
 if os.getenv("ANTHROPIC_API_KEY"):
@@ -46,7 +46,7 @@ with open(f"{parent_dir}/prompts/planer_system.prompt", "r") as f:
 with open(f"{parent_dir}/prompts/voter_system.prompt", "r") as f:
     voter_system_prompt_template = f.read()
 
-planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=read_project_rules()))
+planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=read_coderrules()))
 voter_system_message = SystemMessage(content=voter_system_prompt_template)
 
 

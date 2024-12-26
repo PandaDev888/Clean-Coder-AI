@@ -8,7 +8,7 @@ from termcolor import colored
 
 def set_up_env_coder_pipeline():
     envs = {}
-    print(colored("🖐  Hey! Let's set up our project.", color="cyan"))
+    print(colored("🖐  Hey! Let's set up our project variables.", color="cyan"))
     print(colored("1/3. Provide one or more API keys for LLM providers or the local Ollama model. Don't worry, you can always modify them in the .env file.", color="cyan"))
     envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional):\n")
     envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional):\n")
@@ -27,7 +27,7 @@ def set_up_env_coder_pipeline():
 
 def set_up_env_manager():
     envs = {}
-    print(colored("🖐  Hey! Let's set up our project.", color="cyan"))
+    print(colored("🖐  Hey! Let's set up our project variables.", color="cyan"))
     print(colored("1/4. Provide one or more API keys for LLM providers or the local Ollama model. Don't worry, you can always modify them in the .env file.", color="cyan"))
     envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional):\n")
     envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional):\n")

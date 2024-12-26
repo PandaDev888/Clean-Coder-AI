@@ -243,10 +243,18 @@ def create_frontend_feedback_story():
         input("Fulfill file with informations needed for a frontend feedback agent to know. Save file and hit Enter.")
 
 
-def read_project_rules():
-    project_rules_path = os.path.join(Work.dir(), '.cleanrules')
+def read_coderrules():
+    project_rules_path = os.path.join(Work.dir(), '.coderrules')
     if not os.path.exists(project_rules_path):
-        return "Project rules not exist."
+        return create_coderrules(project_rules_path)
     with open(project_rules_path, 'r') as file:
         return file.read()
 
+
+def create_coderrules(coderrules_path):
+    print_formatted("(Optional) Describe your project rules and structure to give AI more context. Check docs to learn how to do it https://clean-coder.dev/features/coderrules/. ", color="blue")
+    rules = input()
+    with open(coderrules_path, 'w', encoding='utf-8') as file:
+        file.write(rules)
+    print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
+    return rules
