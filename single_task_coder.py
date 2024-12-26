@@ -48,7 +48,8 @@ def run_clean_coder_pipeline(task, work_dir):
     human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed.")
     if human_message in ['o', 'ok']:
         return
-    debugger = Debugger(file_paths, work_dir, human_message, first_vfeedback_screenshots_msg, playwright_codes)
+    debugger = Debugger(
+        file_paths, work_dir, human_message,image_paths,  first_vfeedback_screenshots_msg, playwright_codes)
     debugger.do_task(task, plan)
 
 

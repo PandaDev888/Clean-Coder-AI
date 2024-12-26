@@ -11,7 +11,7 @@ setup_work_dir(folder_with_project_files)
 files = get_filenames_in_folder(folder_with_project_files)
 human_feedback = "Human feedback: Remove some code from the styles. It's too much of code now, let's optimize it."
 
-debugger = Debugger(files, "sandbox_work_dir", human_feedback)
+debugger = Debugger(files, "sandbox_work_dir", human_feedback, [])
 
 task = "Make form wider, with green background. Improve styling."
 plan = """To make the form wider and change its background color to green, we need to modify the CSS file `profileEditStyles.css`. Here are the changes needed:

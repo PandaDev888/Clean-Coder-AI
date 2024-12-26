@@ -85,6 +85,7 @@ def call_planer(state):
 
     return state
 
+
 def ask_human_planner(state):
     human_message = user_input("Type (o)k if you accept or provide commentary.")
     if human_message in ['o', 'ok']:

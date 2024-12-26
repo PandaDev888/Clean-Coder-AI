@@ -47,7 +47,7 @@ with open(f"{parent_dir}/prompts/debugger_system.prompt", "r") as f:
 
 
 class Debugger():
-    def __init__(self, files, work_dir, human_feedback, vfeedback_screenshots_msg=None, playwright_code=None, image_paths=None):
+    def __init__(self, files, work_dir, human_feedback, image_paths, vfeedback_screenshots_msg=None, playwright_code=None):
         self.work_dir = work_dir
         self.tools = prepare_tools(work_dir)
         self.llms = init_llms(self.tools, "Debugger")

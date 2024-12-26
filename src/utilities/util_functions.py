@@ -134,13 +134,12 @@ def see_image(filename, work_dir):
 
 
 def convert_images(image_paths):
-    images = [
-                 {"type": "text", "text": image_path}
-                 for image_path in image_paths
-             ] + [
+    images = []
+    for image_path in image_paths:
+        images.extend([
+                 {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
-                 for image_path in image_paths
-             ]
+             ])
 
     return images
 
