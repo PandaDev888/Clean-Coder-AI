@@ -1,6 +1,7 @@
 .env
 .idea/
 .cache/
+.coderrules
 __pycache__/
 env/
 venv/
