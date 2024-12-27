@@ -154,7 +154,7 @@ def get_joke():
     try:
         response = requests.get("https://v2.jokeapi.dev/joke/Programming?type=single")
         # response = requests.get("https://uselessfacts.jsph.pl//api/v2/facts/random")
-        joke = response.json()["joke"] + "\n\n"
+        joke = response.json()["joke"] + "\n"
     except Exception as e:
         joke = f"Failed to receive joke :/"
     return joke

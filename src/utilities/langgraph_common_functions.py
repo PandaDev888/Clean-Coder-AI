@@ -3,7 +3,7 @@ from src.utilities.print_formatters import print_formatted, print_error, print_f
 from src.utilities.util_functions import invoke_tool, invoke_tool_native, TOOL_NOT_EXECUTED_WORD
 from src.utilities.user_input import user_input
 from langgraph.graph import END
-from src.utilities.graphics import loading_animation
+from src.utilities.graphics import LoadingAnimation
 import threading
 import sys
 
@@ -14,20 +14,9 @@ no_tools_msg = TOOL_NOT_EXECUTED_WORD + """Please provide a tool call to execute
 finish_too_early_msg = TOOL_NOT_EXECUTED_WORD + """You want to call final response with other tool calls. Don't you finishing too early?"""
 
 
+animation = LoadingAnimation()
+
 # nodes
-def _start_loading_animation():
-    loading_animation.is_running = True
-    thread = threading.Thread(target=loading_animation)
-    thread.daemon = True
-    thread.start()
-    return thread
-
-
-def _stop_loading_animation(thread):
-    loading_animation.is_running = False
-    thread.join()
-
-
 def _get_llm_response(llms, messages, printing):
     for llm in llms:
         try:
@@ -46,14 +35,12 @@ def _get_llm_response(llms, messages, printing):
 
 def call_model(state, llms, printing=True):
     messages = state["messages"]
-    loading_thread = None
 
     if printing:
-        loading_thread = _start_loading_animation()
-
+        animation.start()
     response = _get_llm_response(llms, messages, printing)
-    if printing and loading_thread:
-        _stop_loading_animation(loading_thread)
+    if printing:
+        animation.stop()
 
     if printing:
         print_formatted_content(response)

@@ -23,7 +23,7 @@ def split_text_and_code(text):
             language = parts[i]
             content = parts[i + 1]
             result.append(('code_snippet', language, content.strip()))
-
+    print(result)
     return result
 
 
@@ -37,6 +37,7 @@ def print_formatted_content_planner(content):
             language = part[1]
             code_content = part[2]
             print_code_snippet(code=code_content, extension=language)
+
 
 def print_formatted_content(response):
     if type(response.content) == str:

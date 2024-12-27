@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.live import Live
-from rich.columns import Columns
+import threading
 import os
 current = os.path.dirname(os.path.realpath(__file__))
 grandparent = os.path.dirname(os.path.dirname(current))
@@ -115,3 +115,89 @@ def task_completed_animation():
         border_style="green"
     )
     console.print(final_panel)
+
+
+class LoadingAnimation:
+    def __init__(self, message="I'm thinking...", color="cyan", interval=0.07):
+        self.message = message
+        self.color = color
+        self.interval = interval
+
+        # Define your frames once in the constructor
+        self.frames = [
+            "🌘🌑🌑🌑🌑🌑🌑🌑",
+            "🌗🌘🌑🌑🌑🌑🌑🌑",
+            "🌖🌗🌘🌑🌑🌑🌑🌑",
+            "🌕🌖🌗🌘🌑🌑🌑🌑",
+            "🌕🌕🌖🌗🌘🌑🌑🌑",
+            "🌕🌕🌕🌖🌗🌘🌑🌑",
+            "🌕🌕🌕🌕🌖🌗🌘🌑",
+            "🌕🌕🌕🌕🌕🌖🌗🌘",
+            "🌕🌕🌕🌕🌕🌕🌖🌗",
+            "🌕🌕🌕🌕🌕🌕🌕🌖",
+            "🌕🌕🌕🌕🌕🌕🌕🌕",
+            "🌔🌕🌕🌕🌕🌕🌕🌕",
+            "🌓🌔🌕🌕🌕🌕🌕🌕",
+            "🌒🌓🌔🌕🌕🌕🌕🌕",
+            "🌑🌒🌓🌔🌕🌕🌕🌕",
+            "🌑🌑🌒🌓🌔🌕🌕🌕",
+            "🌑🌑🌑🌒🌓🌔🌕🌕",
+            "🌑🌑🌑🌑🌒🌓🌔🌕",
+            "🌑🌑🌑🌑🌑🌒🌓🌔",
+            "🌑🌑🌑🌑🌑🌑🌒🌓",
+            "🌑🌑🌑🌑🌑🌑🌑🌒",
+        ]
+
+        # Use an Event to signal the animation thread to stop
+        self._stop_event = threading.Event()
+        self._thread = None
+
+    def _animate(self):
+        """
+        Private method that performs the animation loop.
+        Runs on a separate thread when start() is called.
+        """
+        # Hide cursor
+        sys.stdout.write("\033[?25l")
+        sys.stdout.flush()
+
+        # Print initial message once
+        print_formatted(self.message, color=self.color, end=" ")
+        sys.stdout.flush()
+
+        try:
+            for frame in itertools.cycle(self.frames):
+                if self._stop_event.is_set():
+                    break
+                # Print the current frame on the same line after the message
+                print_formatted(frame, color=self.color, end="\r" + self.message + " ")
+                time.sleep(self.interval)
+        finally:
+            # Show cursor again
+            sys.stdout.write("\033[?25h")
+            sys.stdout.flush()
+            # Clear the entire line
+            sys.stdout.write('\r' + ' ' * (len(self.message) + len(self.frames[0]) + 2) + '\r')
+            sys.stdout.flush()
+
+    def start(self):
+        """
+        Starts the animation if it is not already running.
+        """
+        if self._thread is not None and self._thread.is_alive():
+            # Already running
+            return
+        self._stop_event.clear()
+        self._thread = threading.Thread(target=self._animate)
+        self._thread.daemon = True
+        self._thread.start()
+
+    def stop(self):
+        """
+        Signals the animation thread to stop and waits for it to finish.
+        """
+        if self._thread is None:
+            return
+        self._stop_event.set()
+        self._thread.join()
+        self._thread = None

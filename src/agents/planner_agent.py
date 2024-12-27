@@ -8,6 +8,7 @@ from src.utilities.print_formatters import print_formatted, print_formatted_cont
 from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
+from src.utilities.graphics import LoadingAnimation
 import os
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
@@ -49,7 +50,7 @@ with open(f"{parent_dir}/prompts/voter_system.prompt", "r") as f:
 planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=read_coderrules()))
 voter_system_message = SystemMessage(content=voter_system_prompt_template)
 
-
+animation = LoadingAnimation()
 # node functions
 def call_planers(state):
     messages = state["messages"]
@@ -79,7 +80,10 @@ def call_planers(state):
 
 def call_planer(state):
     messages = state["messages"]
+    print_formatted(get_joke(), color="green")
+    animation.start()
     response = llm_planner.invoke(messages)
+    animation.stop()
     print_formatted_content_planner(response.content)
     state["messages"].append(response)
 
@@ -99,7 +103,9 @@ def ask_human_planner(state):
 
 def call_model_corrector(state):
     messages = state["messages"]
+    animation.start()
     response = llm_planner.invoke(messages)
+    animation.stop()
     print_formatted_content_planner(response.content)
     state["messages"].append(response)
 

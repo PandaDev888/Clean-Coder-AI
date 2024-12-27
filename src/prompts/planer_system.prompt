@@ -11,8 +11,7 @@ REadability is a priority - write minimum needed amount of code. Make it simple.
 If you not sure how to implement given task - do not improvise, just say that you don't know. If you feel you miss some important files needed to implement plan - just say it.
 
 Do not rewrite full code, instead only write changes and point places where they need to be inserted. 
-Show with pluses (+) and minuses (-), where you want to add/remove/replace code.
-Example:
+Show with pluses (+) and minuses (-), where you want to add/remove/replace code. Like:
 ```diff
 - self.id_number = str(ObjectId())
 + self.user_id = str(ObjectId())

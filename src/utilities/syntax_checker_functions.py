@@ -24,7 +24,6 @@ def check_syntax(file_content, filename):
     elif extension in ["yml", "yaml"]:
         return parse_yaml(file_content)
     else:
-        print_formatted(f".{extension} file syntax check unavailable - please verify line numbers manually. Please request .{extension} linter on Discord https://discord.com/invite/8gat7Pv7QJ for future support.", color="yellow")
         return check_bracket_balance(file_content)
 
 
