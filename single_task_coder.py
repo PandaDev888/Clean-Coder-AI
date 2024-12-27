@@ -30,6 +30,7 @@ def run_clean_coder_pipeline(task, work_dir):
 
     executor = Executor(file_paths, work_dir)
 
+    playwright_codes = None
     if use_frontend_feedback:
         create_frontend_feedback_story()
         with ThreadPoolExecutor() as executor_thread:
