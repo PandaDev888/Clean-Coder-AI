@@ -25,7 +25,7 @@ from src.agents.frontend_feedback import execute_screenshot_codes
 
 load_dotenv(find_dotenv())
 log_file_path = os.getenv("LOG_FILE")
-frontend_port = os.getenv("FRONTEND_PORT")
+frontend_url = os.getenv("FRONTEND_URL")
 
 
 @tool

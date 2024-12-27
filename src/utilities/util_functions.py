@@ -30,12 +30,12 @@ How to write your playwright code:
 
 If you want to test changes that does not require to be logged in, just go straight away to the page you want to see:
 ```python
-page.goto(f'http://localhost:{frontend_port}/your_endpoint_to_test')
+page.goto(f'{frontend_url}/your_endpoint_to_test')
 ```
 
 If it required to be logged in, use next code first: <adjust login code according to login page of your app>.
 ```python
-page.goto(f'http://localhost:{frontend_port}/login')
+page.goto(f'{frontend_url}/login')
 page.fill('input[type="email"]', username)
 page.fill('input[type="password"]', password)
 page.click('button[type="submit"]')

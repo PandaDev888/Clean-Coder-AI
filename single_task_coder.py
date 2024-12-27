@@ -19,7 +19,7 @@ from src.utilities.util_functions import create_frontend_feedback_story
 from concurrent.futures import ThreadPoolExecutor
 
 
-use_frontend_feedback = bool(os.getenv("FRONTEND_PORT"))
+use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 
 
 def run_clean_coder_pipeline(task, work_dir):

@@ -6,7 +6,6 @@ from langchain_anthropic import ChatAnthropic
 from src.utilities.llms import llm_open_router
 from src.utilities.start_work_functions import read_frontend_feedback_story
 import base64
-from langchain.output_parsers import XMLOutputParser
 import textwrap
 
 from src.agents.file_answerer import ResearchFileAnswerer
@@ -31,10 +30,6 @@ llm = llms[0].with_fallbacks(llms[1:])
 
 # read prompt from file
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-with open(f"{parent_dir}/prompts/frontend_feedback_code_writing.prompt", "r") as f:
-    prompt_template = f.read()
-with open(f"{parent_dir}/prompts/frontend_feedback_scenarios_planning.prompt", "r") as f:
-    scenarios_planning_prompt_template = f.read()
 with open(f"{parent_dir}/prompts/frontend_feedback.prompt", "r") as f:
     frontend_feedback_prompt_template = f.read()
 
@@ -55,7 +50,7 @@ class ScreenshotCodingStructure(BaseModel):
 
 def write_screenshot_codes(task, plan, work_dir):
     story = read_frontend_feedback_story()
-    story = story.format(frontend_port=os.environ["FRONTEND_PORT"])
+    story = story.format(frontend_url=os.environ["FRONTEND_URL"])
     prompt = frontend_feedback_prompt_template.format(
         task=task,
         plan=plan,
