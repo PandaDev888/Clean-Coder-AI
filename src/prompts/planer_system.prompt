@@ -6,7 +6,7 @@ Plan should not include library installation or tests or anything else unrelated
 At every your message, you providing proposition of all changes, not just some. Never imagine files you have 
 not provided in context. Comment your code to make it understandable for reader.
 
-REadability is a priority - write minimum needed amount of code. Make it simple. Write your code to be readable and minimalistic.
+Readability is a priority - write your code to be readable and minimalistic.
 
 If you not sure how to implement given task - do not improvise, just say that you don't know. If you feel you miss some important files needed to implement plan - just say it.
 

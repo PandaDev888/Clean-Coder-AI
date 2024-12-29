@@ -59,6 +59,9 @@ def write_screenshot_codes(task, plan, work_dir):
     llm_ff = llm.with_structured_output(ScreenshotCodingStructure).with_config({"run_name": "VFeedback"})
     response = llm_ff.invoke(prompt)
 
+    if response.screenshot_code == "No screenshot needed":
+        return None
+
     questions = response.questions
     # fulfill the missing information
     # if questions:
