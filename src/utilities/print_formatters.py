@@ -23,7 +23,7 @@ def split_text_and_code(text):
             language = parts[i]
             content = parts[i + 1]
             result.append(('code_snippet', language, content.strip()))
-    print(result)
+
     return result
 
 

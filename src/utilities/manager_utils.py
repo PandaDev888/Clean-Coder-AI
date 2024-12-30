@@ -1,8 +1,13 @@
+"""
+In manager_utils.py we are placing all functions used by manager agent only, which are not tools.
+"""
+
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from src.utilities.llms import llm_open_router
+from src.utilities.util_functions import join_paths
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from todoist_api_python.api import TodoistAPI
@@ -12,14 +17,15 @@ import os
 import uuid
 import requests
 import json
+from requests.exceptions import HTTPError
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
+load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
 todoist_api_key = os.getenv('TODOIST_API_KEY')
 todoist_api = TodoistAPI(os.getenv('TODOIST_API_KEY'))
-PROJECT_ID = os.getenv('TODOIST_PROJECT_ID')
 
 
 
@@ -55,14 +61,14 @@ def read_project_description():
 
 
 def fetch_epics():
-    return todoist_api.get_sections(project_id=PROJECT_ID)
+    return todoist_api.get_sections(project_id=os.getenv('TODOIST_PROJECT_ID'))
 
 
 def fetch_tasks():
-    return todoist_api.get_tasks(project_id=PROJECT_ID)
+    return todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'))
 
 
-def get_project_tasks():
+def get_project_tasks_and_epics():
     output_string = ""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_epics = executor.submit(fetch_epics)
@@ -92,6 +98,20 @@ def get_project_tasks():
     output_string += "\n###\n"
     if not tasks:
         output_string = "<empty>"
+    return output_string
+
+
+def get_project_tasks():
+    tasks = fetch_tasks()
+    output_string = str()
+    if tasks:
+        output_string += "\n".join(
+            f"Task:\nid: {task.id}, \nName: {task.content}, \nDescription: \n'''{task.description}''', \nOrder: {task.order}\n\n"
+            for task in tasks
+        )
+    else:
+        output_string += f"No tasks planned yet.\n\n"
+
     return output_string
 
 
@@ -157,3 +177,11 @@ def dict_to_message(msg_dict):
         return AIMessage(type=msg_dict["type"], content=msg_dict["content"], tool_calls=msg_dict.get("tool_calls"))
     elif message_type == "tool":
         return ToolMessage(type=msg_dict["type"], content=msg_dict["content"], tool_call_id=msg_dict.get("tool_call_id"))
+
+
+def create_todoist_project():
+    try:
+        response = todoist_api.add_project(name=f"Clean_Coder_{os.path.basename(os.path.normpath(work_dir))}")
+    except HTTPError:
+        raise Exception("You have too much projects in Todoist, can't create new one.")
+    return response.id
