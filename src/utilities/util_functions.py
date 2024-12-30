@@ -244,7 +244,7 @@ def read_coderrules():
 
 
 def create_coderrules(coderrules_path):
-    print_formatted("(Optional) Describe your project rules and structure to give AI more context. Check docs to learn how to do it https://clean-coder.dev/features/coderrules/. ", color="blue")
+    print_formatted("(Optional) Describe your project rules and structure to give AI more context. Check docs to learn how to do it https://clean-coder.dev/features/coderrules/. ", color="light_blue")
     rules = input()
     with open(coderrules_path, 'w', encoding='utf-8') as file:
         file.write(rules)
