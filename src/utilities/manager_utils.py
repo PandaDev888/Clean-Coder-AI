@@ -7,9 +7,11 @@ from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from src.utilities.llms import llm_open_router
-from src.utilities.util_functions import join_paths
+from src.utilities.util_functions import join_paths, read_coderrules
+from src.utilities.start_project_functions import create_project_description_file
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
+from langchain_core.load import loads
 from todoist_api_python.api import TodoistAPI
 import concurrent.futures
 from dotenv import load_dotenv, find_dotenv
@@ -32,6 +34,8 @@ todoist_api = TodoistAPI(os.getenv('TODOIST_API_KEY'))
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 with open(f"{parent_dir}/prompts/actualize_project_description.prompt", "r") as f:
     actualize_description_prompt_template = f.read()
+with open(f"{parent_dir}/prompts/manager_progress.prompt", "r") as f:
+    tasks_progress_template = f.read()
 
 llms = []
 if os.getenv("OPENAI_API_KEY"):
@@ -195,3 +199,50 @@ def create_todoist_project_if_needed():
         with open(join_paths(work_dir, ".clean_coder/.env"), "a") as f:
             f.write(f"TODOIST_PROJECT_ID={project_id}\n")
         os.environ["TODOIST_PROJECT_ID"] = project_id
+
+
+def get_manager_messages(saved_messages_path):
+    if not os.path.exists(saved_messages_path):
+        # new start
+        project_tasks = get_project_tasks()
+        progress_description = read_progress_description()
+        tasks_and_progress_msg = HumanMessage(
+            content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
+            tasks_and_progress_message=True
+        )
+        start_human_message = HumanMessage(content="Go")  # Claude needs to have human message always as first
+        return [load_system_message(), tasks_and_progress_msg, start_human_message]
+    else:
+        # continue previous work
+        with open(saved_messages_path, "r") as fp:
+            messages = loads(json.load(fp))
+        return [load_system_message()] + messages
+
+
+def actualize_tasks_list_and_progress_description(state):
+    # Remove old tasks message
+    state["messages"] = [msg for msg in state["messages"] if not hasattr(msg, "tasks_and_progress_message")]
+    # Add new message
+    project_tasks = get_project_tasks()
+    progress_description = read_progress_description()
+    tasks_and_progress_msg = HumanMessage(
+        content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
+        tasks_and_progress_message=True
+    )
+    state["messages"].insert(-2, tasks_and_progress_msg)
+    return state
+
+
+def load_system_message():
+    with open(f"{parent_dir}/prompts/manager_system.prompt", "r") as f:
+        system_prompt_template = f.read()
+
+    if os.path.exists(os.path.join(work_dir, '.clean_coder/project_description.txt')):
+        project_description = read_project_description()
+    else:
+        project_description = create_project_description_file(work_dir)
+
+    return SystemMessage(content=system_prompt_template.format(
+            project_description=project_description,
+            project_rules=read_coderrules()
+    ))
