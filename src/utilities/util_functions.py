@@ -30,12 +30,12 @@ How to write your playwright code:
 
 If you want to test changes that does not require to be logged in, just go straight away to the page you want to see:
 ```python
-page.goto(f'http://localhost:{frontend_port}/your_endpoint_to_test')
+page.goto(f'{frontend_url}/your_endpoint_to_test')
 ```
 
 If it required to be logged in, use next code first: <adjust login code according to login page of your app>.
 ```python
-page.goto(f'http://localhost:{frontend_port}/login')
+page.goto(f'{frontend_url}/login')
 page.fill('input[type="email"]', username)
 page.fill('input[type="password"]', password)
 page.click('button[type="submit"]')
@@ -134,26 +134,13 @@ def see_image(filename, work_dir):
 
 
 def convert_images(image_paths):
-    images = [
-                 {"type": "text", "text": image_path}
-                 for image_path in image_paths
-             ] + [
+    images = []
+    for image_path in image_paths:
+        images.extend([
+                 {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
-                 for image_path in image_paths
-             ]
-    # images for claude
-    '''
-    images.append(
-        {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/png",
-                "data": see_image(image_path, work_dir),
-            },
-        }
-    )
-    '''
+             ])
+
     return images
 
 
@@ -167,7 +154,7 @@ def get_joke():
     try:
         response = requests.get("https://v2.jokeapi.dev/joke/Programming?type=single")
         # response = requests.get("https://uselessfacts.jsph.pl//api/v2/facts/random")
-        joke = response.json()["joke"] + "\n\n"
+        joke = response.json()["joke"] + "\n"
     except Exception as e:
         joke = f"Failed to receive joke :/"
     return joke
@@ -255,5 +242,18 @@ def create_frontend_feedback_story():
         input("Fulfill file with informations needed for a frontend feedback agent to know. Save file and hit Enter.")
 
 
-if __name__ == "__main__":
-    print(list_directory_tree(work_dir))
+def read_coderrules():
+    project_rules_path = os.path.join(Work.dir(), '.coderrules')
+    if not os.path.exists(project_rules_path):
+        return create_coderrules(project_rules_path)
+    with open(project_rules_path, 'r') as file:
+        return file.read()
+
+
+def create_coderrules(coderrules_path):
+    print_formatted("(Optional) Describe your project rules and structure to give AI more context. Check docs to learn how to do it https://clean-coder.dev/features/coderrules/. ", color="blue")
+    rules = input()
+    with open(coderrules_path, 'w', encoding='utf-8') as file:
+        file.write(rules)
+    print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
+    return rules

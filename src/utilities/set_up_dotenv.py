@@ -8,16 +8,16 @@ from termcolor import colored
 
 def set_up_env_coder_pipeline():
     envs = {}
-    print(colored("🖐  Hey! Let's set up our project.", color="cyan"))
+    print(colored("🖐  Hey! Let's set up our project variables.", color="cyan"))
     print(colored("1/3. Provide one or more API keys for LLM providers or the local Ollama model. Don't worry, you can always modify them in the .env file.", color="cyan"))
-    envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional):\n")
-    envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional):\n")
-    envs["OPEN_ROUTER_API_KEY"] = input("Provide your Open Router API key (Optional):\n")
-    envs["OLLAMA_MODEL"] = input("Provide your Ollama model name (Optional):\n")
+    envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional) (Why? Best coding capabilities):\n")
+    envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional) (Why? Needed for using microphone, best planning capabilities with o1):\n")
+    envs["OPEN_ROUTER_API_KEY"] = input("Provide your Open Router API key (Optional) (Why? All models in one place):\n")
+    envs["OLLAMA_MODEL"] = input("Provide your Ollama model name (Optional) (Why? If you want to use self-hosted model instead):\n")
     print(colored("2/3. Now provide the folder containing your project.", color="cyan"))
     envs["WORK_DIR"] = input("Provide full path to your work directory:\n")
     print(colored("3/3. (Optional) If you want to use frontend feedback feature:", color="cyan"))
-    envs["FRONTEND_PORT"] = input("Provide port on which your frontend app is running (Optional):\n")
+    envs["FRONTEND_URL"] = input("Provide url under which your frontend app is running (Optional) (Example: http://localhost:1234):\n")
     # save them to file
     with open(".env", "w") as f:
         for key, value in envs.items():
@@ -27,16 +27,16 @@ def set_up_env_coder_pipeline():
 
 def set_up_env_manager():
     envs = {}
-    print(colored("🖐  Hey! Let's set up our project.", color="cyan"))
+    print(colored("🖐  Hey! Let's set up our project variables.", color="cyan"))
     print(colored("1/4. Provide one or more API keys for LLM providers or the local Ollama model. Don't worry, you can always modify them in the .env file.", color="cyan"))
-    envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional):\n")
-    envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional):\n")
-    envs["OPEN_ROUTER_API_KEY"] = input("Provide your Open Router API key (Optional):\n")
-    envs["OLLAMA_MODEL"] = input("Provide your Ollama model name (Optional):\n")
+    envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional) (Why? Best coding capabilities):\n")
+    envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional) (Why? Needed for using microphone, best planning capabilities with o1):\n")
+    envs["OPEN_ROUTER_API_KEY"] = input("Provide your Open Router API key (Optional) (Why? All models in one place):\n")
+    envs["OLLAMA_MODEL"] = input("Provide your Ollama model name (Optional) (Why? If you want to use self-hosted model instead):\n")
     print(colored("2/4. Now provide the folder containing your project.", color="cyan"))
     envs["WORK_DIR"] = input("Provide full path to your work directory:\n")
     print(colored("3/4. (Optional) If you want to use frontend feedback feature:", color="cyan"))
-    envs["FRONTEND_PORT"] = input("Provide port on which your frontend app is running (Optional):\n")
+    envs["FRONTEND_URL"] = input("Provide url under which your frontend app is running (Optional) (Example: http://localhost:1234):\n")
     print(colored("4/4. Now let's set up your Todoist connection.", color="cyan"))
     envs["TODOIST_API_KEY"] = input("Please provide your Todoist API key:\n")
     envs["TODOIST_PROJECT_ID"] = input("Please provide your Todoist project ID:\n")

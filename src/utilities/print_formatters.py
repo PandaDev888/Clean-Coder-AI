@@ -38,6 +38,7 @@ def print_formatted_content_planner(content):
             code_content = part[2]
             print_code_snippet(code=code_content, extension=language)
 
+
 def print_formatted_content(response):
     if type(response.content) == str:
         print_formatted(content=response.content, color="dark_grey")

@@ -19,7 +19,7 @@ from src.utilities.util_functions import create_frontend_feedback_story
 from concurrent.futures import ThreadPoolExecutor
 
 
-use_frontend_feedback = bool(os.getenv("FRONTEND_PORT"))
+use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 
 
 def run_clean_coder_pipeline(task, work_dir):
@@ -30,15 +30,16 @@ def run_clean_coder_pipeline(task, work_dir):
 
     executor = Executor(file_paths, work_dir)
 
+    playwright_codes = None
     if use_frontend_feedback:
         create_frontend_feedback_story()
         with ThreadPoolExecutor() as executor_thread:
             future = executor_thread.submit(write_screenshot_codes, task, plan, work_dir)
             file_paths = executor.do_task(task, plan)
-            playwright_codes, screenshot_descriptions = future.result()
+            playwright_codes = future.result()
         if playwright_codes:
             print_formatted("Making screenshots, please wait a while...", color="light_blue")
-            first_vfeedback_screenshots_msg = execute_screenshot_codes(playwright_codes, screenshot_descriptions)
+            first_vfeedback_screenshots_msg = execute_screenshot_codes(playwright_codes)
         else:
             first_vfeedback_screenshots_msg = None
     else:
@@ -48,7 +49,8 @@ def run_clean_coder_pipeline(task, work_dir):
     human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed.")
     if human_message in ['o', 'ok']:
         return
-    debugger = Debugger(file_paths, work_dir, human_message, first_vfeedback_screenshots_msg, playwright_codes, screenshot_descriptions)
+    debugger = Debugger(
+        file_paths, work_dir, human_message,image_paths,  first_vfeedback_screenshots_msg, playwright_codes)
     debugger.do_task(task, plan)
 
 

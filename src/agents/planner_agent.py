@@ -1,13 +1,14 @@
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
-from typing import TypedDict, Annotated, Sequence
+from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
-from src.utilities.util_functions import check_file_contents, convert_images, get_joke
+from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
+from src.utilities.graphics import LoadingAnimation
 import os
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
@@ -18,9 +19,12 @@ load_dotenv(find_dotenv())
 
 llms_planners = []
 if os.getenv("OPENAI_API_KEY"):
+    # temperature=1 is walkaround as o1 not accepts any temperature
+    llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
+if os.getenv("OPENAI_API_KEY"):
     llms_planners.append(ChatOpenAI(model="gpt-4o", temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
 if os.getenv("OPENROUTER_API_KEY"):
-    llms_planners.append(llm_open_router("anthropic/claude-3.5-sonnet").with_config({"run_name": "Planer"}))
+    llms_planners.append(llm_open_router("openai/gpt-4o").with_config({"run_name": "Planer"}))
 if os.getenv("ANTHROPIC_API_KEY"):
     llms_planners.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
 if os.getenv("OLLAMA_MODEL"):
@@ -43,10 +47,10 @@ with open(f"{parent_dir}/prompts/planer_system.prompt", "r") as f:
 with open(f"{parent_dir}/prompts/voter_system.prompt", "r") as f:
     voter_system_prompt_template = f.read()
 
-planer_system_message = SystemMessage(content=planer_system_prompt_template)
+planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=read_coderrules()))
 voter_system_message = SystemMessage(content=voter_system_prompt_template)
 
-
+animation = LoadingAnimation()
 # node functions
 def call_planers(state):
     messages = state["messages"]
@@ -74,6 +78,18 @@ def call_planers(state):
     return state
 
 
+def call_planer(state):
+    messages = state["messages"]
+    print_formatted(get_joke(), color="green")
+    animation.start()
+    response = llm_planner.invoke(messages)
+    animation.stop()
+    print_formatted_content_planner(response.content)
+    state["messages"].append(response)
+
+    return state
+
+
 def ask_human_planner(state):
     human_message = user_input("Type (o)k if you accept or provide commentary.")
     if human_message in ['o', 'ok']:
@@ -87,17 +103,23 @@ def ask_human_planner(state):
 
 def call_model_corrector(state):
     messages = state["messages"]
+    animation.start()
     response = llm_planner.invoke(messages)
+    animation.stop()
     print_formatted_content_planner(response.content)
     state["messages"].append(response)
 
     return state
 
 
+multiple_planers = False
 # workflow definition
 researcher_workflow = StateGraph(AgentState)
 
-researcher_workflow.add_node("planers", call_planers)
+if multiple_planers:
+    researcher_workflow.add_node("planers", call_planers)
+else:
+    researcher_workflow.add_node("planers", call_planer)
 researcher_workflow.add_node("agent", call_model_corrector)
 researcher_workflow.add_node("human", ask_human_planner)
 researcher_workflow.set_entry_point("planers")
