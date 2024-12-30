@@ -160,6 +160,9 @@ def print_tool_message(tool_name, tool_input=None):
         else:
             print_code_snippet(code=tool_input["test_instruction"], extension='text', title='Instruction:')
         print_formatted("Have any questions about Clean Coder or want to share your experience? Check out our Discord server https://discord.com/invite/8gat7Pv7QJ 😉", color='green')
+    elif tool_name == 'finish_project_planning':
+        message = "Planning finished! Time to execute first task from the list."
+        print_code_snippet(code=message, extension='text')
     else:
         message = f"Calling {tool_name} tool..."
         print_formatted(content=message, color='blue', bold=True)
