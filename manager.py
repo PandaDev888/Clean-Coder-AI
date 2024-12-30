@@ -17,7 +17,7 @@ from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
 from src.tools.tools_project_manager import add_task, modify_task, create_epic, modify_epic, finish_project_planning, reorder_tasks
 from src.tools.tools_coder_pipeline import prepare_list_dir_tool, prepare_see_file_tool, ask_human_tool
-from src.utilities.manager_utils import read_project_description, read_progress_description, get_project_tasks, create_todoist_project
+from src.utilities.manager_utils import read_project_description, read_progress_description, get_project_tasks, create_todoist_project_if_needed
 from src.utilities.langgraph_common_functions import call_model, call_tool, multiple_tools_msg, no_tools_msg
 from src.utilities.start_project_functions import create_project_description_file, set_up_dot_clean_coder_dir
 from src.utilities.util_functions import join_paths, read_coderrules
@@ -151,13 +151,7 @@ What have been done so far:
 
     def run(self):
         print_formatted("😀 Hello! I'm Manager agent. Let's plan your project together!", color="green")
-        load_dotenv(join_paths(self.work_dir, ".clean_coder/.env"))
-        if not os.getenv("TODOIST_PROJECT_ID"):
-            project_id = create_todoist_project()
-            # write project id to .env
-            with open(join_paths(self.work_dir, ".clean_coder/.env"), "a") as f:
-                f.write(f"TODOIST_PROJECT_ID={project_id}\n")
-            os.environ["TODOIST_PROJECT_ID"] = project_id
+        create_todoist_project_if_needed()
 
         if not os.path.exists(self.saved_messages_path):
             # new start

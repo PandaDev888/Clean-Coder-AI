@@ -185,3 +185,13 @@ def create_todoist_project():
     except HTTPError:
         raise Exception("You have too much projects in Todoist, can't create new one.")
     return response.id
+
+
+def create_todoist_project_if_needed():
+    load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
+    if not os.getenv("TODOIST_PROJECT_ID"):
+        project_id = create_todoist_project()
+        # write project id to .env
+        with open(join_paths(work_dir, ".clean_coder/.env"), "a") as f:
+            f.write(f"TODOIST_PROJECT_ID={project_id}\n")
+        os.environ["TODOIST_PROJECT_ID"] = project_id
