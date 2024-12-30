@@ -46,9 +46,6 @@ class Manager:
         self.save_messages_to_disk(state)
         state = call_model(state, self.llms)
         state = self.cut_off_context(state)
-        return state
-
-    def call_tool_manager(self, state):
         state = call_tool(state, self.tools)
         state = actualize_tasks_list_and_progress_description(state)
         return state
@@ -63,8 +60,6 @@ class Manager:
             return "tool"
 
 # just functions
-
-
     def cut_off_context(self, state):
         approx_nr_msgs_to_save = 30
         if len(state["messages"]) > approx_nr_msgs_to_save:
@@ -81,7 +76,6 @@ class Manager:
             state["messages"] = [system_message] + last_messages_excluding_system
 
         return state
-
 
     def save_messages_to_disk(self, state):
         # remove system message
@@ -104,16 +98,13 @@ class Manager:
         ]
         return tools
 
-
-
     # workflow definition
     def setup_workflow(self):
         manager_workflow = StateGraph(AgentState)
         manager_workflow.add_node("agent", self.call_model_manager)
-        manager_workflow.add_node("tool", self.call_tool_manager)
         manager_workflow.set_entry_point("agent")
-        manager_workflow.add_conditional_edges("agent", self.after_agent_condition)
-        manager_workflow.add_edge("tool", "agent")
+        manager_workflow.add_edge("agent", "agent")
+        #manager_workflow.add_conditional_edges("agent", self.after_agent_condition)
         return manager_workflow.compile()
 
 

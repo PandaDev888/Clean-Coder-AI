@@ -195,20 +195,13 @@ def list_directory_tree(work_dir):
     return "Content of directory tree:\n" + "\n".join(tree)
 
 
-def invoke_tool(tool_call, tools):
-    tool_name_to_tool = {tool.name: tool for tool in tools}
-    name = tool_call["tool"]
-    requested_tool = tool_name_to_tool[name]
-
-    return requested_tool.invoke(tool_call["tool_input"])
-
 def invoke_tool_native(tool_call, tools):
     # convert string to real function
     tool_name_to_tool = {tool.name: tool for tool in tools}
     name = tool_call["name"]
     requested_tool = tool_name_to_tool[name]
-
-    tool_output = requested_tool.invoke(tool_call["args"])
+    args = tool_call["args"]
+    tool_output = requested_tool.invoke(args)
     return ToolMessage(tool_output, tool_call_id=tool_call["id"])
 
 

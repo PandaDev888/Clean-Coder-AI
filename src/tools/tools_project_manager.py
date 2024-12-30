@@ -143,11 +143,11 @@ tool_input:
 
 
 @tool
-def finish_project_planning():
+def finish_project_planning(dummy):
     """Call that tool when all task in Todoist correctly reflect work for nearest time. No extra tasks or tasks with
 overlapping scope allowed. Tasks should be in execution order. That tool makes first task to be executed.
 tool_input:
-{}
+dummy: just write "ok"
 """
     human_message = user_input(
         "Project planning finished. Provide your proposition of changes in task list or type (o)k to continue...\n"
