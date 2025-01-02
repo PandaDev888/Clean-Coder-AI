@@ -1,5 +1,4 @@
 import re
-import json5
 import os
 import xml.etree.ElementTree as ET
 import base64
@@ -71,24 +70,6 @@ def watch_file(filename, work_dir, line_numbers=True):
     file_content = filename + ":\n\n" + file_content
 
     return file_content
-
-
-def find_tools_json(response):
-    matches = re.findall(r'```(?:json|json5)\s*\n(.*?)\n\s*```', response, re.DOTALL)
-
-    if not matches:
-        return "No json found in response."
-
-    results = []
-    for match in matches:
-        json_str = match.strip()
-        try:
-            json5_obj = json5.loads(json_str)
-            results.append(json5_obj)
-        except:
-            results.append("Invalid json.")
-
-    return results
 
 
 def find_tool_xml(input_str):
