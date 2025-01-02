@@ -109,7 +109,7 @@ tool input:
                 message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary."
                 human_message = user_input(message)
                 if human_message not in ['o', 'ok']:
-                    return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
+                    return TOOL_NOT_EXECUTED_WORD + f"Human: {human_message}"
                 file.seek(0)
                 file.truncate()
                 file.write(file_contents)
@@ -144,7 +144,7 @@ tool input:
                 message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary."
                 human_message = user_input(message)
                 if human_message not in ['o', 'ok']:
-                    return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
+                    return TOOL_NOT_EXECUTED_WORD + f"Human: {human_message}"
                 file.seek(0)
                 file.truncate()
                 file.write(file_contents)
@@ -171,7 +171,7 @@ tool input:
             message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary."
             human_message = user_input(message)
             if human_message not in ['o', 'ok']:
-                return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
+                return TOOL_NOT_EXECUTED_WORD + f"Human: {human_message}"
 
             full_path = join_paths(work_dir, filename)
             directory = os.path.dirname(full_path)

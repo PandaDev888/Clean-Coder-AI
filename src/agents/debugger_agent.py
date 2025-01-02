@@ -19,7 +19,7 @@ from src.utilities.util_functions import (
 )
 from src.utilities.llms import init_llms
 from src.utilities.langgraph_common_functions import (
-    call_model, call_tool, ask_human, after_ask_human_condition, multiple_tools_msg, agent_looped_human_help,
+    call_model, call_tool, ask_human, after_ask_human_condition, multiple_tools_msg, no_tools_msg, agent_looped_human_help,
 )
 from src.agents.frontend_feedback import execute_screenshot_codes
 
@@ -93,6 +93,8 @@ class Debugger():
             for tool_call in last_ai_message.tool_calls:
                 state["messages"].append(ToolMessage(content="too much tool calls", tool_call_id=tool_call["id"]))
             state["messages"].append(HumanMessage(content=multiple_tools_msg))
+        elif len(last_ai_message.tool_calls) == 0:
+            state["messages"].append(HumanMessage(content=no_tools_msg))
         state = exchange_file_contents(state, self.files, self.work_dir)
         return state
 
@@ -120,7 +122,7 @@ class Debugger():
 
         if bad_tool_call_looped(state):
             return "human_help"
-        elif last_message.tool_calls and last_message.tool_calls[0]["name"] == "final_response_debugger":
+        elif hasattr(last_message, "tool_calls") and last_message.tool_calls[0]["name"] == "final_response_debugger":
             if log_file_path:
                 return "check_log"
             elif self.playwright_code:

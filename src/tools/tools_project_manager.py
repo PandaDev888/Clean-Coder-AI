@@ -144,8 +144,8 @@ tool_input:
 
 @tool
 def finish_project_planning(dummy):
-    """Call that tool when all task in Todoist correctly reflect work for nearest time. No extra tasks or tasks with
-overlapping scope allowed. Tasks should be in execution order. That tool makes first task to be executed.
+    """Call that tool to fire execution of top task from list. Use tool when all task in Todoist correctly reflect work. No extra tasks or tasks with
+overlapping scope allowed.
 tool_input:
 dummy: just write "ok"
 """
@@ -184,7 +184,7 @@ dummy: just write "ok"
     # Display task completed animation
 
     task_completed_animation()
-    return f"Task execution completed. Tester response: {tester_response}"
+    return f"Task done. Tester response: {tester_response}"
 
 
 if __name__ == "__main__":

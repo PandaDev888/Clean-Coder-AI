@@ -202,8 +202,7 @@ def get_manager_messages(saved_messages_path):
             content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
             tasks_and_progress_message=True
         )
-        start_human_message = HumanMessage(content="Go")  # Claude needs to have human message always as first
-        return [load_system_message(), tasks_and_progress_msg, start_human_message]
+        return [load_system_message(), tasks_and_progress_msg]
     else:
         # continue previous work
         with open(saved_messages_path, "r") as fp:

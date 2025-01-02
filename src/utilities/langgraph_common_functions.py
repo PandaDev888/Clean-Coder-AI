@@ -11,6 +11,7 @@ import sys
 multiple_tools_msg = TOOL_NOT_EXECUTED_WORD + """You made multiple tool calls at once. If you want to execute 
 multiple actions, choose only one for now; rest you can execute later."""
 no_tools_msg = TOOL_NOT_EXECUTED_WORD + """Please provide a tool call to execute an action."""
+empty_message_msg = TOOL_NOT_EXECUTED_WORD + "Empty messages are not allowed."
 finish_too_early_msg = TOOL_NOT_EXECUTED_WORD + """You want to call final response with other tool calls. Don't you finishing too early?"""
 
 
