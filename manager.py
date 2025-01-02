@@ -37,7 +37,7 @@ class Manager:
         self.work_dir = os.getenv("WORK_DIR")
         set_up_dot_clean_coder_dir(self.work_dir)
         self.tools = self.prepare_tools()
-        self.llms = init_llms(self.tools, "Manager")
+        self.llms = init_llms(tools=self.tools, run_name="Manager")
         self.manager = self.setup_workflow()
         self.saved_messages_path = join_paths(self.work_dir, ".clean_coder/manager_messages.json")
 

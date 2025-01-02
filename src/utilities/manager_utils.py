@@ -6,7 +6,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
-from src.utilities.llms import llm_open_router
+from src.utilities.llms import init_llms
 from src.utilities.util_functions import join_paths, read_coderrules
 from src.utilities.start_project_functions import create_project_description_file
 from langchain_core.output_parsers import StrOutputParser
@@ -37,15 +37,7 @@ with open(f"{parent_dir}/prompts/actualize_project_description.prompt", "r") as 
 with open(f"{parent_dir}/prompts/manager_progress.prompt", "r") as f:
     tasks_progress_template = f.read()
 
-llms = []
-if os.getenv("OPENAI_API_KEY"):
-    llms.append(ChatOpenAI(model="gpt-4o", temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
-if os.getenv("OPENROUTER_API_KEY"):
-    llms.append(llm_open_router("anthropic/claude-3.5-sonnet").with_config({"run_name": "Planer"}))
-if os.getenv("ANTHROPIC_API_KEY"):
-    llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
-if os.getenv("OLLAMA_MODEL"):
-    llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")).with_config({"run_name": "Planer"}))
+llms = init_llms(run_name="Progress description")
 llm = llms[0].with_fallbacks(llms[1:])
 
 
@@ -229,7 +221,7 @@ def actualize_tasks_list_and_progress_description(state):
         content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
         tasks_and_progress_message=True
     )
-    state["messages"].insert(-2, tasks_and_progress_msg)
+    state["messages"].insert(1, tasks_and_progress_msg)
     return state
 
 
