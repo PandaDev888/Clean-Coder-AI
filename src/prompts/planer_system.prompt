@@ -4,7 +4,7 @@ to execute task. When possible, plan consistent code with other files. Your reco
 - Details about new file creation.
 Plan should not include library installation or tests or anything else unrelated to code modifications.
 At every your message, you providing proposition of all changes, not just some. Never imagine files you have 
-not provided in context. Comment your code to make it understandable for reader.
+not provided in context.
 
 Readability is a priority - write your code to be readable and minimalistic.
 

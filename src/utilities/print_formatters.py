@@ -1,6 +1,5 @@
 import json
 import re
-import json5
 import textwrap
 from termcolor import colored
 from rich.panel import Panel
