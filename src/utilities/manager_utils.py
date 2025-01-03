@@ -13,6 +13,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.load import loads
 from todoist_api_python.api import TodoistAPI
+import questionary
+import concurrent.futures
+from dotenv import load_dotenv, find_dotenv
+import os
 import concurrent.futures
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -97,8 +101,7 @@ def get_project_tasks_and_epics():
     return output_string
 
 
-def get_project_tasks():
-    tasks = fetch_tasks()
+def parse_project_tasks(tasks):
     output_string = str()
     if tasks:
         output_string += "\n".join(
@@ -106,7 +109,7 @@ def get_project_tasks():
             for task in tasks
         )
     else:
-        output_string += f"No tasks planned yet.\n\n"
+        output_string += "No tasks planned yet.\n\n"
 
     return output_string
 
@@ -193,21 +196,52 @@ def create_todoist_project_if_needed():
         os.environ["TODOIST_PROJECT_ID"] = project_id
 
 
+def prompt_user_if_planning_needed():
+    choice = questionary.select(
+        "Choose an option:",
+        choices=[
+            "Start/continue planning my project (Default)",
+            "Project is fully planned in Todoist, just execute tasks"
+        ],
+        style=questionary.Style([
+            ('qmark', 'fg:magenta bold'),      # The '?' symbol
+            ('question', 'fg:white bold'),      # The question text
+            ('answer', 'fg:yellow bold'),       # Selected answer
+            ('pointer', 'fg:green bold'),        # Selection pointer
+            ('highlighted', 'fg:green bold'),    # Highlighted choice
+            ('selected', 'fg:green bold'),      # Selected choice
+            ('separator', 'fg:magenta'),        # Separator between choices
+            ('instruction', 'fg:white'),        # Additional instructions
+        ])
+    ).ask()
+    return choice == "Start/continue planning my project (Default)"
+
+
 def get_manager_messages(saved_messages_path):
-    if not os.path.exists(saved_messages_path):
-        # new start
-        project_tasks = get_project_tasks()
-        progress_description = read_progress_description()
-        tasks_and_progress_msg = HumanMessage(
-            content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
-            tasks_and_progress_message=True
-        )
-        return [load_system_message(), tasks_and_progress_msg]
-    else:
+    tasks = fetch_tasks()
+    if os.path.exists(saved_messages_path):
         # continue previous work
         with open(saved_messages_path, "r") as fp:
             messages = loads(json.load(fp))
-        return [load_system_message()] + messages
+    else:
+        # new start
+        project_tasks = parse_project_tasks(tasks)
+        progress_description = read_progress_description()
+        messages = [HumanMessage(
+            content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
+            tasks_and_progress_message=True
+        )]
+
+    # Add system message as first one and execution message if needed
+    messages = [load_system_message()] + messages
+
+    # Determine if planning is needed based on existing tasks
+    do_planning = prompt_user_if_planning_needed() if tasks else True
+    
+    if not do_planning:
+        messages.append(HumanMessage(content="Tasks are completely done and all you need to do is to execute them."))
+
+    return messages
 
 
 def actualize_tasks_list_and_progress_description(state):

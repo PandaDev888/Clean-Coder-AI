@@ -17,7 +17,7 @@ from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
 from src.tools.tools_project_manager import add_task, modify_task, finish_project_planning, reorder_tasks
 from src.tools.tools_coder_pipeline import prepare_list_dir_tool, prepare_see_file_tool, ask_human_tool
-from src.utilities.manager_utils import actualize_tasks_list_and_progress_description, create_todoist_project_if_needed, get_manager_messages
+from src.utilities.manager_utils import actualize_tasks_list_and_progress_description, create_todoist_project_if_needed, get_manager_messages, fetch_tasks
 from src.utilities.langgraph_common_functions import call_model, call_tool, multiple_tools_msg, no_tools_msg, empty_message_msg
 from src.utilities.start_project_functions import set_up_dot_clean_coder_dir
 from src.utilities.util_functions import join_paths
@@ -41,7 +41,9 @@ class Manager:
         self.manager = self.setup_workflow()
         self.saved_messages_path = join_paths(self.work_dir, ".clean_coder/manager_messages.json")
 
-    # node functions
+
+
+
     def call_model_manager(self, state):
         self.save_messages_to_disk(state)
         state = call_model(state, self.llms)
@@ -111,9 +113,7 @@ class Manager:
         manager_workflow.add_node("agent", self.call_model_manager)
         manager_workflow.set_entry_point("agent")
         manager_workflow.add_edge("agent", "agent")
-        #manager_workflow.add_conditional_edges("agent", self.after_agent_condition)
         return manager_workflow.compile()
-
 
     def run(self):
         print_formatted("😀 Hello! I'm Manager agent. Let's plan your project together!", color="green")

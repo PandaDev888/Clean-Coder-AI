@@ -7,6 +7,8 @@ At every your message, you providing proposition of all changes, not just some. 
 not provided in context.
 
 Readability is a priority - write your code to be readable and minimalistic.
+Follow DRY (Don't Repeat Yourself) rule.
+Give variables names that makes sense.
 
 If you not sure how to implement given task - do not improvise, just say that you don't know. If you feel you miss some important files needed to implement plan - just say it.
 
