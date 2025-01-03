@@ -1,5 +1,4 @@
 import re
-import json5
 import os
 import xml.etree.ElementTree as ET
 import base64
@@ -30,12 +29,12 @@ How to write your playwright code:
 
 If you want to test changes that does not require to be logged in, just go straight away to the page you want to see:
 ```python
-page.goto(f'http://localhost:{frontend_port}/your_endpoint_to_test')
+page.goto(f'{frontend_url}/your_endpoint_to_test')
 ```
 
 If it required to be logged in, use next code first: <adjust login code according to login page of your app>.
 ```python
-page.goto(f'http://localhost:{frontend_port}/login')
+page.goto(f'{frontend_url}/login')
 page.fill('input[type="email"]', username)
 page.fill('input[type="password"]', password)
 page.click('button[type="submit"]')
@@ -71,24 +70,6 @@ def watch_file(filename, work_dir, line_numbers=True):
     file_content = filename + ":\n\n" + file_content
 
     return file_content
-
-
-def find_tools_json(response):
-    matches = re.findall(r'```(?:json|json5)\s*\n(.*?)\n\s*```', response, re.DOTALL)
-
-    if not matches:
-        return "No json found in response."
-
-    results = []
-    for match in matches:
-        json_str = match.strip()
-        try:
-            json5_obj = json5.loads(json_str)
-            results.append(json5_obj)
-        except:
-            results.append("Invalid json.")
-
-    return results
 
 
 def find_tool_xml(input_str):
@@ -134,26 +115,13 @@ def see_image(filename, work_dir):
 
 
 def convert_images(image_paths):
-    images = [
-                 {"type": "text", "text": image_path}
-                 for image_path in image_paths
-             ] + [
+    images = []
+    for image_path in image_paths:
+        images.extend([
+                 {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
-                 for image_path in image_paths
-             ]
-    # images for claude
-    '''
-    images.append(
-        {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/png",
-                "data": see_image(image_path, work_dir),
-            },
-        }
-    )
-    '''
+             ])
+
     return images
 
 
@@ -167,7 +135,7 @@ def get_joke():
     try:
         response = requests.get("https://v2.jokeapi.dev/joke/Programming?type=single")
         # response = requests.get("https://uselessfacts.jsph.pl//api/v2/facts/random")
-        joke = response.json()["joke"] + "\n\n"
+        joke = response.json()["joke"] + "\n"
     except Exception as e:
         joke = f"Failed to receive joke :/"
     return joke
@@ -208,20 +176,13 @@ def list_directory_tree(work_dir):
     return "Content of directory tree:\n" + "\n".join(tree)
 
 
-def invoke_tool(tool_call, tools):
-    tool_name_to_tool = {tool.name: tool for tool in tools}
-    name = tool_call["tool"]
-    requested_tool = tool_name_to_tool[name]
-
-    return requested_tool.invoke(tool_call["tool_input"])
-
 def invoke_tool_native(tool_call, tools):
     # convert string to real function
     tool_name_to_tool = {tool.name: tool for tool in tools}
     name = tool_call["name"]
     requested_tool = tool_name_to_tool[name]
-
-    tool_output = requested_tool.invoke(tool_call["args"])
+    args = tool_call["args"]
+    tool_output = requested_tool.invoke(args)
     return ToolMessage(tool_output, tool_call_id=tool_call["id"])
 
 
@@ -255,5 +216,18 @@ def create_frontend_feedback_story():
         input("Fulfill file with informations needed for a frontend feedback agent to know. Save file and hit Enter.")
 
 
-if __name__ == "__main__":
-    print(list_directory_tree(work_dir))
+def read_coderrules():
+    project_rules_path = os.path.join(Work.dir(), '.coderrules')
+    if not os.path.exists(project_rules_path):
+        return create_coderrules(project_rules_path)
+    with open(project_rules_path, 'r') as file:
+        return file.read()
+
+
+def create_coderrules(coderrules_path):
+    print_formatted("(Optional) Describe your project rules and structure to give AI more context. Check docs to learn how to do it https://clean-coder.dev/features/coderrules/. ", color="light_blue")
+    rules = input()
+    with open(coderrules_path, 'w', encoding='utf-8') as file:
+        file.write(rules)
+    print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
+    return rules

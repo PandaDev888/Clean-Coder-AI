@@ -18,7 +18,7 @@ def get_collection():
         chroma_client = chromadb.PersistentClient(path=os.getenv('WORK_DIR') + '/.clean_coder/chroma_base')
         try:
             return chroma_client.get_collection(name=collection_name)
-        except ValueError:
+        except:
             # print("Vector database does not exist. (Optional) create it by running src/tools/rag/write_descriptions.py to improve file research capabilities")
             return False
     return False

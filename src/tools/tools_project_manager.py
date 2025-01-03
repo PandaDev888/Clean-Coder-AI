@@ -2,27 +2,29 @@ from langchain.tools import tool
 from todoist_api_python.api import TodoistAPI
 import os
 from src.utilities.print_formatters import print_formatted
-from src.utilities.manager_utils import actualize_progress_description_file
+from src.utilities.manager_utils import actualize_progress_description_file, move_task
 from src.utilities.user_input import user_input
+from src.utilities.graphics import task_completed_animation
+from src.utilities.util_functions import join_paths
 from dotenv import load_dotenv, find_dotenv
 from single_task_coder import run_clean_coder_pipeline
 import uuid
 import requests
 import json
-from src.utilities.manager_utils import move_task
 
 
 load_dotenv(find_dotenv())
+load_dotenv()
 
+work_dir = os.getenv('WORK_DIR')
+load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
 todoist_api_key = os.getenv('TODOIST_API_KEY')
 todoist_api = TodoistAPI(todoist_api_key)
-base_work_dir = os.getenv('WORK_DIR')
-PROJECT_ID = os.getenv('TODOIST_PROJECT_ID')
 TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
 
 
 @tool
-def add_task(task_name, task_description, order, epic_id):
+def add_task(task_name, task_description, order):
     """Add new task to Todoist.
 Think very carefully before adding a new task to know what do you want exactly. Explain in detail what needs to be
 done in order to execute task.
@@ -37,30 +39,27 @@ Good description includes:
 you found in internet, files dev need to use, technical details related to existing code programmer need to pay
 attention on.
 :param order: order of the task in project.
-:param epic_id: id of the epic task belongs to.
 """
     human_message = user_input("Type (o)k to agree or provide commentary.")
     if human_message not in ['o', 'ok']:
         return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
 
     todoist_api.add_task(
-        project_id=PROJECT_ID,
+        project_id=os.getenv('TODOIST_PROJECT_ID'),
         content=task_name,
         description=task_description,
         order=order,
-        section_id=epic_id
     )
     return "Task added successfully"
 
 
 @tool
-def modify_task(task_id, new_task_name=None, new_task_description=None, epic_id=None, delete=False):
+def modify_task(task_id, new_task_name=None, new_task_description=None, delete=False):
     """Modify task in project management platform (Todoist).
 tool_input:
 :param task_id: id of the task.
 :param new_task_name: new name of the task (optional).
 :param new_task_description: new detailed description of what needs to be done in order to implement task (optional).
-:param epic_id: id of the epic to move task to.
 :param delete: if True, task will be deleted.
 """
     task_name = todoist_api.get_task(task_id).content
@@ -75,8 +74,6 @@ tool_input:
         update_data['description'] = new_task_description
     if update_data:
         todoist_api.update_task(task_id=task_id, **update_data)
-    if epic_id:
-        move_task(task_id, epic_id)
 
     if delete:
         todoist_api.delete_task(task_id=task_id)
@@ -124,7 +121,8 @@ Create an epic to group tasks with similar scope.
 tool_input:
 :param name: short description of functionality epic is about.
 """
-    section = todoist_api.add_section(name=name, project_id=PROJECT_ID)
+    print(f"project id: {os.getenv('TODOIST_PROJECT_ID')}")
+    section = todoist_api.add_section(name=name, project_id=os.getenv('TODOIST_PROJECT_ID'))
     return f"Epic {section} created successfully"
 
 
@@ -145,11 +143,11 @@ tool_input:
 
 
 @tool
-def finish_project_planning():
-    """Call that tool when all task in Todoist correctly reflect work for nearest time. No extra tasks or tasks with
-overlapping scope allowed. Tasks should be in execution order. That tool makes first task to be executed.
+def finish_project_planning(dummy):
+    """Call that tool to fire execution of top task from list. Use tool when all task in Todoist correctly reflect work. No extra tasks or tasks with
+overlapping scope allowed.
 tool_input:
-{}
+dummy: just write "ok"
 """
     human_message = user_input(
         "Project planning finished. Provide your proposition of changes in task list or type (o)k to continue...\n"
@@ -157,17 +155,17 @@ tool_input:
     if human_message not in ['o', 'ok']:
         return TOOL_NOT_EXECUTED_WORD + human_message
 
-    first_epic_id = todoist_api.get_sections(project_id=PROJECT_ID)[0].id
-    tasks_first_epic = todoist_api.get_tasks(project_id=PROJECT_ID, section_id=first_epic_id)
-    if not tasks_first_epic:
-        return TOOL_NOT_EXECUTED_WORD + "Closest epic is empty. Close it if its scope been completely executed or add tasks into it if not."
-    # Get first task and it's name and description
-    task = todoist_api.get_tasks(project_id=PROJECT_ID, section_id=first_epic_id)[0]
+    # first_epic_id = todoist_api.get_sections(project_id=os.getenv('TODOIST_PROJECT_ID'))[0].id
+    # tasks_first_epic = todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'), section_id=first_epic_id)
+    # if not tasks_first_epic:
+    #     return TOOL_NOT_EXECUTED_WORD + "Closest epic is empty. Close it if its scope been completely executed or add tasks into it if not."
+    # # Get first task and it's name and description
+    task = todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'))[0]
     task_name_description = f"{task.content}\n{task.description}"
 
     # Execute the main pipeline to implement the task
     print_formatted(f"\nAsked programmer to execute task: {task_name_description}\n", color="light_blue")
-    run_clean_coder_pipeline(task_name_description, base_work_dir)
+    run_clean_coder_pipeline(task_name_description, work_dir)
 
     # ToDo: git upload
 
@@ -183,7 +181,10 @@ tool_input:
     # Mark task as done
     todoist_api.close_task(task_id=task.id)
 
-    return f"Task execution completed. Tester response: {tester_response}"
+    # Display task completed animation
+
+    task_completed_animation()
+    return f"Task done. Tester response: {tester_response}"
 
 
 if __name__ == "__main__":

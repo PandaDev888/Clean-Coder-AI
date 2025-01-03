@@ -2,8 +2,8 @@ Several implementation plans for a task implementation have been proposed. Caref
 determine which one accomplishes the task most effectively.
 
 Take in account the following criteria:
-1. The primary criterion is the effectiveness of the plan in executing the task. It is most important.
-2. A secondary criterion is simplicity. If two plans are equally good, chose one described more concise and required
+1. The primary criterion is the effectiveness of the plan in executing the task.
+2. A secondary criterion is simplicity and readability. If two plans are equally good, chose one described more concise and required
 less modifications.
 3. The third criterion is consistency with existing code in other files. Prefer plan with code more similar to existing codebase.
 

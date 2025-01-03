@@ -20,26 +20,36 @@ def llm_open_router(model):
     timeout=60,
 )
 
-def init_llms(tools, run_name, temp=0):
+
+def init_llms(tools=None, run_name="Clean Coder", temp=0):
     llms = []
     if os.getenv("ANTHROPIC_API_KEY"):
-        llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=temp, timeout=120, max_tokens=2048).bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=temp, timeout=60, max_tokens=2048))
     if os.getenv("OPENROUTER_API_KEY"):
-        llms.append(llm_open_router("anthropic/claude-3.5-sonnet").bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(llm_open_router("anthropic/claude-3.5-sonnet"))
     if os.getenv("OPENAI_API_KEY"):
-        llms.append(ChatOpenAI(model="gpt-4o", temperature=temp, timeout=120).bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(ChatOpenAI(model="gpt-4o", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):
-        llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")).bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
+    for i, llm in enumerate(llms):
+        if tools:
+            llm = llm.bind_tools(tools)
+        llms[i] = llm.with_config({"run_name": run_name})
     return llms
 
-def init_llms_mini(tools, run_name, temp=0):
+
+def init_llms_mini(tools=None, run_name="Clean Coder", temp=0):
     llms = []
     if os.getenv("ANTHROPIC_API_KEY"):
-        llms.append(ChatAnthropic(model='claude-3-5-haiku-20241022', temperature=temp, timeout=120).bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(ChatAnthropic(model='claude-3-5-haiku-20241022', temperature=temp, timeout=60))
     if os.getenv("OPENROUTER_API_KEY"):
-        llms.append(llm_open_router("anthropic/claude-3.5-haiku").bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(llm_open_router("anthropic/claude-3.5-haiku"))
     if os.getenv("OPENAI_API_KEY"):
-        llms.append(ChatOpenAI(model="gpt-4o-mini", temperature=temp, timeout=120).bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(ChatOpenAI(model="gpt-4o-mini", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):
-        llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")).bind_tools(tools).with_config({"run_name": run_name}))
+        llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
+    for i, llm in enumerate(llms):
+        if tools:
+            llm = llm.bind_tools(tools)
+        llms[i] = llm.with_config({"run_name": run_name})
     return llms
