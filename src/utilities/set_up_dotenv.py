@@ -25,10 +25,12 @@ def set_up_env_coder_pipeline():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
+    # load
+    for key, value in envs.items():
+        if value:  # Only load if the value is not empty
+            os.environ[key] = value
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
-    load_dotenv(".env")
-    print(os.getenv("OPENAI_API_KEY"))
-
+    print(os.getenv("WORK_DIR"))
 
 def set_up_env_manager():
     envs = {}
@@ -48,8 +50,12 @@ def set_up_env_manager():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
+
+    # load
+    for key, value in envs.items():
+        if value:  # Only load if the value is not empty
+            os.environ[key] = value
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
-    load_dotenv(".env")
 
 
 def add_todoist_envs():
@@ -60,5 +66,10 @@ def add_todoist_envs():
     with open(".env", "a+") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
+
+    # load
+    for key, value in envs.items():
+        if value:  # Only load if the value is not empty
+            os.environ[key] = value
+
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
-    load_dotenv(".env")
