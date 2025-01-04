@@ -8,7 +8,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from src.utilities.llms import init_llms
 from src.utilities.util_functions import join_paths, read_coderrules
-from src.utilities.start_project_functions import create_project_description_file
+from src.utilities.start_project_functions import create_project_plan_file
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.load import loads
@@ -36,8 +36,8 @@ todoist_api = TodoistAPI(os.getenv('TODOIST_API_KEY'))
 
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-with open(f"{parent_dir}/prompts/actualize_project_description.prompt", "r") as f:
-    actualize_description_prompt_template = f.read()
+with open(f"{parent_dir}/prompts/actualize_progress_description.prompt", "r") as f:
+    actualize_progress_description_prompt_template = f.read()
 with open(f"{parent_dir}/prompts/manager_progress.prompt", "r") as f:
     tasks_progress_template = f.read()
 
@@ -45,8 +45,8 @@ llms = init_llms(run_name="Progress description")
 llm = llms[0].with_fallbacks(llms[1:])
 
 
-def read_project_description():
-    file_path = os.path.join(work_dir, ".clean_coder", "project_description.txt")
+def read_project_plan():
+    file_path = os.path.join(work_dir, ".clean_coder", "project_plan.txt")
 
     # Check if the file exists
     if not os.path.exists(file_path):
@@ -116,7 +116,7 @@ def parse_project_tasks(tasks):
 
 def actualize_progress_description_file(task_name_description, tester_response):
     progress_description = read_progress_description()
-    actualize_description_prompt = PromptTemplate.from_template(actualize_description_prompt_template)
+    actualize_description_prompt = PromptTemplate.from_template(actualize_progress_description_prompt_template)
     chain = actualize_description_prompt | llm | StrOutputParser()
     progress_description = chain.invoke(
         {
@@ -263,12 +263,12 @@ def load_system_message():
     with open(f"{parent_dir}/prompts/manager_system.prompt", "r") as f:
         system_prompt_template = f.read()
 
-    if os.path.exists(os.path.join(work_dir, '.clean_coder/project_description.txt')):
-        project_description = read_project_description()
+    if os.path.exists(os.path.join(work_dir, '.clean_coder/project_plan.txt')):
+        project_plan = read_project_plan()
     else:
-        project_description = create_project_description_file(work_dir)
+        project_plan = create_project_plan_file(work_dir)
 
     return SystemMessage(content=system_prompt_template.format(
-            project_description=project_description,
+            project_plan=project_plan,
             project_rules=read_coderrules()
     ))

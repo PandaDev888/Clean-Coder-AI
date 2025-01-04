@@ -138,11 +138,15 @@ def print_tool_message(tool_name, tool_input=None):
         message = "Let's add a task..."
         print_formatted(content=message, color='blue', bold=True)
         print_code_snippet(code=tool_input['task_description'], title=tool_input['task_name'], extension='text')
-    elif tool_name == 'create_epic':
-        message = "Let's create an epic..."
-        print_formatted(content=message, color='blue', bold=True)
-        print_formatted(content=tool_input, color='cyan', bold=True)
-
+    elif tool_name == 'modify_task':
+        if 'delete' in tool_input:
+            print_code_snippet(code="I want to delete task", extension='text')
+        else:
+            message = "Let's modify a task..."
+            print_formatted(content=message, color='blue', bold=True)
+            title = tool_input['new_task_name'] if 'new_task_name' in tool_input else f"ID: {tool_input['task_id']}"
+            if 'new_task_description' in tool_input:
+                print_code_snippet(code=tool_input['new_task_description'], title=title, extension='text')
     elif tool_name == 'final_response_researcher':
         json_string = json.dumps(tool_input, indent=2)
         print_code_snippet(code=json_string, extension='json', title='Files:')

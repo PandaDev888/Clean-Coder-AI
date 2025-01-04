@@ -14,10 +14,11 @@ When you need to decide about introducing new technology into the project, consu
 
 Always absolutely execute orders of a human.
 
-Here is description of the project you work on:
+Here is description of changes in the project you work on:
 '''
-{project_description}
+{project_plan}
 '''
+Some of the changes may be already implemented, some not.
 
 Some important project informations and rules:
 '''
