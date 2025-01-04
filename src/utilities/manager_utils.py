@@ -248,7 +248,8 @@ def actualize_tasks_list_and_progress_description(state):
     # Remove old tasks message
     state["messages"] = [msg for msg in state["messages"] if not hasattr(msg, "tasks_and_progress_message")]
     # Add new message
-    project_tasks = get_project_tasks()
+    tasks = fetch_tasks()
+    project_tasks = parse_project_tasks(tasks)
     progress_description = read_progress_description()
     tasks_and_progress_msg = HumanMessage(
         content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
