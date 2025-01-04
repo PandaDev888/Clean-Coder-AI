@@ -29,8 +29,9 @@ def set_up_env_coder_pipeline():
     #     if value:  # Only load if the value is not empty
     #         os.environ[key] = value
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
-    
-    if not os.getenv("WORK_DIR"):
+
+    print(os.getenv("WORK_DIR"))
+    if os.getenv("WORK_DIR") == "":
         print(colored("Restart container to read variables you just saved.", color="yellow"))
         sys.exit()
 
