@@ -24,15 +24,11 @@ def set_up_env_coder_pipeline():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
-    # # load
-    # for key, value in envs.items():
-    #     if value:  # Only load if the value is not empty
-    #         os.environ[key] = value
+
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
 
-    print(os.getenv("WORK_DIR"))
     if os.getenv("WORK_DIR") == "/work_dir":
-        print(colored("Restart container to read variables you just saved.", color="yellow"))
+        print(colored("Rerun to read variables you just saved.", color="yellow"))
         sys.exit()
 
 def set_up_env_manager():
@@ -53,13 +49,12 @@ def set_up_env_manager():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
-    #
-    # # load
-    # for key, value in envs.items():
-    #     if value:  # Only load if the value is not empty
-    #         os.environ[key] = value
+
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
 
+    if os.getenv("WORK_DIR") == "/work_dir":
+        print(colored("Rerun to read variables you just saved.", color="yellow"))
+        sys.exit()
 
 def add_todoist_envs():
     envs = {}
