@@ -3,6 +3,8 @@ File with functions allowing to set up api keys in .env file.
 
 As that functions are set up in the beginning of work process, avoid improrting anything from other files. (Especially from files where env variables are needed).
 """
+import os
+
 from termcolor import colored
 from dotenv import load_dotenv
 
@@ -25,6 +27,7 @@ def set_up_env_coder_pipeline():
             f.write(f"{key}={value}\n")
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
     load_dotenv(".env")
+    print(os.getenv("OPENAI_API_KEY"))
 
 
 def set_up_env_manager():
