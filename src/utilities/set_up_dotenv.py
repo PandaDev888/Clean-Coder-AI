@@ -31,7 +31,7 @@ def set_up_env_coder_pipeline():
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
 
     print(os.getenv("WORK_DIR"))
-    if os.getenv("WORK_DIR") == "":
+    if os.getenv("WORK_DIR") == "/work_dir":
         print(colored("Restart container to read variables you just saved.", color="yellow"))
         sys.exit()
 
