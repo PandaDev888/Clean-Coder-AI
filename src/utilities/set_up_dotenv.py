@@ -4,9 +4,8 @@ File with functions allowing to set up api keys in .env file.
 As that functions are set up in the beginning of work process, avoid improrting anything from other files. (Especially from files where env variables are needed).
 """
 import os
-
+import sys
 from termcolor import colored
-from dotenv import load_dotenv
 
 
 def set_up_env_coder_pipeline():
@@ -25,12 +24,15 @@ def set_up_env_coder_pipeline():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
-    # load
-    for key, value in envs.items():
-        if value:  # Only load if the value is not empty
-            os.environ[key] = value
+    # # load
+    # for key, value in envs.items():
+    #     if value:  # Only load if the value is not empty
+    #         os.environ[key] = value
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
-    print(os.getenv("WORK_DIR"))
+    
+    if not os.getenv("WORK_DIR"):
+        print(colored("Restart container to read variables you just saved.", color="yellow"))
+        sys.exit()
 
 def set_up_env_manager():
     envs = {}
@@ -50,11 +52,11 @@ def set_up_env_manager():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
-
-    # load
-    for key, value in envs.items():
-        if value:  # Only load if the value is not empty
-            os.environ[key] = value
+    #
+    # # load
+    # for key, value in envs.items():
+    #     if value:  # Only load if the value is not empty
+    #         os.environ[key] = value
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
 
 
