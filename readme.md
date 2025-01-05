@@ -34,6 +34,17 @@ or (recommended) check detailed instructions [how to start in documentation](htt
 You can also [deploy with Docker](https://clean-coder.dev/quick_start/run_with_docker/).
 
 
+## 📺 Demo videos
+
+Create an entire web app ~~with~~ by Clean Coder:
+
+<div align="center">
+<a href="https://youtu.be/aNpB-Tw-YPw" title="Greg's Tech video">
+  <img src="https://img.youtube.com/vi/aNpB-Tw-YPw/maxresdefault.jpg" width="600" alt="Demo video">
+</a>
+</div>
+
+
 ## ✨ Key advantages:
 
 - Get project supervised by [Manager agent](https://clean-coder.dev/quick_start/manager/) with thoroughly-described tasks organized in Todoist, just like with a human scrum master.
@@ -45,15 +56,6 @@ You can also [deploy with Docker](https://clean-coder.dev/quick_start/run_with_d
 - File Researcher agent with (but not only) [RAG tool](https://clean-coder.dev/advanced_features_installation/similarity_search_for_researcher/) for effective searching of project files.
 - [Sensitive files protection](https://clean-coder.dev/features/sensitive_file_protection/) from being watched by AI.
 
-## 📺 Demo videos
-
-Create an entire web app ~~with~~ by Clean Coder:
-
-<div align="center">
-<a href="https://youtu.be/aNpB-Tw-YPw" title="Greg's Tech video">
-  <img src="https://img.youtube.com/vi/aNpB-Tw-YPw/maxresdefault.jpg" width="600" alt="Demo video">
-</a>
-</div>
 
 ## ⛓️‍💥 Something got broken?
 
