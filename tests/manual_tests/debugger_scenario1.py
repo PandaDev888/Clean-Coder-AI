@@ -1,4 +1,7 @@
-import os, sys
+import sys
+import pathlib
+repo_directory = pathlib.Path(__file__).parent.parent.resolve()
+sys.path.append(str(repo_directory))
 from utils_for_tests import setup_work_dir, cleanup_work_dir, get_filenames_in_folder
 from src.agents.debugger_agent import Debugger
 from dotenv import load_dotenv, find_dotenv

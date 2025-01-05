@@ -96,8 +96,9 @@ def print_error(message: str) -> None:
 
 
 def print_tool_message(tool_name, tool_input=None):
-    if tool_name == 'ask_human':
-        pass
+    if tool_name == 'ask_human_tool':
+        message = "I have a question for you:"
+        print_code_snippet(code=tool_input['prompt'], title=message, extension='text')
     elif tool_name == 'see_file':
         message = "Looking at the file content..."
         print_formatted(content=message, color='blue', bold=True)
