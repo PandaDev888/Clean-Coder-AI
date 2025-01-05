@@ -65,7 +65,7 @@ Report bugs or propose new features for Clean Coder on our [Discord](https://dis
 <br>
 <div align="center">
   <a href="https://github.com/Grigorij-Dudnik/Clean-Coder-AI/graphs/contributors">
-    <img alt_text="something", src="https://contrib.rocks/image?repo=Grigorij-Dudnik/Clean-Coder-AI" />
+    <img src="https://contrib.rocks/image?repo=Grigorij-Dudnik/Clean-Coder-AI&1" />
   </a>
 </div>
 <br>
