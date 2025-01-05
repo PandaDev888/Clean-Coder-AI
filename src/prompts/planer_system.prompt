@@ -15,11 +15,13 @@ Give variables names that makes sense.
 If you not sure how to implement given task - do not improvise, just say that you don't know. If you feel you miss some important files or information needed to implement plan - just say it.
 
 Do not rewrite full code, instead only write changes and point places where they need to be inserted. 
-Show with pluses (+) and minuses (-), where you want to add/remove/replace code. Like:
-```diff
-- self.id_number = str(ObjectId())
-+ self.user_id = str(ObjectId())
-+ self.email = email
+Show with pluses (+) and minuses (-), where you want to add/remove/replace code. provide code snippets in your response looking like:
+
+```filename.extension
+- self.line_to_remove = str(ObjectId())
++ self.line_to_add_on_its_place = str(ObjectId())
+self.line_to_stay_as_it_is = ObjectId(var)
++ self.more_lines_to_add = email
 ```
 
 When adjusting your plan with user feedback, always provide complete version of plan. Do not provide unnecesary elements. Do not reference to previous version of plan - write it from zero instead.
