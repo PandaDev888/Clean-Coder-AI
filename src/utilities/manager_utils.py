@@ -33,6 +33,17 @@ load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
 todoist_api_key = os.getenv('TODOIST_API_KEY')
 todoist_api = TodoistAPI(os.getenv('TODOIST_API_KEY'))
 
+QUESTIONARY_STYLE = questionary.Style([
+    ('qmark', 'fg:magenta bold'),      # The '?' symbol
+    ('question', 'fg:white bold'),      # The question text
+    ('answer', 'fg:orange bold'),       # Selected answer
+    ('pointer', 'fg:green bold'),       # Selection pointer
+    ('highlighted', 'fg:green bold'),   # Highlighted choice
+    ('selected', 'fg:green bold'),      # Selected choice
+    ('separator', 'fg:magenta'),        # Separator between choices
+    ('instruction', 'fg:white'),        # Additional instructions
+])
+
 
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -67,6 +78,11 @@ def fetch_epics():
 def fetch_tasks():
     return todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'))
 
+
+def store_project_id(proj_id):
+    with open(join_paths(work_dir, ".clean_coder/.env"), "a") as f:
+        f.write(f"TODOIST_PROJECT_ID={proj_id}\n")
+    os.environ["TODOIST_PROJECT_ID"] = proj_id
 
 def get_project_tasks_and_epics():
     output_string = ""
@@ -186,15 +202,38 @@ def create_todoist_project():
     return response.id
 
 
-def create_todoist_project_if_needed():
+def setup_todoist_project_if_needed():
     load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
-    if not os.getenv("TODOIST_PROJECT_ID"):
-        project_id = create_todoist_project()
-        # write project id to .env
-        with open(join_paths(work_dir, ".clean_coder/.env"), "a") as f:
-            f.write(f"TODOIST_PROJECT_ID={project_id}\n")
-        os.environ["TODOIST_PROJECT_ID"] = project_id
+    if os.getenv("TODOIST_PROJECT_ID"):
+        return
+    setup_todoist_project()
 
+
+def setup_todoist_project():
+    projects = todoist_api.get_projects()
+    if not projects:
+        new_proj_id = create_todoist_project()
+        store_project_id(new_proj_id)
+        return
+
+    project_choices = [f"{proj.name} (ID: {proj.id})" for proj in projects]
+    choice = questionary.select(
+        "No project connected. Do you want to create a new project or use existing one?",
+        choices=["Create new project", "Use existing project"],
+        style=QUESTIONARY_STYLE
+    ).ask()
+
+    if choice == "Create new project":
+        new_proj_id = create_todoist_project()
+        store_project_id(new_proj_id)
+    else:
+        selected_project = questionary.select(
+            "Select a project to connect:",
+            choices=project_choices,
+            style=QUESTIONARY_STYLE
+        ).ask()
+        selected_project_id = selected_project.split("(ID:")[-1].strip(" )")
+        store_project_id(selected_project_id)
 
 def prompt_user_if_planning_needed():
     choice = questionary.select(
@@ -203,17 +242,9 @@ def prompt_user_if_planning_needed():
             "Start/continue planning my project (Default)",
             "Project is fully planned in Todoist, just execute tasks"
         ],
-        style=questionary.Style([
-            ('qmark', 'fg:magenta bold'),      # The '?' symbol
-            ('question', 'fg:white bold'),      # The question text
-            ('answer', 'fg:yellow bold'),       # Selected answer
-            ('pointer', 'fg:green bold'),        # Selection pointer
-            ('highlighted', 'fg:green bold'),    # Highlighted choice
-            ('selected', 'fg:green bold'),      # Selected choice
-            ('separator', 'fg:magenta'),        # Separator between choices
-            ('instruction', 'fg:white'),        # Additional instructions
-        ])
+        style=QUESTIONARY_STYLE
     ).ask()
+    return choice == "Start/continue planning my project (Default)"
     return choice == "Start/continue planning my project (Default)"
 
 

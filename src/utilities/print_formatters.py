@@ -129,7 +129,7 @@ def print_tool_message(tool_name, tool_input=None):
         print_formatted(content=message, color='blue', bold=True)
         print_code_snippet(code=tool_input['code'], extension=extension, start_line=tool_input['start_line'] + 1, title=tool_input['filename'])
     elif tool_name == 'replace_code':
-        message = f"Let's insert code on the place of lines {tool_input['start_line']} to {tool_input['end_line']}"
+        message = f"Let's replace code in lines {tool_input['start_line']} to {tool_input['end_line']} for:"
         extension = tool_input['filename'].split(".")[-1]
         print_formatted(content=message, color='blue', bold=True)
         print_code_snippet(code=tool_input['code'], extension=extension, start_line=tool_input['start_line'], title=tool_input['filename'])
