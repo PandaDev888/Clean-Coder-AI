@@ -82,11 +82,8 @@ class Debugger():
     # node functions
     def call_model_debugger(self, state):
         state = call_model(state, self.llms)
-        state = self.call_tool_debugger(state)
-        return state
-
-    def call_tool_debugger(self, state):
         state = call_tool(state, self.tools)
+        
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
         if len(last_ai_message.tool_calls) > 1:
@@ -95,6 +92,10 @@ class Debugger():
             state["messages"].append(HumanMessage(content=multiple_tools_msg))
         elif len(last_ai_message.tool_calls) == 0:
             state["messages"].append(HumanMessage(content=no_tools_msg))
+
+        for tool_call in last_ai_message.tool_calls:
+            if tool_call["name"] == "create_file_with_code":
+                self.files.add(tool_call["args"]["filename"])
         state = exchange_file_contents(state, self.files, self.work_dir)
         return state
 

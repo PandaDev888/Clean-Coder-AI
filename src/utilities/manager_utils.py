@@ -7,7 +7,7 @@ from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from src.utilities.llms import init_llms
-from src.utilities.util_functions import join_paths, read_coderrules
+from src.utilities.util_functions import join_paths, read_coderrules, list_directory_tree
 from src.utilities.start_project_functions import create_project_plan_file
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -245,7 +245,6 @@ def prompt_user_if_planning_needed():
         style=QUESTIONARY_STYLE
     ).ask()
     return choice == "Start/continue planning my project (Default)"
-    return choice == "Start/continue planning my project (Default)"
 
 
 def get_manager_messages(saved_messages_path):
@@ -261,7 +260,9 @@ def get_manager_messages(saved_messages_path):
         messages = [HumanMessage(
             content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
             tasks_and_progress_message=True
-        )]
+        ),
+        HumanMessage(content=list_directory_tree(work_dir))
+        ]
 
     # Add system message as first one and execution message if needed
     messages = [load_system_message()] + messages
