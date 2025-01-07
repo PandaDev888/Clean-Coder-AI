@@ -14,7 +14,7 @@ services:
       - LOG_FILE=${LOG_FILE:-}
     volumes:
       - .:/Clean_Coder
-      - ${WORK_DIR}:/work_dir
+      - ${WORK_DIR:-.}:/work_dir
     # Uncomment (linux) or adjust (other systems) the following line to use microphone
     # devices:
     #   - "/dev/snd:/dev/snd"
@@ -33,7 +33,7 @@ services:
       - LOG_FILE=${LOG_FILE:-}
     volumes:
       - .:/Clean_Coder
-      - ${WORK_DIR}:/work_dir
+      - ${WORK_DIR:-.}:/work_dir
     # Uncomment (linux) or adjust (other systems) the following line to use microphone
     # devices:
     #   - "/dev/snd:/dev/snd"
