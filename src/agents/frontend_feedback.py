@@ -44,7 +44,7 @@ class ScreenshotCodingStructure(BaseModel):
         description="If you have missing info about some endpoint/selector/other important element name, ask about it here. If everything clear, questions are not needed."
     )
     screenshot_code: str = Field(description="""
-    Provide here your playwright code for a screenshot or write "No screenshot needed".
+    Provide here your playwright code for a screenshot. If screenshot is not needed for that task write exactly "No screenshot needed".
     """)
 
 

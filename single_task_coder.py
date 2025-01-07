@@ -46,7 +46,7 @@ def run_clean_coder_pipeline(task, work_dir):
         file_paths = executor.do_task(task, plan)
         first_vfeedback_screenshots_msg = None
 
-    human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed.")
+    human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed. ")
     if human_message in ['o', 'ok']:
         return
     debugger = Debugger(
@@ -57,5 +57,5 @@ def run_clean_coder_pipeline(task, work_dir):
 if __name__ == "__main__":
     work_dir = os.getenv("WORK_DIR")
     set_up_dot_clean_coder_dir(work_dir)
-    task = user_input("Provide task to be executed.")
+    task = user_input("Provide task to be executed. ")
     run_clean_coder_pipeline(task, work_dir)

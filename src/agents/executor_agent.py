@@ -26,7 +26,7 @@ def final_response_executor(test_instruction):
 tool input:
 :param test_instruction: write detailed instruction for human what actions he need to do in order to check if
 implemented changes work correctly."""
-    print_formatted(content=test_instruction, color="blue")
+    pass
 
 
 class AgentState(TypedDict):
@@ -87,7 +87,7 @@ class Executor():
 
         if bad_tool_call_looped(state):
             return "human_help"
-        elif last_message.tool_calls[0]["name"] == "final_response_executor":
+        elif len(last_message.tool_calls) > 0 and last_message.tool_calls[0]["name"] == "final_response_executor":
             return END
         else:
             return "agent"

@@ -83,7 +83,7 @@ class Debugger():
     def call_model_debugger(self, state):
         state = call_model(state, self.llms)
         state = call_tool(state, self.tools)
-        
+
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
         if len(last_ai_message.tool_calls) > 1:
