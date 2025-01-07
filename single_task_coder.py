@@ -54,6 +54,11 @@ def run_clean_coder_pipeline(task, work_dir):
     debugger.do_task(task, plan)
 
 
+def run_clean_coder_pipeline_docrag(task: str, work_dir: str, docrag: False = False): # type: ignore
+    """Run a single clean coder pipeline task with optional RAG documentation."""
+    pass
+
+
 if __name__ == "__main__":
     work_dir = os.getenv("WORK_DIR")
     set_up_dot_clean_coder_dir(work_dir)
