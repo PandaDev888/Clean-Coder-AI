@@ -61,5 +61,5 @@ class VoiceRecorder:
                 timeout=20,
             )
         os.remove(self.soundfile_path)
-        print(transcription.text)
+        #print(transcription.text)
         return transcription.text

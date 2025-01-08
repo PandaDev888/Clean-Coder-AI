@@ -105,17 +105,16 @@ def check_application_logs():
 
 
 def see_image(filename, work_dir):
-    try:
-        with open(join_paths(work_dir, filename), 'rb') as image_file:
-            img_encoded = base64.b64encode(image_file.read()).decode("utf-8")
-        return img_encoded
-    except Exception as e:
-        return f"{type(e).__name__}: {e}"
+    with open(join_paths(work_dir, filename), 'rb') as image_file:
+        img_encoded = base64.b64encode(image_file.read()).decode("utf-8")
+    return img_encoded
 
 
 def convert_images(image_paths):
     images = []
     for image_path in image_paths:
+        if not os.path.exists(join_paths(work_dir, image_path)):
+            continue
         images.extend([
                  {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}

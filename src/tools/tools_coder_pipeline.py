@@ -18,7 +18,7 @@ Please analyze which place is correct to introduce the code before calling a too
 """
 syntax_error_modify_code = """
 Changes can cause next error: {error_response}. Probably you:
-- Provided a wrong end or beginning line number (end code line happens more often), or
+- Provided a wrong end or beginning line number, or
 - Forgot to add an indents on beginning of code.
 Think step by step which function/code block you want to change before proposing improved change.
 """

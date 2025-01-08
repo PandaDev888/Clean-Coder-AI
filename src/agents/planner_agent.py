@@ -135,7 +135,7 @@ def planning(task, text_files, image_paths, work_dir):
     print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     file_contents = check_file_contents(text_files, work_dir, line_numbers=False)
     images = convert_images(image_paths)
-    message_content_without_imgs = f"Task: {task},\n\nFiles:\n{file_contents}"
+    message_content_without_imgs = f"Task: {task},\n\n###\n\nFiles:\n{file_contents}"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
     message_images = HumanMessage(content=images)
 
