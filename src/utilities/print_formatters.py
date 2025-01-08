@@ -22,7 +22,7 @@ def print_formatted_content_planner(content):
         snippet_content = lines[1].strip()
         # Place outside text after this snippet
         outside_text = outside_texts[i+1].strip()
-        print_code_snippet(code=snippet_content, extension=filename)
+        print_code_snippet(code=snippet_content, title=filename, extension="diff")
         print_formatted(content=outside_text, color="dark_grey")
 
 

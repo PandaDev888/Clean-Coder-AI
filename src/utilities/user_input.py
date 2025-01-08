@@ -2,6 +2,7 @@ import os
 from src.utilities.print_formatters import print_formatted
 from src.utilities.voice_utils import VoiceRecorder
 import keyboard
+import readline
 
 
 recorder = VoiceRecorder()
@@ -15,7 +16,13 @@ def user_input(prompt=""):
             print_formatted("Set OPENAI_API_KEY to use microphone feature.", color="red")
             user_sentence = input()
         elif recorder.libportaudio_available:
-            user_sentence = record_voice_message()
+            transcription = record_voice_message()
+            if os.getenv("EDIT_TRANSCRIPTION"):
+                print_formatted("Edit text or hit Enter to proceed.\n", color="green")
+                user_sentence = input_with_preinserted_text(transcription)
+            else:
+                print(transcription)
+                user_sentence = transcription
         else:
             print_formatted("Install 'sudo apt-get install libportaudio2' (Linux) or 'brew install portaudio' (Mac) to use microphone feature.", color="red")
             user_sentence = input()
@@ -27,5 +34,15 @@ def record_voice_message():
     recorder.start_recording()
     keyboard.wait('enter', suppress=True)
     recorder.stop_recording()
-    print("Recording finished.\n")
+    print_formatted("Recording finished.", color="green")
     return recorder.transcribe_audio()
+
+
+def input_with_preinserted_text(text):
+    def hook():
+        readline.insert_text(text)
+        readline.redisplay()
+    readline.set_pre_input_hook(hook)
+    result = input()
+    readline.set_pre_input_hook()
+    return result

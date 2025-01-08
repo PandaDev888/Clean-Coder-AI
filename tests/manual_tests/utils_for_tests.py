@@ -1,3 +1,6 @@
+"""
+Universal utility functions for manual (and not only) tests.
+"""
 import os
 import shutil
 
