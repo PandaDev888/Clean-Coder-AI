@@ -10,6 +10,7 @@ from dotenv import load_dotenv, find_dotenv
 from single_task_coder import run_clean_coder_pipeline
 import uuid
 import requests
+from requests.exceptions import HTTPError
 import json
 
 
@@ -44,12 +45,15 @@ attention on.
     if human_message not in ['o', 'ok']:
         return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
 
-    todoist_api.add_task(
-        project_id=os.getenv('TODOIST_PROJECT_ID'),
-        content=task_name,
-        description=task_description,
-        order=order,
-    )
+    try:
+        todoist_api.add_task(
+            project_id=os.getenv('TODOIST_PROJECT_ID'),
+            content=task_name,
+            description=task_description,
+            order=order,
+        )
+    except HTTPError:
+        raise Exception(f"Are you sure Todoist project (ID: {os.getenv('TODOIST_PROJECT_ID')}) exists?")
     return "Task added successfully"
 
 
@@ -62,8 +66,11 @@ tool_input:
 :param new_task_description: new detailed description of what needs to be done in order to implement task (optional).
 :param delete: if True, task will be deleted.
 """
-    task_name = todoist_api.get_task(task_id).content
-    human_message = user_input(f"I want to {'delete' if delete else 'modify'} task '{task_name}'. Type (o)k to agree or provide commentary.")
+    try:
+        task_name = todoist_api.get_task(task_id).content
+    except HTTPError:
+        raise Exception(f"Are you sure Todoist project (ID: {os.getenv('TODOIST_PROJECT_ID')}) exists?")
+    human_message = user_input(f"I want to {'delete' if delete else 'modify'} task '{task_name}'. Type (o)k or provide commentary. ")
     if human_message not in ['o', 'ok']:
         return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
 

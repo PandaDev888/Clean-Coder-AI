@@ -91,7 +91,7 @@ def call_planer(state):
 
 
 def ask_human_planner(state):
-    human_message = user_input("Type (o)k if you accept or provide commentary.")
+    human_message = user_input("Type (o)k if you accept or provide commentary. ")
     if human_message in ['o', 'ok']:
         state["messages"].append(HumanMessage(content="Approved by human"))
     else:

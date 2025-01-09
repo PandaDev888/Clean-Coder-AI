@@ -11,7 +11,7 @@ elif load_dotenv(find_dotenv()) and not os.getenv("TODOIST_API_KEY"):
     add_todoist_envs()
 
 from typing import TypedDict, Sequence
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
 from langchain_core.load import dumps
 from langgraph.graph import StateGraph
 from src.tools.tools_project_manager import add_task, modify_task, finish_project_planning, reorder_tasks
@@ -40,9 +40,6 @@ class Manager:
         self.manager = self.setup_workflow()
         self.saved_messages_path = join_paths(self.work_dir, ".clean_coder/manager_messages.json")
 
-
-
-
     def call_model_manager(self, state):
         self.save_messages_to_disk(state)
         state = call_model(state, self.llms)
@@ -50,7 +47,7 @@ class Manager:
         state = call_tool(state, self.tools)
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
-        if not last_ai_message.content:
+        if not last_ai_message.content and not last_ai_message.tool_calls:
             state["messages"].pop()
             state["messages"].append(HumanMessage(content=empty_message_msg))
         elif len(last_ai_message.tool_calls) == 0:
