@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-import sys
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
 from typing import TypedDict, Sequence
@@ -9,13 +7,6 @@ from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
-
-if __name__ == "__main__":
-    # Add repo path to PYTHONPATH for when running this executable file directly.
-    repo_path = str(Path(__file__).parents[2])
-    sys.path.append(repo_path)
-
-from src.agents.researcher_agent import Researcher
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
 from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
 from src.utilities.langgraph_common_functions import after_ask_human_condition
@@ -154,15 +145,3 @@ def planning(task, text_files, image_paths, work_dir):
     planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 
     return planner_response.content
-
-
-if __name__ == "__main__":
-    task = "Test task"
-    work_dir = os.getenv("WORK_DIR")
-    researcher = Researcher(work_dir)
-    file_paths, image_paths = researcher.research_task(task)
-    planning(task=task,
-             text_files=file_paths,
-             image_paths=image_paths,
-             work_dir=work_dir,
-             )
