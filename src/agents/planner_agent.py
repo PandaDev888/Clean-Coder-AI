@@ -1,7 +1,7 @@
 import os
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
-from typing import TypedDict, Sequence
+from typing import TypedDict, Sequence, Union
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
@@ -130,7 +130,7 @@ planner_workflow.add_conditional_edges("human", after_ask_human_condition)
 planner = planner_workflow.compile()
 
 
-def planning(task, text_files, image_paths, work_dir):
+def planning(task: str, text_files, image_paths, work_dir: str, documentation: Union[None, list[str]] = None):
     print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     file_contents = check_file_contents(text_files, work_dir, line_numbers=False)
     images = convert_images(image_paths)
@@ -139,7 +139,7 @@ def planning(task, text_files, image_paths, work_dir):
     message_images = HumanMessage(content=images)
 
     inputs = {
-        "messages": [planer_system_message, message_without_imgs, message_images],
+        "messages": [planer_system_message, message_without_imgs, message_images, documentation],
         "voter_messages": [voter_system_message, message_without_imgs],
     }
     planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]

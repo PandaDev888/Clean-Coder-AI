@@ -7,6 +7,7 @@ if not find_dotenv():
     set_up_env_coder_pipeline()
 
 from src.agents.researcher_agent import Researcher
+from src.agents.doc_harvester import Doc_harvester
 from src.agents.planner_agent import planning
 from src.agents.executor_agent import Executor
 from src.agents.debugger_agent import Debugger
@@ -25,8 +26,10 @@ use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 def run_clean_coder_pipeline(task, work_dir):
     researcher = Researcher(work_dir)
     file_paths, image_paths = researcher.research_task(task)
+    harvester = Doc_harvester()
+    documentation = harvester.find_documentation(task, work_dir)
 
-    plan = planning(task, file_paths, image_paths, work_dir)
+    plan = planning(task, file_paths, image_paths, work_dir, documentation=documentation)
 
     executor = Executor(file_paths, work_dir)
 
@@ -46,11 +49,6 @@ def run_clean_coder_pipeline(task, work_dir):
     debugger = Debugger(
         file_paths, work_dir, human_message,image_paths,  playwright_codes)
     debugger.do_task(task, plan)
-
-
-def run_clean_coder_pipeline_docrag(task: str, work_dir: str, docrag: False = False): # type: ignore
-    """Run a single clean coder pipeline task with optional RAG documentation."""
-    pass
 
 
 if __name__ == "__main__":
