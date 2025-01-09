@@ -129,7 +129,7 @@ planner_workflow.add_edge("planers", "human")
 planner_workflow.add_edge("agent", "human")
 planner_workflow.add_conditional_edges("human", after_ask_human_condition)
 
-researcher = planner_workflow.compile()
+planner = planner_workflow.compile()
 
 
 def planning(task, text_files, image_paths, work_dir):
@@ -144,7 +144,7 @@ def planning(task, text_files, image_paths, work_dir):
         "messages": [planer_system_message, message_without_imgs, message_images],
         "voter_messages": [voter_system_message, message_without_imgs],
     }
-    planner_response = researcher.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
+    planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 
     return planner_response.content
 
