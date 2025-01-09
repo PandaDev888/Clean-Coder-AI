@@ -1,20 +1,27 @@
+import os
+from pathlib import Path
+import sys
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
 from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
+from langchain_community.chat_models import ChatOllama
+from langchain_anthropic import ChatAnthropic
+
+if __name__ == "__main__":
+    # Add repo path to PYTHONPATH for when running this executable file directly.
+    repo_path = str(Path(__file__).parents[2])
+    sys.path.append(repo_path)
+
 from src.agents.researcher_agent import Researcher
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
 from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
-import os
-from langchain_community.chat_models import ChatOllama
-from langchain_anthropic import ChatAnthropic
 from src.utilities.llms import llm_open_router
-
 
 load_dotenv(find_dotenv())
 
