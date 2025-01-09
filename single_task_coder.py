@@ -23,11 +23,13 @@ from concurrent.futures import ThreadPoolExecutor
 use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 
 
-def run_clean_coder_pipeline(task, work_dir):
+def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False):
     researcher = Researcher(work_dir)
     file_paths, image_paths = researcher.research_task(task)
-    harvester = Doc_harvester()
-    documentation = harvester.find_documentation(task, work_dir)
+    documentation = None
+    if doc_harvest:
+        harvester = Doc_harvester()
+        documentation = harvester.find_documentation(task, work_dir)
 
     plan = planning(task, file_paths, image_paths, work_dir, documentation=documentation)
 
@@ -55,4 +57,6 @@ if __name__ == "__main__":
     work_dir = os.getenv("WORK_DIR")
     set_up_dot_clean_coder_dir(work_dir)
     task = user_input("Provide task to be executed. ")
+    if not work_dir:
+        raise Exception("WORK_DIR variable not provided. Please add WORK_DIR to .env file")
     run_clean_coder_pipeline(task, work_dir)
