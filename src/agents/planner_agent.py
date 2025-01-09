@@ -4,6 +4,7 @@ from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
+from src.agents.researcher_agent import Researcher
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
 from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
 from src.utilities.langgraph_common_functions import after_ask_human_condition
@@ -114,21 +115,21 @@ def call_model_corrector(state):
 
 multiple_planers = False
 # workflow definition
-researcher_workflow = StateGraph(AgentState)
+planner_workflow = StateGraph(AgentState)
 
 if multiple_planers:
-    researcher_workflow.add_node("planers", call_planers)
+    planner_workflow.add_node("planers", call_planers)
 else:
-    researcher_workflow.add_node("planers", call_planer)
-researcher_workflow.add_node("agent", call_model_corrector)
-researcher_workflow.add_node("human", ask_human_planner)
-researcher_workflow.set_entry_point("planers")
+    planner_workflow.add_node("planers", call_planer)
+planner_workflow.add_node("agent", call_model_corrector)
+planner_workflow.add_node("human", ask_human_planner)
+planner_workflow.set_entry_point("planers")
 
-researcher_workflow.add_edge("planers", "human")
-researcher_workflow.add_edge("agent", "human")
-researcher_workflow.add_conditional_edges("human", after_ask_human_condition)
+planner_workflow.add_edge("planers", "human")
+planner_workflow.add_edge("agent", "human")
+planner_workflow.add_conditional_edges("human", after_ask_human_condition)
 
-researcher = researcher_workflow.compile()
+researcher = planner_workflow.compile()
 
 
 def planning(task, text_files, image_paths, work_dir):
@@ -151,4 +152,10 @@ def planning(task, text_files, image_paths, work_dir):
 if __name__ == "__main__":
     task = "Test task"
     work_dir = os.getenv("WORK_DIR")
-    planning(task, work_dir=work_dir)
+    researcher = Researcher(work_dir)
+    file_paths, image_paths = researcher.research_task(task)
+    planning(task=task,
+             text_files=file_paths,
+             image_paths=image_paths,
+             work_dir=work_dir,
+             )
