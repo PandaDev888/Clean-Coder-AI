@@ -26,7 +26,7 @@ def final_response_executor(test_instruction):
 tool input:
 :param test_instruction: write detailed instruction for human what actions he need to do in order to check if
 implemented changes work correctly."""
-    print_formatted(content=test_instruction, color="blue")
+    pass
 
 
 class AgentState(TypedDict):
@@ -53,13 +53,10 @@ class Executor():
         executor_workflow = StateGraph(AgentState)
 
         executor_workflow.add_node("agent", self.call_model_executor)
-        executor_workflow.add_node("tool", self.call_tool_executor)
         executor_workflow.add_node("human_help", agent_looped_human_help)
 
         executor_workflow.set_entry_point("agent")
 
-        # executor_workflow.add_edge("agent", "checker")
-        executor_workflow.add_edge("tool", "agent")
         executor_workflow.add_edge("human_help", "agent")
         executor_workflow.add_conditional_edges("agent", self.after_agent_condition)
 
@@ -68,18 +65,15 @@ class Executor():
     # node functions
     def call_model_executor(self, state):
         state = call_model(state, self.llms)
+        state = call_tool(state, self.tools)
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
         if len(last_ai_message.tool_calls) > 1:
             for tool_call in last_ai_message.tool_calls:
                 state["messages"].append(ToolMessage(content="too much tool calls", tool_call_id=tool_call["id"]))
             state["messages"].append(HumanMessage(content=multiple_tools_msg))
-        return state
-
-    def call_tool_executor(self, state):
-        state = call_tool(state, self.tools)
-        messages = [msg for msg in state["messages"] if msg.type == "ai"]
-        last_ai_message = messages[-1]
+        elif len(last_ai_message.tool_calls) == 0:
+            state["messages"].append(HumanMessage(content=no_tools_msg))
         for tool_call in last_ai_message.tool_calls:
             if tool_call["name"] == "create_file_with_code":
                 self.files.add(tool_call["args"]["filename"])
@@ -93,12 +87,10 @@ class Executor():
 
         if bad_tool_call_looped(state):
             return "human_help"
-        elif last_message.content in (multiple_tools_msg, no_tools_msg):
-            return "agent"
-        elif last_message.tool_calls[0]["name"] == "final_response_executor":
+        elif len(last_message.tool_calls) > 0 and last_message.tool_calls[0]["name"] == "final_response_executor":
             return END
         else:
-            return "tool"
+            return "agent"
 
     # just functions
     def do_task(self, task, plan):

@@ -47,7 +47,7 @@ with open(f"{parent_dir}/prompts/debugger_system.prompt", "r") as f:
 
 
 class Debugger():
-    def __init__(self, files, work_dir, human_feedback, image_paths, vfeedback_screenshots_msg=None, playwright_code=None):
+    def __init__(self, files, work_dir, human_feedback, image_paths, playwright_code=None):
         self.work_dir = work_dir
         self.tools = prepare_tools(work_dir)
         self.llms = init_llms(self.tools, "Debugger")
@@ -57,7 +57,6 @@ class Debugger():
         self.files = files
         self.images = convert_images(image_paths)
         self.human_feedback = human_feedback
-        self.visual_feedback = vfeedback_screenshots_msg
         self.playwright_code = playwright_code
 
         # workflow definition
@@ -82,11 +81,8 @@ class Debugger():
     # node functions
     def call_model_debugger(self, state):
         state = call_model(state, self.llms)
-        state = self.call_tool_debugger(state)
-        return state
-
-    def call_tool_debugger(self, state):
         state = call_tool(state, self.tools)
+
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
         if len(last_ai_message.tool_calls) > 1:
@@ -95,6 +91,10 @@ class Debugger():
             state["messages"].append(HumanMessage(content=multiple_tools_msg))
         elif len(last_ai_message.tool_calls) == 0:
             state["messages"].append(HumanMessage(content=no_tools_msg))
+
+        for tool_call in last_ai_message.tool_calls:
+            if tool_call["name"] == "create_file_with_code":
+                self.files.add(tool_call["args"]["filename"])
         state = exchange_file_contents(state, self.files, self.work_dir)
         return state
 
@@ -154,8 +154,10 @@ class Debugger():
             HumanMessage(content=self.images),
             HumanMessage(content=f"Human feedback: {self.human_feedback}"),
         ]}
-        if self.visual_feedback:
-            inputs["messages"].append(self.visual_feedback)
+        if self.playwright_code:
+            print_formatted("Making screenshots, please wait a while...", color="light_blue")
+            screenshot_msg = execute_screenshot_codes(self.playwright_code)
+            inputs["messages"].append(screenshot_msg)
         self.debugger.invoke(inputs, {"recursion_limit": 150})
 
 

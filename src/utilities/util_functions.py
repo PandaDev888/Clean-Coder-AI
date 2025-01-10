@@ -3,13 +3,12 @@ import os
 import xml.etree.ElementTree as ET
 import base64
 import requests
-from src.utilities.start_work_functions import file_folder_ignored, CoderIgnore
+from src.utilities.start_work_functions import file_folder_ignored, CoderIgnore, Work
 from src.utilities.print_formatters import print_formatted
 from dotenv import load_dotenv, find_dotenv
 from todoist_api_python.api import TodoistAPI
 from langchain_core.messages import HumanMessage, ToolMessage
 import click
-from src.utilities.start_work_functions import Work
 
 
 load_dotenv(find_dotenv())
@@ -106,17 +105,16 @@ def check_application_logs():
 
 
 def see_image(filename, work_dir):
-    try:
-        with open(join_paths(work_dir, filename), 'rb') as image_file:
-            img_encoded = base64.b64encode(image_file.read()).decode("utf-8")
-        return img_encoded
-    except Exception as e:
-        return f"{type(e).__name__}: {e}"
+    with open(join_paths(work_dir, filename), 'rb') as image_file:
+        img_encoded = base64.b64encode(image_file.read()).decode("utf-8")
+    return img_encoded
 
 
 def convert_images(image_paths):
     images = []
     for image_path in image_paths:
+        if not os.path.exists(join_paths(work_dir, image_path)):
+            continue
         images.extend([
                  {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}

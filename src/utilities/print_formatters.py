@@ -1,5 +1,4 @@
 import json
-import re
 import textwrap
 from termcolor import colored
 from rich.panel import Panel
@@ -10,32 +9,21 @@ from pygments.util import ClassNotFound
 from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
 
 
-def split_text_and_code(text):
-    pattern = r'```(\w+)\s*\n(.*?)\n\s*```'
-    parts = re.split(pattern, text, flags=re.DOTALL)
-    result = []
-    for i, part in enumerate(parts):
-        if i == 0 or i % 3 == 0:  # Text parts
-            if parts[i].strip():
-                result.append(('text', parts[i].strip()))
-        elif i % 3 == 1:  # Code block or snippets parts
-            language = parts[i]
-            content = parts[i + 1]
-            result.append(('code_snippet', language, content.strip()))
-
-    return result
-
-
 def print_formatted_content_planner(content):
-    content_parts = split_text_and_code(content)
+    parts = content.split('```')
+    outside_texts = parts[::2]
+    code_snippets = parts[1::2]
 
-    for part in content_parts:
-        if part[0] == 'text':
-            print_formatted(content=part[1], color="dark_grey")
-        elif part[0] == 'code_snippet':
-            language = part[1]
-            code_content = part[2]
-            print_code_snippet(code=code_content, extension=language)
+    print_formatted(content=outside_texts[0], color="dark_grey")
+    for i, snippet in enumerate(code_snippets):
+        # Split snippet into filename and content
+        lines = snippet.split('\n', 1)
+        filename = lines[0]
+        snippet_content = lines[1].strip()
+        # Place outside text after this snippet
+        outside_text = outside_texts[i+1].strip()
+        print_code_snippet(code=snippet_content, title=filename, extension="diff")
+        print_formatted(content=outside_text, color="dark_grey")
 
 
 def print_formatted_content(response):
@@ -108,8 +96,9 @@ def print_error(message: str) -> None:
 
 
 def print_tool_message(tool_name, tool_input=None):
-    if tool_name == 'ask_human':
-        pass
+    if tool_name == 'ask_human_tool':
+        message = "I have a question for you:"
+        print_code_snippet(code=tool_input['prompt'], title=message, extension='text')
     elif tool_name == 'see_file':
         message = "Looking at the file content..."
         print_formatted(content=message, color='blue', bold=True)
@@ -129,7 +118,7 @@ def print_tool_message(tool_name, tool_input=None):
         print_formatted(content=message, color='blue', bold=True)
         print_code_snippet(code=tool_input['code'], extension=extension, start_line=tool_input['start_line'] + 1, title=tool_input['filename'])
     elif tool_name == 'replace_code':
-        message = f"Let's insert code on the place of lines {tool_input['start_line']} to {tool_input['end_line']}"
+        message = f"Let's replace code in lines {tool_input['start_line']} to {tool_input['end_line']} for:"
         extension = tool_input['filename'].split(".")[-1]
         print_formatted(content=message, color='blue', bold=True)
         print_code_snippet(code=tool_input['code'], extension=extension, start_line=tool_input['start_line'], title=tool_input['filename'])
@@ -138,11 +127,15 @@ def print_tool_message(tool_name, tool_input=None):
         message = "Let's add a task..."
         print_formatted(content=message, color='blue', bold=True)
         print_code_snippet(code=tool_input['task_description'], title=tool_input['task_name'], extension='text')
-    elif tool_name == 'create_epic':
-        message = "Let's create an epic..."
-        print_formatted(content=message, color='blue', bold=True)
-        print_formatted(content=tool_input, color='cyan', bold=True)
-
+    elif tool_name == 'modify_task':
+        if 'delete' in tool_input:
+            print_code_snippet(code="I want to delete task", extension='text')
+        else:
+            message = "Let's modify a task..."
+            print_formatted(content=message, color='blue', bold=True)
+            title = tool_input['new_task_name'] if 'new_task_name' in tool_input else f"ID: {tool_input['task_id']}"
+            if 'new_task_description' in tool_input:
+                print_code_snippet(code=tool_input['new_task_description'], title=title, extension='text')
     elif tool_name == 'final_response_researcher':
         json_string = json.dumps(tool_input, indent=2)
         print_code_snippet(code=json_string, extension='json', title='Files:')
@@ -169,4 +162,19 @@ def print_tool_message(tool_name, tool_input=None):
 
 
 if __name__ == '__main__':
-   pass
+    text = """
+Here’s the complete plan, split into two separate steps:
+```profileEditStyles.css
+-   max-width: 300px;
++   max-width: 600px;
+-   background-color: #f9f9f9;
++   background-color: #daf5da;
+```
+Step 2: dziki pies
+```profileEditStyles.css
+-   background-color: #218838;
++   background-color: #34a853;
+```
+"""
+
+    print_formatted_content_planner(text)

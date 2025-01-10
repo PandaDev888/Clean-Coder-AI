@@ -3,6 +3,8 @@ File with functions allowing to set up api keys in .env file.
 
 As that functions are set up in the beginning of work process, avoid improrting anything from other files. (Especially from files where env variables are needed).
 """
+import os
+import sys
 from termcolor import colored
 
 
@@ -12,7 +14,7 @@ def set_up_env_coder_pipeline():
     print(colored("1/3. Provide one or more API keys for LLM providers or the local Ollama model. Don't worry, you can always modify them in the .env file.", color="cyan"))
     envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional) (Why? Best coding capabilities):\n")
     envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional) (Why? Needed for using microphone, best planning capabilities with o1):\n")
-    envs["OPEN_ROUTER_API_KEY"] = input("Provide your Open Router API key (Optional) (Why? All models in one place):\n")
+    envs["OPEN_ROUTER_API_KEY"] = input("Provide your OpenRouter API key (Optional) (Why? All models in one place):\n")
     envs["OLLAMA_MODEL"] = input("Provide your Ollama model name (Optional) (Why? If you want to use self-hosted model instead):\n")
     print(colored("2/3. Now provide the folder containing your project.", color="cyan"))
     envs["WORK_DIR"] = input("Provide full path to your work directory:\n")
@@ -22,8 +24,12 @@ def set_up_env_coder_pipeline():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
+
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
 
+    if os.getenv("WORK_DIR") == "/work_dir":
+        print(colored("Rerun to read variables you just saved.", color="yellow"))
+        sys.exit()
 
 def set_up_env_manager():
     envs = {}
@@ -31,7 +37,7 @@ def set_up_env_manager():
     print(colored("1/4. Provide one or more API keys for LLM providers or the local Ollama model. Don't worry, you can always modify them in the .env file.", color="cyan"))
     envs["ANTHROPIC_API_KEY"] = input("Provide your Anthropic API key (Optional) (Why? Best coding capabilities):\n")
     envs["OPENAI_API_KEY"] = input("Provide your OpenAI API key (Optional) (Why? Needed for using microphone, best planning capabilities with o1):\n")
-    envs["OPEN_ROUTER_API_KEY"] = input("Provide your Open Router API key (Optional) (Why? All models in one place):\n")
+    envs["OPEN_ROUTER_API_KEY"] = input("Provide your OpenRouter API key (Optional) (Why? All models in one place):\n")
     envs["OLLAMA_MODEL"] = input("Provide your Ollama model name (Optional) (Why? If you want to use self-hosted model instead):\n")
     print(colored("2/4. Now provide the folder containing your project.", color="cyan"))
     envs["WORK_DIR"] = input("Provide full path to your work directory:\n")
@@ -43,8 +49,12 @@ def set_up_env_manager():
     with open(".env", "w") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
+
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))
 
+    if os.getenv("WORK_DIR") == "/work_dir":
+        print(colored("Rerun to read variables you just saved.", color="yellow"))
+        sys.exit()
 
 def add_todoist_envs():
     envs = {}
@@ -54,4 +64,10 @@ def add_todoist_envs():
     with open(".env", "a+") as f:
         for key, value in envs.items():
             f.write(f"{key}={value}\n")
+
+    # load
+    for key, value in envs.items():
+        if value:  # Only load if the value is not empty
+            os.environ[key] = value
+
     print(colored("We have done .env file set up! You can modify your variables in any moment in .env.\n", color="green"))

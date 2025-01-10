@@ -1,13 +1,11 @@
 from langchain.tools import tool
 import os
-from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.syntax_checker_functions import check_syntax
 from src.utilities.start_work_functions import file_folder_ignored, CoderIgnore
 from src.utilities.util_functions import join_paths, TOOL_NOT_EXECUTED_WORD
 from src.utilities.user_input import user_input
 from src.tools.rag.retrieval import retrieve
-import base64
 
 
 load_dotenv(find_dotenv())
@@ -20,7 +18,7 @@ Please analyze which place is correct to introduce the code before calling a too
 """
 syntax_error_modify_code = """
 Changes can cause next error: {error_response}. Probably you:
-- Provided a wrong end or beginning line number (end code line happens more often), or
+- Provided a wrong end or beginning line number, or
 - Forgot to add an indents on beginning of code.
 Think step by step which function/code block you want to change before proposing improved change.
 """
@@ -106,7 +104,7 @@ tool input:
                 if check_syntax_response != "Valid syntax":
                     print("Wrong syntax provided, asking to correct.")
                     return TOOL_NOT_EXECUTED_WORD + syntax_error_insert_code.format(error_response=check_syntax_response)
-                message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary."
+                message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary. "
                 human_message = user_input(message)
                 if human_message not in ['o', 'ok']:
                     return TOOL_NOT_EXECUTED_WORD + f"Human: {human_message}"
@@ -141,7 +139,7 @@ tool input:
                 if check_syntax_response != "Valid syntax":
                     print(check_syntax_response)
                     return TOOL_NOT_EXECUTED_WORD + syntax_error_modify_code.format(error_response=check_syntax_response)
-                message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary."
+                message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary. "
                 human_message = user_input(message)
                 if human_message not in ['o', 'ok']:
                     return TOOL_NOT_EXECUTED_WORD + f"Human: {human_message}"
@@ -168,7 +166,7 @@ tool input:
 :param code: Code to write in the file.
 """
         try:
-            message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary."
+            message = "Never accept changes you don't understand. Type (o)k if you accept or provide commentary. "
             human_message = user_input(message)
             if human_message not in ['o', 'ok']:
                 return TOOL_NOT_EXECUTED_WORD + f"Human: {human_message}"
@@ -196,12 +194,5 @@ def ask_human_tool(prompt):
     tool input:
     :param prompt: prompt to human.
     """
-    try:
-        human_message = user_input(prompt)
-        
-        return human_message
-    except Exception as e:
-        return f"{type(e).__name__}: {e}"
-
-
-
+    human_message = user_input("Type ")
+    return human_message

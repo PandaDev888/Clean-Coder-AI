@@ -34,17 +34,6 @@ or (recommended) check detailed instructions [how to start in documentation](htt
 You can also [deploy with Docker](https://clean-coder.dev/quick_start/run_with_docker/).
 
 
-## ✨ Key advantages:
-
-- Get project supervised by [Manager agent](https://clean-coder.dev/quick_start/manager/) with thoroughly-described tasks organized in Todoist, just like with a human scrum master.
-- Watch tasks executed one by one by [Programming agents](https://clean-coder.dev/quick_start/programmer_pipeline/), with a well-designed context pipeline and advanced techniques for enhanced intelligence.
-- Allow AI to see fronted it creates using [frontend feedback feature](https://clean-coder.dev/features/frontend_feedback/). At the day of writing no other AI coder has that.
-- Create a [frontend based on images](https://clean-coder.dev/features/working_with_images/) with designs.
-- [Speak to Clean Coder](https://clean-coder.dev/features/talk_to_cc/) instead of writing.
-- Automatic file linting prevents from introducing incorrect changes and [log check for self-debug](https://clean-coder.dev/advanced_features_installation/logs_check/).
-- File Researcher agent with (but not only) [RAG tool](https://clean-coder.dev/advanced_features_installation/similarity_search_for_researcher/) for effective searching of project files.
-- [Sensitive files protection](https://clean-coder.dev/features/sensitive_file_protection/) from being watched by AI.
-
 ## 📺 Demo videos
 
 Create an entire web app ~~with~~ by Clean Coder:
@@ -55,6 +44,19 @@ Create an entire web app ~~with~~ by Clean Coder:
 </a>
 </div>
 
+
+## ✨ Key advantages:
+
+- Get project supervised by [Manager agent](https://clean-coder.dev/quick_start/manager/) with thoroughly-described tasks organized in Todoist, just like with a human scrum master.
+- Watch tasks executed one by one by [Programming agents](https://clean-coder.dev/quick_start/programmer_pipeline/), with a well-designed context pipeline and advanced techniques for enhanced intelligence.
+- Allow AI to see frontend it creates with [frontend feedback feature](https://clean-coder.dev/features/frontend_feedback/). At the day of writing no other AI coder has that feature.
+- Create a [frontend based on images](https://clean-coder.dev/features/working_with_images/) with designs.
+- [Speak to Clean Coder](https://clean-coder.dev/features/talk_to_cc/) instead of writing.
+- Automatic file linting prevents from introducing incorrect changes and [log check for self-debug](https://clean-coder.dev/advanced_features_installation/logs_check/).
+- File Researcher agent with (but not only) [RAG tool](https://clean-coder.dev/advanced_features_installation/similarity_search_for_researcher/) for effective searching of project files.
+- [Sensitive files protection](https://clean-coder.dev/features/sensitive_file_protection/) from being watched by AI.
+
+
 ## ⛓️‍💥 Something got broken?
 
 Report bugs or propose new features for Clean Coder on our [Discord](https://discord.gg/8gat7Pv7QJ)!
@@ -63,7 +65,7 @@ Report bugs or propose new features for Clean Coder on our [Discord](https://dis
 <br>
 <div align="center">
   <a href="https://github.com/Grigorij-Dudnik/Clean-Coder-AI/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=Grigorij-Dudnik/Clean-Coder-AI" />
+    <img src="https://contrib.rocks/image?repo=Grigorij-Dudnik/Clean-Coder-AI&1" />
   </a>
 </div>
 <br>
