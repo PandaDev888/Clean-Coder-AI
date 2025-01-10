@@ -57,7 +57,7 @@ tool input:
                 return f"You are not allowed to work with {filename}."
             with open(join_paths(work_dir, filename), 'r', encoding='utf-8') as file:
                 lines = file.readlines()
-            formatted_lines = [f"{i+1}|{line[:-1]}\n" for i, line in enumerate(lines)]
+            formatted_lines = [f"{i+1}|{line[:-1]}|{i+1}\n" for i, line in enumerate(lines)]
             file_content = "".join(formatted_lines)
             file_content = filename + ":\n\n" + file_content
 
