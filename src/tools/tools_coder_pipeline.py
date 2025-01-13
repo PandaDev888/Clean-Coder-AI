@@ -1,4 +1,4 @@
-from langchain.tools import tool
+from langchain_core.tools import tool
 import os
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.syntax_checker_functions import check_syntax
@@ -28,7 +28,7 @@ def prepare_list_dir_tool(work_dir):
     @tool
     def list_dir(directory):
         """
-List files in directory.
+List files in directory. Use only for dirs content of which is hidden in the project tree.
 tool input:
 :param directory: Name of directory to list files in.
 """

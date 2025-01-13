@@ -2,7 +2,7 @@ from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
-from langchain.tools import tool
+from langchain_core.tools import tool
 from src.tools.tools_coder_pipeline import (
      prepare_see_file_tool, prepare_list_dir_tool, retrieve_files_by_semantic_query
 )

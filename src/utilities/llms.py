@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_ollama import ChatOllama
+#from langchain_google_genai import ChatGoogleGenerativeAI
 
 load_dotenv()
 
@@ -29,6 +30,8 @@ def init_llms(tools=None, run_name="Clean Coder", temp=0):
         llms.append(llm_open_router("anthropic/claude-3.5-sonnet"))
     if os.getenv("OPENAI_API_KEY"):
         llms.append(ChatOpenAI(model="gpt-4o", temperature=temp, timeout=60))
+    # if os.getenv("GOOGLE_API_KEY"):
+    #     llms.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):
         llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
     for i, llm in enumerate(llms):
@@ -46,6 +49,29 @@ def init_llms_mini(tools=None, run_name="Clean Coder", temp=0):
         llms.append(llm_open_router("anthropic/claude-3.5-haiku"))
     if os.getenv("OPENAI_API_KEY"):
         llms.append(ChatOpenAI(model="gpt-4o-mini", temperature=temp, timeout=60))
+    # if os.getenv("GOOGLE_API_KEY"):
+    #     llms.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=temp, timeout=60))
+    if os.getenv("OLLAMA_MODEL"):
+        llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
+    for i, llm in enumerate(llms):
+        if tools:
+            llm = llm.bind_tools(tools)
+        llms[i] = llm.with_config({"run_name": run_name})
+    return llms
+
+
+def init_llms_planer(tools=None, run_name="Clean Coder", temp=0.2):
+    llms = []
+    if os.getenv("OPENAI_API_KEY"):
+        llms.append(ChatOpenAI(model="o1", temperature=temp, timeout=60))
+    if os.getenv("OPENROUTER_API_KEY"):
+        llms.append(llm_open_router("openai/gpt-4o"))
+    if os.getenv("OPENAI_API_KEY"):
+        llms.append(ChatOpenAI(model="gpt-4o", temperature=temp, timeout=60))
+    if os.getenv("ANTHROPIC_API_KEY"):
+        llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=temp, timeout=60, max_tokens=2048))
+    # if os.getenv("GOOGLE_API_KEY"):
+    #     llms.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):
         llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
     for i, llm in enumerate(llms):
