@@ -4,7 +4,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AI
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
-from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
+from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules, list_directory_tree
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
@@ -135,7 +135,7 @@ def planning(task, text_files, image_paths, work_dir):
     print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     file_contents = check_file_contents(text_files, work_dir, line_numbers=False)
     images = convert_images(image_paths)
-    message_content_without_imgs = f"Task: {task},\n\n###\n\nFiles:\n{file_contents}"
+    message_content_without_imgs = f"Task:\n{task},\n\n###\n\nFiles:\n{file_contents}, \n\n###\n\nDirectory tree:\n{list_directory_tree(work_dir)}"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
     message_images = HumanMessage(content=images)
 
