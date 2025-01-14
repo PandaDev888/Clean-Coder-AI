@@ -218,7 +218,7 @@ def setup_todoist_project():
 
     project_choices = [f"{proj.name} (ID: {proj.id})" for proj in projects]
     choice = questionary.select(
-        "No project connected. Do you want to create a new project or use existing one?",
+        "No Todoist project connected. Do you want to create a new project or use existing one?",
         choices=["Create new project", "Use existing project"],
         style=QUESTIONARY_STYLE
     ).ask()

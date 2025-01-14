@@ -12,23 +12,14 @@ from src.utilities.util_functions import check_file_contents, convert_images, ge
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
-from src.utilities.llms import llm_open_router
+from src.utilities.llms import init_llms_planer
+import os
+from langchain_community.chat_models import ChatOllama
+from langchain_anthropic import ChatAnthropic
 
 load_dotenv(find_dotenv())
 
-llms_planners = []
-if os.getenv("OPENAI_API_KEY"):
-    # temperature=1 is walkaround as o1 not accepts any temperature
-    llms_planners.append(ChatOpenAI(model="o1", temperature=1, timeout=90).with_config({"run_name": "Planer"}))
-if os.getenv("OPENAI_API_KEY"):
-    llms_planners.append(ChatOpenAI(model="gpt-4o", temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
-if os.getenv("OPENROUTER_API_KEY"):
-    llms_planners.append(llm_open_router("openai/gpt-4o").with_config({"run_name": "Planer"}))
-if os.getenv("ANTHROPIC_API_KEY"):
-    llms_planners.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=0.3, timeout=90).with_config({"run_name": "Planer"}))
-if os.getenv("OLLAMA_MODEL"):
-    llms_planners.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")).with_config({"run_name": "Planer"}))
-
+llms_planners = init_llms_planer(run_name="Planner")
 llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:])
 # copy planers, but exchange config name
 llm_voter = llm_planner.with_config({"run_name": "Voter"})
@@ -90,7 +81,7 @@ def call_planer(state):
 
 
 def ask_human_planner(state):
-    human_message = user_input("Type (o)k if you accept or provide commentary.")
+    human_message = user_input("Type (o)k if you accept or provide commentary. ")
     if human_message in ['o', 'ok']:
         state["messages"].append(HumanMessage(content="Approved by human"))
     else:
