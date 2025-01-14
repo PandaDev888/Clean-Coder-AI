@@ -1,4 +1,3 @@
-from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
 from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
@@ -11,13 +10,25 @@ from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
 from src.utilities.llms import init_llms_planer
 import os
-from langchain_community.chat_models import ChatOllama
-from langchain_anthropic import ChatAnthropic
+from typing import Optional
+from pydantic import BaseModel, Field
+
 
 load_dotenv(find_dotenv())
 
+class PlanStructure(BaseModel):
+    """Output structure"""
+    plan: str = Field(description="""
+    Your plan of changes here.
+    """)
+    ask_researcher: Optional[str] = Field(
+        default=None,
+        description="If you feel that not all important project files been provided for modification/reference, ask here Researcher to provide more."
+    )
+
+
 llms_planners = init_llms_planer(run_name="Planner")
-llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:])
+llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:]).with_structured_output(PlanStructure)
 # copy planers, but exchange config name
 llm_voter = llm_planner.with_config({"run_name": "Voter"})
 
@@ -25,6 +36,8 @@ llm_voter = llm_planner.with_config({"run_name": "Voter"})
 class AgentState(TypedDict):
     messages: Sequence[BaseMessage]
     voter_messages: Sequence[BaseMessage]
+
+
 
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -71,7 +84,7 @@ def call_planer(state):
     animation.start()
     response = llm_planner.invoke(messages)
     animation.stop()
-    print_formatted_content_planner(response.content)
+    print_formatted_content_planner(response.plan)
     state["messages"].append(response)
 
     return state
