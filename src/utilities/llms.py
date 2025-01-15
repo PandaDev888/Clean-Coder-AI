@@ -24,7 +24,7 @@ def llm_open_router(model):
 
 def llm_open_local_hosted(model):
     return ChatOpenAI(
-    openai_api_key=None,
+    openai_api_key="n/a",
     openai_api_base=getenv("LOCAL_MODEL_API_BASE"),
     model_name=model,
     timeout=90,
@@ -63,6 +63,8 @@ def init_llms_mini(tools=None, run_name="Clean Coder", temp=0):
     #     llms.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):
         llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
+    if getenv("LOCAL_MODEL_API_BASE"):
+        llms.append(llm_open_local_hosted(getenv("LOCAL_MODEL_NAME")))
     for i, llm in enumerate(llms):
         if tools:
             llm = llm.bind_tools(tools)
@@ -84,6 +86,8 @@ def init_llms_planer(tools=None, run_name="Clean Coder", temp=0.2):
     #     llms.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):
         llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
+    if getenv("LOCAL_MODEL_API_BASE"):
+        llms.append(llm_open_local_hosted(getenv("LOCAL_MODEL_NAME")))
     for i, llm in enumerate(llms):
         if tools:
             llm = llm.bind_tools(tools)
