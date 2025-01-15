@@ -38,8 +38,6 @@ class AgentState(TypedDict):
     voter_messages: Sequence[BaseMessage]
 
 
-
-
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 with open(f"{parent_dir}/prompts/planer_system.prompt", "r") as f:
@@ -103,10 +101,12 @@ def ask_human_planner(state):
 
 def call_model_corrector(state):
     messages = state["messages"]
+    print("got messages...")
     animation.start()
     response = llm_planner.invoke(messages)
+    print("got response...")
     animation.stop()
-    print_formatted_content_planner(response.content)
+    print_formatted_content_planner(response.plan)
     state["messages"].append(response)
 
     return state
