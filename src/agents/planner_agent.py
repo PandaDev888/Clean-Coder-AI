@@ -83,7 +83,7 @@ def call_planer(state):
     response = llm_planner.invoke(messages)
     animation.stop()
     print_formatted_content_planner(response.plan)
-    state["messages"].append(response)
+    state["messages"].append(response.plan)
 
     return state
 
@@ -101,13 +101,11 @@ def ask_human_planner(state):
 
 def call_model_corrector(state):
     messages = state["messages"]
-    print("got messages...")
     animation.start()
     response = llm_planner.invoke(messages)
-    print("got response...")
     animation.stop()
     print_formatted_content_planner(response.plan)
-    state["messages"].append(response)
+    state["messages"].append(response.plan)
 
     return state
 
@@ -145,7 +143,7 @@ def planning(task, text_files, image_paths, work_dir):
     }
     planner_response = researcher.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 
-    return planner_response.content
+    return planner_response
 
 
 if __name__ == "__main__":
