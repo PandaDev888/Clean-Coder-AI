@@ -9,6 +9,7 @@ from langchain_ollama import ChatOllama
 
 load_dotenv()
 
+
 def llm_open_router(model):
     return ChatOpenRouter(
     openai_api_key=getenv("OPENROUTER_API_KEY"),
@@ -63,7 +64,7 @@ def init_llms_mini(tools=None, run_name="Clean Coder", temp=0):
 def init_llms_planer(tools=None, run_name="Clean Coder", temp=0.2):
     llms = []
     if os.getenv("OPENAI_API_KEY"):
-        llms.append(ChatOpenAI(model="o1", temperature=temp, timeout=60))
+        llms.append(ChatOpenAI(model="o1", temperature=1, timeout=60))
     if os.getenv("OPENROUTER_API_KEY"):
         llms.append(llm_open_router("openai/gpt-4o"))
     if os.getenv("OPENAI_API_KEY"):
