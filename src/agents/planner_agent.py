@@ -45,7 +45,6 @@ with open(f"{parent_dir}/prompts/planer_system.prompt", "r") as f:
 with open(f"{parent_dir}/prompts/voter_system.prompt", "r") as f:
     voter_system_prompt_template = f.read()
 
-planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=read_coderrules()))
 voter_system_message = SystemMessage(content=voter_system_prompt_template)
 
 animation = LoadingAnimation()
@@ -83,6 +82,8 @@ def call_planer(state):
     response = llm_planner.invoke(messages)
     animation.stop()
     print_formatted_content_planner(response.plan)
+    if response.ask_researcher:
+        print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
     state["messages"].append(response.plan)
 
     return state
@@ -105,6 +106,8 @@ def call_model_corrector(state):
     response = llm_planner.invoke(messages)
     animation.stop()
     print_formatted_content_planner(response.plan)
+    if response.ask_researcher:
+        print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
     state["messages"].append(response.plan)
 
     return state
@@ -129,11 +132,16 @@ researcher_workflow.add_conditional_edges("human", after_ask_human_condition)
 researcher = researcher_workflow.compile()
 
 
-def planning(task, text_files, image_paths, work_dir):
+def planning(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=None):
+    if not dir_tree:
+        dir_tree = list_directory_tree(work_dir)
+    if not coderrules:
+        coderrules = read_coderrules()
+    planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=coderrules))
     print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     file_contents = check_file_contents(text_files, work_dir, line_numbers=False)
     images = convert_images(image_paths)
-    message_content_without_imgs = f"Task:\n{task},\n\n###\n\nFiles:\n{file_contents}, \n\n###\n\nDirectory tree:\n{list_directory_tree(work_dir)}"
+    message_content_without_imgs = f"Task:\n'''{task}''',\n\n###\n\nFiles:\n'''{file_contents}''', \n\n###\n\nDirectory tree:\n'''{dir_tree}'''"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
     message_images = HumanMessage(content=images)
 
