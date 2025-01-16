@@ -71,8 +71,6 @@ def call_planer(state):
     response = llm_planner.invoke(messages)
     animation.stop()
     print_formatted_content_planner(response.content)
-    if response.ask_researcher:
-        print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
     state["messages"].append(response.content)
 
     return state
@@ -95,8 +93,6 @@ def call_model_corrector(state):
     response = llm_planner.invoke(messages)
     animation.stop()
     print_formatted_content_planner(response.content)
-    if response.ask_researcher:
-        print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
     state["messages"].append(response.content)
 
     return state
