@@ -45,7 +45,7 @@ For being logged in as admin user, use username="frontend.feedback@admin", passw
 
 
 def check_file_contents(files, work_dir, line_numbers=True):
-    file_contents = f"Files available: {files}\n\n"
+    file_contents = f"Files shown: {files}\n\n"
     for file_name in files:
         file_content = watch_file(file_name, work_dir, line_numbers)
         file_contents += file_content + "\n\n###\n\n"

@@ -16,19 +16,8 @@ from pydantic import BaseModel, Field
 
 load_dotenv(find_dotenv())
 
-class PlanStructure(BaseModel):
-    """Output structure"""
-    plan: str = Field(description="""
-    Your plan of changes here.
-    """)
-    ask_researcher: Optional[str] = Field(
-        default=None,
-        description="If you feel that not all important project files been provided for modification/reference, ask here Researcher to provide more."
-    )
-
-
 llms_planners = init_llms_planer(run_name="Planner")
-llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:]).with_structured_output(PlanStructure)
+llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:])
 # copy planers, but exchange config name
 llm_voter = llm_planner.with_config({"run_name": "Voter"})
 
@@ -81,10 +70,10 @@ def call_planer(state):
     animation.start()
     response = llm_planner.invoke(messages)
     animation.stop()
-    print_formatted_content_planner(response.plan)
+    print_formatted_content_planner(response.content)
     if response.ask_researcher:
         print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
-    state["messages"].append(response.plan)
+    state["messages"].append(response.content)
 
     return state
 
@@ -105,10 +94,10 @@ def call_model_corrector(state):
     animation.start()
     response = llm_planner.invoke(messages)
     animation.stop()
-    print_formatted_content_planner(response.plan)
+    print_formatted_content_planner(response.content)
     if response.ask_researcher:
         print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
-    state["messages"].append(response.plan)
+    state["messages"].append(response.content)
 
     return state
 
@@ -137,11 +126,11 @@ def planning(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=
         dir_tree = list_directory_tree(work_dir)
     if not coderrules:
         coderrules = read_coderrules()
-    planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=coderrules))
-    print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     file_contents = check_file_contents(text_files, work_dir, line_numbers=False)
+    planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=coderrules, file_contents=file_contents, dir_tree=dir_tree))
+    print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     images = convert_images(image_paths)
-    message_content_without_imgs = f"Task:\n'''{task}''',\n\n###\n\nFiles:\n'''{file_contents}''', \n\n###\n\nDirectory tree:\n'''{dir_tree}'''"
+    message_content_without_imgs = f"Task:\n'''{task}'''"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
     message_images = HumanMessage(content=images)
 

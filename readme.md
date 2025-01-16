@@ -27,9 +27,9 @@ cd Clean-Coder-AI
 
 pip install -r requirements.txt
 
-python single_task_coder.py
+python manager.py
 ```
-or (recommended) check detailed instructions [how to start in documentation](https://clean-coder.dev/quick_start/programmer_pipeline/).
+or check detailed instructions [how to start in documentation](https://clean-coder.dev/quick_start/programmer_pipeline/).
 
 You can also [deploy with Docker](https://clean-coder.dev/quick_start/run_with_docker/).
 
