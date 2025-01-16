@@ -155,8 +155,3 @@ def planning(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=
 
     return planner_response
 
-
-if __name__ == "__main__":
-    task = "Test task"
-    work_dir = os.getenv("WORK_DIR")
-    planning(task, work_dir=work_dir)
