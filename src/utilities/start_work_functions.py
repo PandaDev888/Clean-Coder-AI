@@ -3,6 +3,7 @@ Place here functions that should be called when clean coder is started.
 """
 import os
 import fnmatch
+from termcolor import colored
 
 
 def read_frontend_feedback_story():
@@ -54,6 +55,15 @@ class Work:
         if Work.work_dir is None:
             Work.work_dir = Work.read_work_dir()
         return Work.work_dir
+
+
+def print_ascii_logo():
+    with open("assets/ascii-art.txt", "r") as f:
+        logo = f.read()
+    with open("assets/Clean_Coder_writing.txt", "r") as f:
+        writing = f.read()
+    print(colored(logo, color="yellow"))
+    print(colored(writing, color="white"))
 
 
 if __name__ == '__main__':

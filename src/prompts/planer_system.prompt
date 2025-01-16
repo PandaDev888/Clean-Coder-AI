@@ -21,7 +21,7 @@ For additional context, here's the directory tree:
 Instructions:
 
 1. Plan the logic:
-   Outline the algorithm before proposing code changes.
+   Outline the logic algorithm before proposing code changes.
 
 2. Draft a detailed modification plan:
    - Prioritize readability

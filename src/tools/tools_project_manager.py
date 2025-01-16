@@ -188,10 +188,8 @@ dummy: just write "ok"
     # Mark task as done
     todoist_api.close_task(task_id=task.id)
 
-    # Display task completed animation
-
     task_completed_animation()
-    return f"Task done. Tester response: {tester_response}"
+
 
 
 if __name__ == "__main__":

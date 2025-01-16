@@ -1,5 +1,5 @@
 if __name__ == "__main__":
-    from src.utilities.graphics import print_ascii_logo
+    from src.utilities.start_work_functions import print_ascii_logo
     print_ascii_logo()
 from dotenv import find_dotenv
 from src.utilities.set_up_dotenv import set_up_env_coder_pipeline
@@ -13,7 +13,6 @@ from src.agents.debugger_agent import Debugger
 from src.agents.frontend_feedback import write_screenshot_codes
 import os
 from src.utilities.user_input import user_input
-from src.utilities.print_formatters import print_formatted
 from src.utilities.start_project_functions import set_up_dot_clean_coder_dir
 from src.utilities.util_functions import create_frontend_feedback_story
 from concurrent.futures import ThreadPoolExecutor
