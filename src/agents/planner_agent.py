@@ -1,5 +1,3 @@
-import os
-from langchain_openai.chat_models import ChatOpenAI
 from langchain.output_parsers import XMLOutputParser
 from typing import TypedDict, Sequence, Union
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
@@ -8,19 +6,31 @@ from dotenv import load_dotenv, find_dotenv
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from src.utilities.print_formatters import print_formatted, print_formatted_content_planner
-from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules
+from src.utilities.util_functions import check_file_contents, convert_images, get_joke, read_coderrules, list_directory_tree
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
 from src.utilities.llms import init_llms_planer
 import os
-from langchain_community.chat_models import ChatOllama
-from langchain_anthropic import ChatAnthropic
+from typing import Optional
+from pydantic import BaseModel, Field
+
 
 load_dotenv(find_dotenv())
 
+class PlanStructure(BaseModel):
+    """Output structure"""
+    plan: str = Field(description="""
+    Your plan of changes here.
+    """)
+    ask_researcher: Optional[str] = Field(
+        default=None,
+        description="If you feel that not all important project files been provided for modification/reference, ask here Researcher to provide more."
+    )
+
+
 llms_planners = init_llms_planer(run_name="Planner")
-llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:])
+llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:]).with_structured_output(PlanStructure)
 # copy planers, but exchange config name
 llm_voter = llm_planner.with_config({"run_name": "Voter"})
 
@@ -37,7 +47,6 @@ with open(f"{parent_dir}/prompts/planer_system.prompt", "r") as f:
 with open(f"{parent_dir}/prompts/voter_system.prompt", "r") as f:
     voter_system_prompt_template = f.read()
 
-planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=read_coderrules()))
 voter_system_message = SystemMessage(content=voter_system_prompt_template)
 
 animation = LoadingAnimation()
@@ -74,8 +83,10 @@ def call_planer(state):
     animation.start()
     response = llm_planner.invoke(messages)
     animation.stop()
-    print_formatted_content_planner(response.content)
-    state["messages"].append(response)
+    print_formatted_content_planner(response.plan)
+    if response.ask_researcher:
+        print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
+    state["messages"].append(response.plan)
 
     return state
 
@@ -96,8 +107,10 @@ def call_model_corrector(state):
     animation.start()
     response = llm_planner.invoke(messages)
     animation.stop()
-    print_formatted_content_planner(response.content)
-    state["messages"].append(response)
+    print_formatted_content_planner(response.plan)
+    if response.ask_researcher:
+        print_formatted(f"I have a question to Researcher!: {response.ask_researcher}", color="light_red")
+    state["messages"].append(response.plan)
 
     return state
 
@@ -121,11 +134,16 @@ planner_workflow.add_conditional_edges("human", after_ask_human_condition)
 planner = planner_workflow.compile()
 
 
-def planning(task: str, text_files, image_paths, work_dir: str, documentation: Union[None, list[str]] = None):
+def planning(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=None):
+    if not dir_tree:
+        dir_tree = list_directory_tree(work_dir)
+    if not coderrules:
+        coderrules = read_coderrules()
+    planer_system_message = SystemMessage(content=planer_system_prompt_template.format(project_rules=coderrules))
     print_formatted("📈 Planner here! Create plan of changes with me!", color="light_blue")
     file_contents = check_file_contents(text_files, work_dir, line_numbers=False)
     images = convert_images(image_paths)
-    message_content_without_imgs = f"Task: {task},\n\n###\n\nFiles:\n{file_contents}"
+    message_content_without_imgs = f"Task:\n'''{task}''',\n\n###\n\nFiles:\n'''{file_contents}''', \n\n###\n\nDirectory tree:\n'''{dir_tree}'''"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
     message_images = HumanMessage(content=images)
 
@@ -135,4 +153,10 @@ def planning(task: str, text_files, image_paths, work_dir: str, documentation: U
     }
     planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 
-    return planner_response.content
+    return planner_response
+
+
+if __name__ == "__main__":
+    task = "Test task"
+    work_dir = os.getenv("WORK_DIR")
+    planning(task, work_dir=work_dir)
