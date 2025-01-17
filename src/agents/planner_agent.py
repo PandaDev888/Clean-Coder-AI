@@ -7,7 +7,7 @@ from src.utilities.util_functions import check_file_contents, convert_images, ge
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
-from src.utilities.llms import init_llms_planer
+from src.utilities.llms import init_llms_planer, init_llms_mini
 import os
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -17,6 +17,8 @@ load_dotenv(find_dotenv())
 
 llms_planners = init_llms_planer(run_name="Planner")
 llm_planner = llms_planners[0].with_fallbacks(llms_planners[1:])
+llms_controller = init_llms_mini(run_name="Plan Files Controller")
+llm_controller = llms_controller[0].with_fallbacks(llms_controller[1:])
 
 
 class AgentState(TypedDict):
@@ -24,11 +26,14 @@ class AgentState(TypedDict):
 
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-with open(f"{parent_dir}/prompts/planer_system.prompt", "r") as f:
+with open(f"{parent_dir}/prompts/planner_system.prompt", "r") as f:
     planer_system_prompt_template = f.read()
+with open(f"{parent_dir}/prompts/planner_files_controller.prompt", "r") as f:
+    files_controller_prompt_template = f.read()
 
 animation = LoadingAnimation()
 
+controller_system_message = SystemMessage(content=files_controller_prompt_template)
 
 # node functions
 def call_planer(state):
@@ -39,6 +44,12 @@ def call_planer(state):
     animation.stop()
     print_formatted_content_planner(response.content)
     state["messages"].append(response.content)
+
+    plan_message_for_controller = HumanMessage(content=f"Proposed_plan:\n###\n'''{response.content}'''")
+    controller_response = llm_controller.invoke([controller_system_message, plan_message_for_controller])
+    print("Plan controller response:")
+    print(controller_response.content)
+
     ask_human_planner(state)
 
     return state
@@ -57,16 +68,13 @@ def ask_human_planner(state):
 
 # workflow definition
 planner_workflow = StateGraph(AgentState)
-
 planner_workflow.add_node("agent", call_planer)
 planner_workflow.set_entry_point("agent")
-
 planner_workflow.add_conditional_edges("agent", after_ask_human_condition)
-
 planner = planner_workflow.compile()
 
 
-def planning(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=None):
+def planning(task, text_files, image_paths, work_dir, documentation, dir_tree=None, coderrules=None):
     if not dir_tree:
         dir_tree = list_directory_tree(work_dir)
     if not coderrules:
@@ -80,7 +88,7 @@ def planning(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=
     message_images = HumanMessage(content=images)
 
     inputs = {
-        "messages": [planer_system_message, message_without_imgs, message_images],# documentation],
+        "messages": [planer_system_message, message_without_imgs, message_images,]# documentation],
     }
     planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 

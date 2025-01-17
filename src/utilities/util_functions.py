@@ -119,6 +119,8 @@ def convert_images(image_paths):
                  {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
              ])
+    else:
+        images = "<No images provided>"
 
     return images
 
