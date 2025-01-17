@@ -2,18 +2,18 @@ You are an AI assistant tasked with analyzing whether the files provided by a Re
 
 Here is the programming task that needs to be executed:
 <programming_task>
-{{PROGRAMMING_TASK}}
+{task}
 </programming_task>
 
 The Researcher has found the following files:
 <researcher_files>
-{{RESEARCHER_FILES}}
+{file_contents}
 </researcher_files>
 
-The Planner has proposed the following modifications:
-<planner_modifications>
-{{PLANNER_MODIFICATIONS}}
-</planner_modifications>
+Project directory tree:
+<directory_tree>
+{dir_tree}
+</directory_tree>
 
 Your task is to carefully analyze the programming task, the files provided by the Researcher, and the modifications proposed by the Planner. Determine whether the provided files are sufficient for the Planner to execute the task accurately and completely.
 

@@ -1,4 +1,5 @@
 from langchain_openai.chat_models import ChatOpenAI as ChatOpenRouter
+from langchain_openai.chat_models import ChatOpenAI as ChatLocalModel
 from os import getenv
 import os
 from dotenv import load_dotenv
@@ -23,7 +24,7 @@ def llm_open_router(model):
 )
 
 def llm_open_local_hosted(model):
-    return ChatOpenAI(
+    return ChatLocalModel(
     openai_api_key="n/a",
     openai_api_base=getenv("LOCAL_MODEL_API_BASE"),
     model_name=model,

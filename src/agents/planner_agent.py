@@ -23,6 +23,7 @@ llm_controller = llms_controller[0].with_fallbacks(llms_controller[1:])
 
 class AgentState(TypedDict):
     messages: Sequence[BaseMessage]
+    controller_messages: Sequence[BaseMessage]
 
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -32,8 +33,6 @@ with open(f"{parent_dir}/prompts/planner_files_controller.prompt", "r") as f:
     files_controller_prompt_template = f.read()
 
 animation = LoadingAnimation()
-
-controller_system_message = SystemMessage(content=files_controller_prompt_template)
 
 # node functions
 def call_planer(state):
@@ -46,7 +45,7 @@ def call_planer(state):
     state["messages"].append(response.content)
 
     plan_message_for_controller = HumanMessage(content=f"Proposed_plan:\n###\n'''{response.content}'''")
-    controller_response = llm_controller.invoke([controller_system_message, plan_message_for_controller])
+    controller_response = llm_controller.invoke([state["controller_messages"][0], plan_message_for_controller])
     print("Plan controller response:")
     print(controller_response.content)
 
@@ -86,9 +85,11 @@ def planning(task, text_files, image_paths, work_dir, documentation, dir_tree=No
     message_content_without_imgs = f"Task:\n'''{task}'''"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
     message_images = HumanMessage(content=images)
+    controller_system_message = SystemMessage(content=files_controller_prompt_template.format(file_contents=file_contents, dir_tree=dir_tree, task=task))
 
     inputs = {
-        "messages": [planer_system_message, message_without_imgs, message_images,]# documentation],
+        "messages": [planer_system_message, message_without_imgs, message_images,],# documentation],
+        "controller_messages": [controller_system_message]
     }
     planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 
