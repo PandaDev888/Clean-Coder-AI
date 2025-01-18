@@ -9,18 +9,7 @@ from dotenv import find_dotenv, load_dotenv
 from src.agents.planner_agent import planning
 from tests.manual_tests.utils_for_tests import cleanup_work_dir, get_filenames_in_folder, setup_work_dir
 
-# import os, sys
-# current = os.path.dirname(os.path.realpath(__file__))
-# parent = os.path.dirname(current)
-# sys.path.append(parent)
-# from utils_for_tests import setup_work_dir, cleanup_work_dir, get_filenames_in_folder
-# from src.agents.planner_agent import planning
-# from dotenv import load_dotenv, find_dotenv
-
 load_dotenv(find_dotenv())
-
-# folder_with_project_files = "planner_scenario_2_files"
-# setup_work_dir(folder_with_project_files)
 
 folder_with_project_files = repo_directory.joinpath("tests", "manual_tests", "projects_files", "executor_scenario_1_files")
 tmp_folder =  pathlib.Path(__file__).parent.resolve().joinpath("sandbox_work_dir")
@@ -93,7 +82,7 @@ Technical notes:
 - Add proper logging for debugging
 - Update all related interfaces and types,
 """
-# files = get_filenames_in_folder(folder_with_project_files)
+
 files = get_filenames_in_folder(manual_tests_folder=tmp_folder)
 
 directory_tree = """
@@ -187,6 +176,5 @@ FastApi.
 - Separate functions by 3 newlines.
 Place endpoints on main.py only, but advanced logic inside of endpoints keep in functions in different files."""
 
-# planning(task, files, image_paths={}, work_dir="sandbox_work_dir", dir_tree=directory_tree, coderrules=coderrules)
 planning(task, files, image_paths={}, work_dir=str(tmp_folder), dir_tree=directory_tree, coderrules=coderrules)
 cleanup_work_dir(manual_tests_folder=tmp_folder)
