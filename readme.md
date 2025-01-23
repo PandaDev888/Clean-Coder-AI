@@ -1,10 +1,10 @@
 <div align="center">
   <img
-    src="/non-src/assets/starting_video.gif"
+    src="/non_src/assets/starting_video.gif"
     alt="Starting video"
   >
   <br>
-  <img src="/non-src/assets/logo_wide_2.png" alt="Logo">
+  <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
   <h2>Tired of explaining AI what to do? Let Clean Coder handle it for you.</h2>
   <br>
   Clean Coder is your 2-in-1 AI Scrum Master and Developer. Delegate planning, managing, and coding to AI. Agents create tasks within Todoist, write code, and test it, helping you create great projects with minimal effort and stress!
@@ -16,7 +16,7 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue)](https://clean-coder.dev)
 [![Discord](https://img.shields.io/static/v1?logo=discord&label=discord&message=Join&color=brightgreen)](https://discord.gg/8gat7Pv7QJ)
 
-  <img src="/non-src/assets/CC_diagram_full.png" alt="Logo">
+  <img src="/non_src/assets/CC_diagram_full.png" alt="Logo">
 </div>
 
 ## 🏖️ Relax and watch it code
