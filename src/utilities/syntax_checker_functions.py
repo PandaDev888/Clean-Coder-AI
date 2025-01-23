@@ -216,77 +216,122 @@ def parse_yaml(yaml_string):
 
 if __name__ == "__main__":
     code = """
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button, TextInput } from '../styles/uiElements';
+import PopupNotification from '../components/PopupNotification';
 
-export const Button = ({ children, ...props }) => (
-  <button
-    {...props}
-    className="w-full bg-purple-700 text-white py-3 px-6 rounded-lg font-medium 
-    hover:bg-purple-800 active:bg-purple-900 transition-colors duration-200 
-    disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-  >
-    {children}
-  </button>
-);
+export default function ChangePasswordPage() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [notification, setNotification] = useState<{ message: string; type: 'positive' | 'negative' } | null>(null);
+  const router = useRouter();
 
-export const TextInput = ({ label, ...props }) => (
-  <div className="mb-4">
-    {label && (
-      <label className="block mb-2 text-sm font-medium text-gray-900">
-        {label}
-      </label>
-    )}
-    <input
-      {...props}
-      className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900
-      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-      placeholder:text-gray-400"
-    />
-  </div>
-);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNotification(null);
 
-export const Dropdown = ({ options, label, ...props }) => (
-  <div className="mb-4">
-    {label && (
-      <label className="block mb-2 text-sm font-medium text-gray-900">
-        {label}
-      </label>
-    )}
-    <select
-      {...props}
-      className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900
-      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-      bg-white"
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
-export const PoliticalPartySelect = ({ value, onChange, name }) => {
+    if (newPassword !== confirmNewPassword) {
+      setNotification({ message: 'New passwords do not match.', type: 'negative' });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setNotification({ message: 'Password must be at least 8 characters long.', type: 'negative' });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setNotification({ message: 'Password changed successfully!', type: 'positive' });
+        setTimeout(() => {
+          router.push('/profile');
+        }, 2000);
+      } else {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          // fallback if no JSON is returned
+          errorData = { detail: 'Unknown error occurred' };
+        }
+        if (response.status === 400) {
+          setNotification({ message: errorData.detail || 'Bad request.', type: 'negative' });
+        } else if (response.status === 401) {
+          setNotification({ message: errorData.detail || 'Unauthorized. Please log in again.', type: 'negative' });
+        } else {
+          setNotification({ message: errorData.detail || 'Error changing password.', type: 'negative' });
+        }
+      }
+    } catch (networkError) {
+      setNotification({ message: 'Network error. Please try again.', type: 'negative' });
+    }
+  };
+
   return (
-      <div className="mb-4">
-        <label className="block mb-2 text-sm font-medium text-gray-900">Political affiliation</label>
-            <div className="relative">
-            <select
-            name={name}
-              value={value}
-                onChange={onChange}
-                className="w-full pl-8 pr-4 py-2 border rounded-lg"
-                >
-                    <option value="">Not specified</option>
-                      <option value="democrat">Democrats</option>
-                        <option value="republican">Republicans</option>            
-                        </select>
-                        <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                        <div className={`w-3 h-3 rounded-full ${value === "democrat" ? "bg-blue-500" : value === "republican" ? "bg-red-500" : ""}`} />
-                        </div>
-                        </div>
-                    </div>  
-                );
-            };
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
+        <h1 className="text-2xl font-semibold text-center mb-8">Change Password</h1>
+
+        {notification && (
+          <PopupNotification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <TextInput
+            label="Current Password"
+            type="password"
+            value={currentPassword}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)}
+            required
+          />
+          <TextInput
+            label="New Password"
+            type="password"
+            value={newPassword}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+            required
+          />
+          <TextInput
+            label="Confirm New Password"
+            type="password"
+            value={confirmNewPassword}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(e.target.value)}
+            required
+          />
+          <Button type="submit">Change Password</Button>
+        </form>
+
+        <div className="text-center mt-6">
+          <a
+            href="/profile"
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Back to Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 """
     print(parse_tsx(code))

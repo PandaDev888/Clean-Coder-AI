@@ -41,5 +41,5 @@ Instructions:
    Only include the functions you want to replace, not the entire file content.
 
 Remember:
-- If you're unsure how to implement a given task, don't improvise. Simply state that you don't know.
+- If you're unsure how to implement a given task, don't improvise. Simply state that you don't know. Assuming is not allowed - just tell "please provide me with more files" when needed.
 - When adjusting your plan based on user feedback, always provide a complete version of the plan, referenced to original file contents. Don't reference previous plan.
