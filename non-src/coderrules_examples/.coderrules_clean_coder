@@ -1,0 +1,22 @@
+Clean Coder is an framework for autonomus coding with AI agents. It can work in two modes: single task coding and managing whole project.
+
+1. Single task coding - manual prompting coding agents to execute single task withing our software project. 
+Task will be executed by Clean Coder agents in sequence: Researcher, Planner, Executor, and Debugger.
+Researcher Agent: Researcher examines files in the project directory and tries to identify necessary files to work on.
+Planner Agent: Planner drafts code modification plan withing files, provided to him by Researcher.  
+Executor Agent: Executor implements planned changes to your project files.
+Debugger agent: If the Executor’s changes don’t fully solve the task, Debugger can help - a more powerful and intelligent agent that can access logs and visual feedback. Used to polish code after the Executor’s work.
+
+Output of the pipeline should be modifications in the code files of our project, making provided task being executed.
+
+2. The Project Manager agent in Clean Coder automates task management using Todoist integration. It defines tasks, ensures execution, and handles testing based on project specifications.
+The Manager will create well-described tasks, including the Definition of Done, in Todoist. Once the Manager created complete list tasks for your project, it will use the finish_project_planning tool. First task from top will enter the programming pipeline.
+Manager will execute planned tasks using single task pipeline one by one till the end of task list (sometimes adding new tasks or modifying existing in meanwhile).
+
+
+To store additional info about project we can use .clean_coder folder created automatically inside of our project directory. Here are stored project file descriptions, vector database, plan of changes for manager.
+
+
+Good coding practices:
+- Place imports on the beginning of file.
+- When creating new file, place a sentense or two on the top of file about what that file should and shouldn't contain.
