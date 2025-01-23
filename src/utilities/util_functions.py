@@ -45,7 +45,7 @@ For being logged in as admin user, use username="frontend.feedback@admin", passw
 
 
 def check_file_contents(files, work_dir, line_numbers=True):
-    file_contents = str()
+    file_contents = f"Files shown: {files}\n\n"
     for file_name in files:
         file_content = watch_file(file_name, work_dir, line_numbers)
         file_contents += file_content + "\n\n###\n\n"
@@ -119,6 +119,8 @@ def convert_images(image_paths):
                  {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
              ])
+    else:
+        images = "<No images provided>"
 
     return images
 
@@ -223,7 +225,7 @@ def read_coderrules():
 
 
 def create_coderrules(coderrules_path):
-    print_formatted("(Optional) Describe your project rules and structure to give AI more context. Check docs to learn how to do it https://clean-coder.dev/features/coderrules/. ", color="light_blue")
+    print_formatted("(Optional) Describe your project rules and structure to give AI more context about it. Learn how to do it: https://clean-coder.dev/features/coderrules/. ", color="light_blue")
     rules = input()
     with open(coderrules_path, 'w', encoding='utf-8') as file:
         file.write(rules)

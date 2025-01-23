@@ -2,7 +2,7 @@ from typing import TypedDict, Sequence
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
-from langchain.tools import tool
+from langchain_core.tools import tool
 from src.tools.tools_coder_pipeline import (
      prepare_see_file_tool, prepare_list_dir_tool, retrieve_files_by_semantic_query
 )
@@ -100,7 +100,7 @@ class Researcher():
     # just functions
     def research_task(self, task):
         print_formatted("Researcher starting its work", color="green")
-        print_formatted("👋 Hey! I'm looking for a files on which we will work on together!", color="light_blue")
+        print_formatted("👋 Hey! I'm looking for files on which we will work on together!", color="light_blue")
 
         system_message = system_prompt_template.format(task=task, project_rules=read_coderrules())
         inputs = {

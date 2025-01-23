@@ -1,0 +1,6 @@
+You writing project in python. Follow next rules:
+
+- Always place imports on the top of the file.
+- Separate functions by 3 newlines.
+- Avoid logic overcomplication. Do not try to handle all corner cases.
+- Use variables names having sense from point of view of whole program, not just current task.

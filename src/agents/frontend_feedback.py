@@ -1,30 +1,15 @@
 import os
-from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.messages import HumanMessage
-from langchain_ollama import ChatOllama
-from langchain_anthropic import ChatAnthropic
-from src.utilities.llms import llm_open_router
+from src.utilities.llms import init_llms
 from src.utilities.start_work_functions import read_frontend_feedback_story
 import base64
 import textwrap
-
 from src.agents.file_answerer import ResearchFileAnswerer
-from typing import Optional, List
-from typing_extensions import Annotated, TypedDict
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
-llms = []
-if os.getenv("ANTHROPIC_API_KEY"):
-    llms.append(ChatAnthropic(
-        model='claude-3-5-sonnet-20241022', temperature=0, max_tokens=2000, timeout=120
-    ))
-if os.getenv("OPENROUTER_API_KEY"):
-    llms.append(llm_open_router("anthropic/claude-3.5-sonnet"))
-if os.getenv("OPENAI_API_KEY"):
-    llms.append(ChatOpenAI(model="gpt-4o", temperature=0, timeout=120))
-if os.getenv("OLLAMA_MODEL"):
-    llms.append(ChatOllama(model=os.getenv("OLLAMA_MODEL")))
+llms = init_llms(run_name="Frontend Feedback")
 
 llm = llms[0].with_fallbacks(llms[1:])
 

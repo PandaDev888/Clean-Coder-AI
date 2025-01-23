@@ -87,7 +87,7 @@ class Executor():
 
         if bad_tool_call_looped(state):
             return "human_help"
-        elif len(last_message.tool_calls) > 0 and last_message.tool_calls[0]["name"] == "final_response_executor":
+        elif hasattr(last_message, "tool_calls") and len(last_message.tool_calls) > 0 and last_message.tool_calls[0]["name"] == "final_response_executor":
             return END
         else:
             return "agent"
