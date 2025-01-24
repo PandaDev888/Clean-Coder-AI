@@ -1,7 +1,7 @@
 import pathlib
 import sys
 
-repo_directory = pathlib.Path(__file__).parents[2].resolve()
+repo_directory = pathlib.Path(__file__).parents[3].resolve()
 sys.path.append(str(repo_directory))
 from src.agents.executor_agent import Executor
 from non_src.tests.manual_tests.utils_for_tests import cleanup_work_dir
