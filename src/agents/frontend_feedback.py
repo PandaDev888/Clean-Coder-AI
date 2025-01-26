@@ -85,6 +85,7 @@ def execute_screenshot_codes(playwright_code):
 
     screenshot_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
     output_message_content = ([
+        {"type": "text", "text": f"Screenshot of current app state:"},
         {
             "type": "image_url",
             "image_url": {
@@ -94,7 +95,3 @@ def execute_screenshot_codes(playwright_code):
     ])
 
     return HumanMessage(content=output_message_content, contains_screenshots=True)
-
-
-if __name__ == "__main__":
-    write_screenshot_codes_v2(task, plan, work_dir="nothing")

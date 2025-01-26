@@ -113,8 +113,8 @@ def see_image(filename, work_dir):
 def convert_images(image_paths):
     images = []
     for image_path in image_paths:
-        print(image_path)
         if not os.path.exists(join_paths(work_dir, image_path)):
+            print_formatted(f"Image not exists: {image_path}", color="yellow")
             continue
         images.extend([
                  {"type": "text", "text": f"I###\n{image_path}"},
