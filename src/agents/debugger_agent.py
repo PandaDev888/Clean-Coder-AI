@@ -151,9 +151,10 @@ class Debugger():
             self.system_message,
             HumanMessage(content=f"Task: {task}\n\n######\n\nPlan which developer implemented already:\n\n{plan}"),
             HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True),
-            HumanMessage(content=self.images),
             HumanMessage(content=f"Human feedback: {self.human_feedback}"),
         ]}
+        if self.images:
+            inputs["messages"].append(HumanMessage(content=self.images))
         if self.playwright_code:
             print_formatted("Making screenshots, please wait a while...", color="light_blue")
             screenshot_msg = execute_screenshot_codes(self.playwright_code)

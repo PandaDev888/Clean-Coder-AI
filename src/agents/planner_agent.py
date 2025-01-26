@@ -84,13 +84,14 @@ def planning(task, text_files, image_paths, work_dir, documentation=None, dir_tr
     images = convert_images(image_paths)
     message_content_without_imgs = f"Task:\n'''{task}'''"
     message_without_imgs = HumanMessage(content=message_content_without_imgs)
-    message_images = HumanMessage(content=images)
     controller_system_message = SystemMessage(content=files_controller_prompt_template.format(file_contents=file_contents, dir_tree=dir_tree, task=task))
 
     inputs = {
-        "messages": [planer_system_message, message_without_imgs, message_images,],# documentation],
+        "messages": [planer_system_message, message_without_imgs,],# documentation],
         "controller_messages": [controller_system_message]
     }
+    if images:
+        inputs["messages"].append(HumanMessage(content=images))
     planner_response = planner.invoke(inputs, {"recursion_limit": 50})["messages"][-2]
 
     return planner_response
