@@ -44,10 +44,10 @@ def call_planer(state):
     print_formatted_content_planner(response.content)
     state["messages"].append(response.content)
 
-    plan_message_for_controller = HumanMessage(content=f"Proposed_plan:\n###\n'''{response.content}'''")
-    controller_response = llm_controller.invoke([state["controller_messages"][0], plan_message_for_controller])
-    print("Plan controller response:")
-    print(controller_response.content)
+    # plan_message_for_controller = HumanMessage(content=f"Proposed_plan:\n###\n'''{response.content}'''")
+    # controller_response = llm_controller.invoke([state["controller_messages"][0], plan_message_for_controller])
+    # print("Plan controller response:")
+    # print(controller_response.content)
 
     ask_human_planner(state)
 
