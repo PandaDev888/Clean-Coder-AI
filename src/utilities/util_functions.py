@@ -113,13 +113,14 @@ def see_image(filename, work_dir):
 def convert_images(image_paths):
     images = []
     for image_path in image_paths:
+        print(image_path)
         if not os.path.exists(join_paths(work_dir, image_path)):
             continue
         images.extend([
                  {"type": "text", "text": f"I###\n{image_path}"},
                  {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
              ])
-    else:
+    if not images:
         images = "<No images provided>"
 
     return images
