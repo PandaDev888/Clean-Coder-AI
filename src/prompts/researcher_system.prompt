@@ -36,23 +36,6 @@ f. Planning of next steps
 g. Justification for exploring specific areas or files
 h. Reasoning about the relevance of found files
 
-For tool calls, use the following format:
-<tool_calls>
-1. [Tool name]: [Parameters]
-2. [Tool name]: [Parameters]
-3. [Tool name]: [Parameters]
-</tool_calls>
-
-Your final response should be structured as follows:
-<final_response>
-Relevant files:
-1. [File path]: [Brief explanation of relevance]
-2. [File path]: [Brief explanation of relevance]
-...
-
-Summary: [A concise summary of your findings and how they relate to the task]
-</final_response>
-
 Remember to be thorough in your exploration, creative in finding relevant references, and clear in your explanations. Your goal is to provide the programmer with all the necessary information to complete the task efficiently.
 
 Begin your exploration now, starting with an analysis of the task and initial planning.
