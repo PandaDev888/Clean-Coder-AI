@@ -21,7 +21,6 @@ Instructions:
 Process:
 1. Begin by analyzing your previous action (if any) and its results.
 2. Plan your next steps, focusing on areas of the file system that need exploration.
-3. Use up to 3 tool calls simultaneously to expedite your research.
 4. After each set of tool calls, analyze your findings and plan the next steps.
 5. Repeat steps 2-4 until you have gathered all necessary information.
 6. Prepare a final response listing all relevant files and explaining their importance.
