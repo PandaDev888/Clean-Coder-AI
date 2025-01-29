@@ -1,0 +1,10 @@
+TakZyli.pl is a platform for memorizing best moments in the lives of our passed away relatives.
+TakŻyli allows user to create beautiful-looking memorial profiles containing photos
+and descriptions showing life stories.
+
+Frontend: NextJS + Tailwind
+- Use last version of NextJS (13+) syntax
+- File-based routing required
+- Common styles in app/styles/
+- UI components in uiElements.tsx
+- Backend requests via NEXT_PUBLIC_API_URL env variable

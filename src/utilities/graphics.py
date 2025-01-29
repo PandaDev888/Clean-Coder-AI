@@ -2,7 +2,6 @@ import itertools
 import sys
 import time
 import random
-from termcolor import colored
 from time import sleep
 from rich.console import Console
 from rich.panel import Panel
@@ -14,14 +13,25 @@ current = os.path.dirname(os.path.realpath(__file__))
 grandparent = os.path.dirname(os.path.dirname(current))
 sys.path.append(grandparent)
 from src.utilities.print_formatters import print_formatted
+from src.utilities.manager_utils import fetch_tasks
 
-def print_ascii_logo():
-    with open("assets/ascii-art.txt", "r") as f:
-        logo = f.read()
-    with open("assets/Clean_Coder_writing.txt", "r") as f:
-        writing = f.read()
-    print(colored(logo, color="yellow"))
-    print(colored(writing, color="white"))
+def increment_completed_tasks():
+    """
+    Reads the .clean_coder/statistics.txt file, increments the completed tasks count,
+    then writes the updated value back to the file. Returns the new total of tasks completed.
+    """
+    import os
+    stats_file = os.path.join(os.getenv("WORK_DIR"), ".clean_coder", "statistics.txt")
+    if not os.path.exists(stats_file):
+        tasks_completed = 0
+    else:
+        with open(stats_file, "r") as f:
+            content = f.read().strip()
+            tasks_completed = int(content) if content else 0
+    tasks_completed += 1
+    with open(stats_file, "w") as f:
+        f.write(str(tasks_completed))
+    return tasks_completed
 
 
 def loading_animation(message="I'm thinking...", color="cyan"):
@@ -66,6 +76,7 @@ def loading_animation(message="I'm thinking...", color="cyan"):
 
 loading_animation.is_running = True
 
+
 def task_completed_animation():
     console = Console()
     width = console.width  # Get console width
@@ -108,13 +119,19 @@ def task_completed_animation():
             live.update(Text("\n".join(lines), justify="center"))
             sleep(0.05)  # Fast animation
 
+    console.print()  # Add spacing
+    tasks_completed = increment_completed_tasks()
+    tasks_to_do = len(fetch_tasks())
+    show_progress_bar(tasks_completed, tasks_completed + tasks_to_do)
+    console.print()  # Add spacing
+
     # Final message
-    final_panel = Panel(
-        Text("✨ Great job! Moving on to the next task... ✨",
-             justify="center"),
-        border_style="green"
-    )
-    console.print(final_panel)
+    # final_panel = Panel(
+    #     Text("✨ Great job! Moving on to the next task... ✨",
+    #          justify="center"),
+    #     border_style="green"
+    # )
+    # console.print(final_panel)
 
 
 class LoadingAnimation:
@@ -201,3 +218,36 @@ class LoadingAnimation:
         self._stop_event.set()
         self._thread.join()
         self._thread = None
+
+        
+def show_progress_bar(completed, total):
+    """
+    Display a rich progress bar showing task completion status.
+    """
+    console = Console()
+
+    # Calculate percentage
+    percentage = (completed / total) * 100
+    
+    # Create progress bar with rich formatting
+    bar_length = 60
+    filled_length = int((bar_length * completed) / total)
+    bar = "█" * filled_length + "░" * (bar_length - filled_length)
+    
+    # Create panel with progress information
+    progress_panel = Panel(
+        Text(
+            f"{bar} {percentage:.1f}%\n"
+            f"{completed} of {total} tasks completed",
+            justify="center"
+        ),
+        border_style="green",
+        title="[bold cyan]📊 Project Progress",
+        padding=(1, 2)
+    )
+    console.print(progress_panel)
+
+    # Add motivational message with light color
+    message = Text("\n✨ ", style="bold")
+    message.append(f"We've completed {completed} of {total} tasks together! Keep up the great work! ✨", style="bold light_magenta")
+    console.print(message)

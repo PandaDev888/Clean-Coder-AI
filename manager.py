@@ -1,5 +1,5 @@
 if __name__ == "__main__":
-    from src.utilities.graphics import print_ascii_logo
+    from src.utilities.start_work_functions import print_ascii_logo
     print_ascii_logo()
 
 from dotenv import find_dotenv, load_dotenv

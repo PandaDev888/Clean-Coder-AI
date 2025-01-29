@@ -22,8 +22,11 @@ def print_formatted_content_planner(content):
         snippet_content = lines[1].strip()
         # Place outside text after this snippet
         outside_text = outside_texts[i+1].strip()
-        print_code_snippet(code=snippet_content, title=filename, extension="diff")
+        extension = "diff" if '.' in filename else filename
+        print_code_snippet(code=snippet_content, title=filename, extension=extension)
         print_formatted(content=outside_text, color="dark_grey")
+
+
 
 
 def print_formatted_content(response):
