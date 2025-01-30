@@ -8,7 +8,7 @@ if not find_dotenv():
 
 from src.agents.researcher_agent import Researcher
 from src.agents.doc_harvester import Doc_harvester
-from src.agents.planner_agent import planning
+from src.agents.planner_agent import planning, planning_advanced
 from src.agents.executor_agent import Executor
 from src.agents.debugger_agent import Debugger
 from src.agents.frontend_feedback import write_screenshot_codes
@@ -30,6 +30,7 @@ def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False
         harvester = Doc_harvester()
         documentation = harvester.find_documentation(task, work_dir)
 
+    planning_advanced(task, file_paths, image_paths, work_dir)
     plan = planning(task, file_paths, image_paths, work_dir, documentation=documentation)
 
     executor = Executor(file_paths, work_dir)
