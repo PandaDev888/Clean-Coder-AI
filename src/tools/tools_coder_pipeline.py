@@ -1,4 +1,5 @@
 from langchain_core.tools import tool
+from typing_extensions import Annotated
 import os
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.syntax_checker_functions import check_syntax
@@ -26,11 +27,11 @@ Think step by step which function/code block you want to change before proposing
 
 def prepare_list_dir_tool(work_dir):
     @tool
-    def list_dir(directory):
+    def list_dir(
+            directory: Annotated[str, "Directory to list files in."],
+    ):
         """
 List files in directory. Use only for dirs content of which is hidden in the project tree.
-tool input:
-:param directory: Name of directory to list files in.
 """
         try:
             if file_folder_ignored(directory, CoderIgnore.get_forbidden()):
@@ -123,6 +124,7 @@ def prepare_replace_code_tool(work_dir):
     def replace_code(filename, start_line,  code, end_line):
         """
 Replace old piece of code between start_line and end_line with new one. Proper indentation is important.
+Exchange entire functions or code blocks at once. Avoid changing functions partially.
 Avoid changing multiple functions at once.
 tool input:
 :param filename: Name and path of file to change.
