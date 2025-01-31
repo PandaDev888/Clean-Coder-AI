@@ -1,4 +1,5 @@
 from langchain.tools import tool
+from typing_extensions import Annotated
 from todoist_api_python.api import TodoistAPI
 import os
 from src.utilities.print_formatters import print_formatted
@@ -25,21 +26,14 @@ TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
 
 
 @tool
-def add_task(task_name, task_description, order):
+def add_task(
+    task_name: Annotated[str, "Name of the task. Good name is descriptive, starts with a verb and usually could be fitted in formula 'To complete this task, I need to $TASK_NAME'"],
+    task_description: Annotated[str, "Detailed description of what needs to be done in order to implement task. Good description includes: - Definition of done (required) - section, describing what need to be done with acceptance criteria. - Resources (optional) - Include here all information that will be helpful for developer to complete task"],
+    order: Annotated[int, "Order of the task in project"]):
     """Add new task to Todoist.
 Think very carefully before adding a new task to know what do you want exactly. Explain in detail what needs to be
 done in order to execute task.
 Avoid creating new tasks that have overlapping scope with old ones - modify or delete old tasks first.
-tool_input:
-:param task_name: name of the task. Good name is descriptive, starts with a verb and usually could be fitted in formula
-'To complete this task, I need to $TASK_NAME'.
-:param task_description: detailed description of what needs to be done in order to implement task.
-Good description includes:
-- Definition of done (required) - section, describing what need to be done with acceptance criteria.
-- Resources (optional) - Include here all information that will be helpful for developer to complete task. Example code
-you found in internet, files dev need to use, technical details related to existing code programmer need to pay
-attention on.
-:param order: order of the task in project.
 """
     human_message = user_input("Type (o)k to agree or provide commentary.")
     if human_message not in ['o', 'ok']:
@@ -58,14 +52,12 @@ attention on.
 
 
 @tool
-def modify_task(task_id, new_task_name=None, new_task_description=None, delete=False):
-    """Modify task in project management platform (Todoist).
-tool_input:
-:param task_id: id of the task.
-:param new_task_name: new name of the task (optional).
-:param new_task_description: new detailed description of what needs to be done in order to implement task (optional).
-:param delete: if True, task will be deleted.
-"""
+def modify_task(
+    task_id: Annotated[str, "ID of the task"],
+    new_task_name: Annotated[str, "New name of the task (optional)"] = None,
+    new_task_description: Annotated[str, "New detailed description of what needs to be done in order to implement task (optional)"] = None,
+    delete: Annotated[bool, "If True, task will be deleted"] = False):
+    """Modify task in project management platform (Todoist)."""
     try:
         task_name = todoist_api.get_task(task_id).content
     except HTTPError:
@@ -90,21 +82,8 @@ tool_input:
 
 
 @tool
-def reorder_tasks(task_items):
-    """Reorder tasks in project management platform (Todoist).
-    tool_input:
-    :param task_items: list of dictionaries with 'id' (str) and 'child_order' (int) keys.
-    Example:
-    {
-    "tool": "reorder_tasks",
-    "tool_input": {
-        task_items: [
-        {"id": "123", "child_order": 0},
-        {"id": "456", "child_order": 1},
-    ]
-
-}
-    """
+def reorder_tasks(task_items: Annotated[list, "List of dictionaries with 'id' (str) and 'child_order' (int) keys. Example: [{'id': '123', 'child_order': 0}, {'id': '456', 'child_order': 1}]"]):
+    """Reorder tasks in project management platform (Todoist)."""
     command = {
         "type": "item_reorder",
         "uuid": str(uuid.uuid4()),
@@ -122,39 +101,9 @@ def reorder_tasks(task_items):
 
 
 @tool
-def create_epic(name):
-    """
-Create an epic to group tasks with similar scope.
-tool_input:
-:param name: short description of functionality epic is about.
-"""
-    print(f"project id: {os.getenv('TODOIST_PROJECT_ID')}")
-    section = todoist_api.add_section(name=name, project_id=os.getenv('TODOIST_PROJECT_ID'))
-    return f"Epic {section} created successfully"
-
-
-@tool
-def modify_epic(epic_id, new_epic_name=None, delete=False):
-    """Modify an epic in project management platform (Todoist).
-tool_input:
-:param epic_id: id of the epic.
-:param new_epic_name: new name of the epic (optional).
-:param delete: if True, epic will be deleted with all tasks inside.
-"""
-    if delete:
-        todoist_api.delete_section(section_id=epic_id)
-        return "Epic deleted successfully"
-
-    todoist_api.update_section(section_id=epic_id, name=new_epic_name)
-    return "Epic modified successfully"
-
-
-@tool
-def finish_project_planning(dummy):
+def finish_project_planning(dummy: Annotated[str, "Type 'ok' to proceed."]):
     """Call that tool to fire execution of top task from list. Use tool when all task in Todoist correctly reflect work. No extra tasks or tasks with
 overlapping scope allowed.
-tool_input:
-dummy: just write "ok"
 """
     human_message = user_input(
         "Project planning finished. Provide your proposition of changes in task list or type (o)k to continue...\n"
