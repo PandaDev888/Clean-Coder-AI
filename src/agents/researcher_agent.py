@@ -1,4 +1,4 @@
-from typing import TypedDict, Sequence
+from typing import TypedDict, Sequence, Annotated
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
@@ -24,16 +24,14 @@ work_dir = os.getenv("WORK_DIR")
 
 
 @tool
-def final_response_researcher(files_to_work_on, reference_files, template_images):
+def final_response_researcher(
+        files_to_work_on: Annotated[str, '["List", "of", "existing files", "to potentially introduce", "changes"]'],
+        reference_files: Annotated [str, '["List", "of code files", "useful as a reference", "without images"]'],
+        template_images: Annotated[str, '["List of", "template", "images"]'],):
     """That tool outputs list of files programmer will need to change and paths to graphical patterns if some.
     Use that tool only when you 100% sure you found all the files programmer will need to modify.
     If not, do additional research. Include only the files you convinced will be useful.
     Provide only existing files, do not provide files to be implemented.
-
-    tool input:
-    :param files_to_work_on: ["List", "of", "existing files", "to potentially introduce", "changes"],
-    :param reference_files: ["List", "of code files", "useful as a reference", "without images"],
-    :param template_images: ["List of", "template", "images"],
     """
     pass
 
