@@ -217,121 +217,354 @@ def parse_yaml(yaml_string):
 if __name__ == "__main__":
     code = """
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, TextInput } from '../styles/uiElements';
-import PopupNotification from '../components/PopupNotification';
 
-export default function ChangePasswordPage() {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [notification, setNotification] = useState<{ message: string; type: 'positive' | 'negative' } | null>(null);
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import ProfileCard from "./components/ProfileCard";
+import PopupNotification from "./components/PopupNotification";
+
+interface ProfileItem {
+  uuid: string;
+  full_name: string;
+  short_bio?: string;
+  bio?: string;
+}
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState<'Explore' | 'Received' | 'Sent' | 'Matches'>('Explore');
+  const [exploreItems, setExploreItems] = useState<ProfileItem[]>([]);
+  const [receivedItems, setReceivedItems] = useState<ProfileItem[]>([]);
+  const [sentItems, setSentItems] = useState<ProfileItem[]>([]);
+  const [matchedItems, setMatchedItems] = useState<ProfileItem[]>([]);
+  const [error, setError] = useState('');
+  const [notification, setNotification] = useState<{ message: string, type: 'positive' | 'negative' } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [iconLoading, setIconLoading] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const [limit] = useState(10);
+  const [totalExploreItems, setTotalExploreItems] = useState(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setNotification(null);
-
-    if (newPassword !== confirmNewPassword) {
-      setNotification({ message: 'New passwords do not match.', type: 'negative' });
-      return;
+  function goToProfile(uuid: string) {
+    const userRole = localStorage.getItem('role');
+    if (userRole === "intern") {
+      router.push(`/campaign/${uuid}`);
+    } else {
+      router.push(`/intern/${uuid}`);
     }
+  }
 
-    if (newPassword.length < 8) {
-      setNotification({ message: 'Password must be at least 8 characters long.', type: 'negative' });
-      return;
-    }
-
+  async function handleConnect(uuid: string) {
+    setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/change-password`, {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token not found');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/create/${uuid}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-        }),
-        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to create invitation');
+      setNotification({ message: 'Invitation sent successfully', type: 'positive' });
+
+      // Optimistically update the explore list
+      setExploreItems((prevItems) => prevItems.filter(item => item.uuid !== uuid));
+    } catch (err: any) {
+      setNotification({ message: err.message, type: 'negative' });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setNotification(null), 3000);
+    }
+  }
+
+  async function handleAccept(invitationId: string) {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token not found');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/accept/${invitationId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to accept invitation');
+      setNotification({ message: 'Invitation accepted successfully', type: 'positive' });
+      setReceivedItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
+    } catch (err: any) {
+      setNotification({ message: err.message, type: 'negative' });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setNotification(null), 3000);
+    }
+  }
+
+  async function handleReject(invitationId: string) {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token not found');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/reject/${invitationId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to reject invitation');
+      setNotification({ message: 'Invitation rejected successfully', type: 'positive' });
+      setReceivedItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
+    } catch (err: any) {
+      setNotification({ message: err.message, type: 'negative' });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setNotification(null), 3000);
+    }
+  }
+
+  async function handleCancel(invitationId: string) {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token not found');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/cancel/${invitationId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to cancel invitation');
+      setNotification({ message: 'Invitation canceled successfully', type: 'positive' });
+      setSentItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
+    } catch (err: any) {
+      setNotification({ message: err.message, type: 'negative' });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setNotification(null), 3000);
+    }
+  }
+  async function fetchExplore() {
+    try {
+      const userRole = localStorage.getItem('role');
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      if (!userRole) {
+        throw new Error('User role not found');
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}${
+        userRole === "intern"
+          ? '/fetch-campaigns-for-main-page'
+          : '/fetch-interns-for-main-page'
+      }?skip=${skip}&limit=${limit}`;
+
+      console.log('Fetching from URL:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
-      if (response.ok) {
-        setNotification({ message: 'Password changed successfully!', type: 'positive' });
-        setTimeout(() => {
-          router.push('/profile');
-        }, 2000);
-      } else {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (parseError) {
-          // fallback if no JSON is returned
-          errorData = { detail: 'Unknown error occurred' };
-        }
-        if (response.status === 400) {
-          setNotification({ message: errorData.detail || 'Bad request.', type: 'negative' });
-        } else if (response.status === 401) {
-          setNotification({ message: errorData.detail || 'Unauthorized. Please log in again.', type: 'negative' });
-        } else {
-          setNotification({ message: errorData.detail || 'Error changing password.', type: 'negative' });
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to fetch explore items');
       }
-    } catch (networkError) {
-      setNotification({ message: 'Network error. Please try again.', type: 'negative' });
+
+      const data = await response.json();
+      setExploreItems(prev => [...prev, ...(data.items || [])]);
+      setTotalExploreItems(data.total || 0);
+    } catch (err: any) {
+      console.error('Fetch error:', err);
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
     }
+  }
+
+  async function fetchReceived() {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/received`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch received invitations');
+      const data = await response.json();
+      setReceivedItems(data.items || []);
+    } catch (err: any) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  }
+
+  async function fetchSent() {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/sent`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch sent invitations');
+      const data = await response.json();
+      setSentItems(data.items || []);
+    } catch (err: any) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  }
+  async function fetchMatches() {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token not found');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch matches');
+      const data = await response.json();
+      setMatchedItems(data.items || []);
+    } catch (err: any) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  }
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Please login first');
+      return;
+    }
+    // Initial load of the first page
+    fetchExplore().then(() => setSkip(prev => prev + limit));
+  }, []);
+
+  // Infinite scroll: Observe the sentinel at the bottom of the Explore list
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      // If sentinel is in view and we have more items to fetch
+      if (entry.isIntersecting && skip < totalExploreItems) {
+        // Fetch the next batch
+        fetchExplore().then(() => {
+          setSkip(prev => prev + limit);
+        });
+      }
+    });
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    // Cleanup
+    return () => {
+      if (sentinelRef.current) {
+        observer.unobserve(sentinelRef.current);
+      }
+    };
+  }, [skip, totalExploreItems, limit]);
+
+  const handleTabClick = (tab: 'Explore' | 'Received' | 'Sent' | 'Matches') => {
+    setActiveTab(tab);
+    if (tab === 'Explore') fetchExplore();
+    if (tab === 'Received') fetchReceived();
+    if (tab === 'Sent') fetchSent();
+    if (tab === 'Matches') fetchMatches();
   };
 
+  let listToRender: ProfileItem[] = [];
+  if (activeTab === 'Explore') listToRender = exploreItems;
+  if (activeTab === 'Received') listToRender = receivedItems;
+  if (activeTab === 'Sent') listToRender = sentItems;
+  if (activeTab === 'Matches') listToRender = matchedItems;
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
-        <h1 className="text-2xl font-semibold text-center mb-8">Change Password</h1>
+    <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <header className="flex items-center justify-between mb-8">
+          <button className="w-10 h-10 rounded-full bg-[#EEEEEE] flex items-center justify-center">
+            <Image 
+              src="/profile.svg" 
+              alt="Profile" 
+              width={24} 
+              height={24} 
+              onError={(e) => e.currentTarget.src = '/fallback-icon.svg'} // Fallback icon
+            />
+          </button>
+        <h1 className="text-xl font-semibold">Glovn</h1>
+      </header>
 
-        {notification && (
-          <PopupNotification
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <TextInput
-            label="Current Password"
-            type="password"
-            value={currentPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)}
-            required
-          />
-          <TextInput
-            label="New Password"
-            type="password"
-            value={newPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
-            required
-          />
-          <TextInput
-            label="Confirm New Password"
-            type="password"
-            value={confirmNewPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(e.target.value)}
-            required
-          />
-          <Button type="submit">Change Password</Button>
-        </form>
-
-        <div className="text-center mt-6">
-          <a
-            href="/profile"
-            className="text-blue-600 hover:text-blue-800 font-medium"
+      <nav className="flex p-1 mb-8 justify-center bg-[#F5F5F5]/40 rounded-full max-w-md mx-auto">
+        {["Explore", "Received", "Sent", "Matches"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => handleTabClick(tab as 'Explore' | 'Received' | 'Sent' | 'Matches')}
+            className={`flex-1 px-6 py-2.5 rounded-full text-sm transition-all duration-300 ${
+              activeTab === tab
+                ? "bg-white font-medium text-black shadow-sm text-[15px]"
+                : "text-gray-400/80 hover:text-gray-500"
+            }`}
           >
-            Back to Profile
-          </a>
+            {tab}
+          </button>
+        ))}
+      </nav>
+
+      {error && (
+        <div className="mb-6 py-2 px-4 w-full text-center bg-[#FFF2F2] text-[#FF0000] text-[14px] rounded-full">
+          {error}
         </div>
-      </div>
-    </div>
+      )}
+
+      <section className="space-y-4">
+        {listToRender.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">No items found</div>
+        ) : (
+          listToRender.map((item) => (
+            <ProfileCard
+              key={item.uuid}
+              item={item}
+              onConnect={handleConnect}
+              onAccept={handleAccept}
+              onReject={handleReject}
+              onCancel={handleCancel}
+              activeTab={activeTab}
+            />
+          ))
+        )}
+      </section>
+
+      {/*<div ref={sentinelRef} style={{ height: "1px" }} />*/}
+      {notification && (
+        <PopupNotification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+    </main>
   );
 }
+
 """
     print(parse_tsx(code))

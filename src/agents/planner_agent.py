@@ -134,6 +134,6 @@ def planning_advanced(task, text_files, image_paths, work_dir, dir_tree=None, co
     print("###")
     plan_finalizer_messages.append(HumanMessage(content=f"Logic pseudocode plan to follow:\n\n{logic_pseudocode.content}"))
     plan = llm_middle_strength.invoke(plan_finalizer_messages)
-    print(plan.content)
+    print_formatted_content_planner(plan.content)
 
     return plan.content
