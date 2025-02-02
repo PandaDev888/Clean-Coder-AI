@@ -103,6 +103,7 @@ def planning(task, text_files, image_paths, work_dir, documentation=None, dir_tr
 
     return planner_response
 
+
 def planning_advanced(task, text_files, image_paths, work_dir, dir_tree=None, coderrules=None):
     # that ifs needed for sake of testing (manual tests)
     if not dir_tree:
