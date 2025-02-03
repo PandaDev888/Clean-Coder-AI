@@ -73,7 +73,7 @@ def init_llms_mini(tools=None, run_name="Clean Coder", temp=0):
     return llms
 
 
-def init_llms_planer(tools=None, run_name="Clean Coder", temp=0.2):
+def init_llms_high_intelligence(tools=None, run_name="Clean Coder", temp=0.2):
     llms = []
     if os.getenv("OPENAI_API_KEY"):
         llms.append(ChatOpenAI(model="o3-mini", temperature=1, timeout=60))
