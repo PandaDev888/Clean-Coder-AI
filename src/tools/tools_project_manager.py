@@ -22,7 +22,6 @@ work_dir = os.getenv('WORK_DIR')
 load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
 todoist_api_key = os.getenv('TODOIST_API_KEY')
 todoist_api = TodoistAPI(todoist_api_key)
-TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
 
 
 @tool
@@ -37,7 +36,7 @@ Avoid creating new tasks that have overlapping scope with old ones - modify or d
 """
     human_message = user_input("Type (o)k to agree or provide commentary.")
     if human_message not in ['o', 'ok']:
-        return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
+        return f"Action wasn't executed because of human interruption. He said: {human_message}"
 
     try:
         todoist_api.add_task(
@@ -64,7 +63,7 @@ def modify_task(
         raise Exception(f"Are you sure Todoist project (ID: {os.getenv('TODOIST_PROJECT_ID')}) exists?")
     human_message = user_input(f"I want to {'delete' if delete else 'modify'} task '{task_name}'. Type (o)k or provide commentary. ")
     if human_message not in ['o', 'ok']:
-        return TOOL_NOT_EXECUTED_WORD + f"Action wasn't executed because of human interruption. He said: {human_message}"
+        return f"Action wasn't executed because of human interruption. He said: {human_message}"
 
     update_data = {}
     if new_task_name:
@@ -109,13 +108,8 @@ overlapping scope allowed.
         "Project planning finished. Provide your proposition of changes in task list or type (o)k to continue...\n"
     )
     if human_message not in ['o', 'ok']:
-        return TOOL_NOT_EXECUTED_WORD + human_message
-
-    # first_epic_id = todoist_api.get_sections(project_id=os.getenv('TODOIST_PROJECT_ID'))[0].id
-    # tasks_first_epic = todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'), section_id=first_epic_id)
-    # if not tasks_first_epic:
-    #     return TOOL_NOT_EXECUTED_WORD + "Closest epic is empty. Close it if its scope been completely executed or add tasks into it if not."
-    # # Get first task and it's name and description
+        return f"Human: {human_message}"
+    # Get first task and it's name and description
     task = todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'))[0]
     task_name_description = f"{task.content}\n{task.description}"
 

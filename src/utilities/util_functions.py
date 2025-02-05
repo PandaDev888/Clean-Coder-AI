@@ -19,6 +19,7 @@ PROJECT_ID = os.getenv('TODOIST_PROJECT_ID')
 
 
 TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
+WRONG_TOOL_CALL_WORD = "Wrong tool call. "
 
 storyfile_template = """<This is the story of your project for a frontend feedback agent. Modify it according to commentaries provided in <> brackets.>
 
@@ -197,9 +198,9 @@ def exchange_file_contents(state, files, work_dir):
 
 
 def bad_tool_call_looped(state):
-    last_human_messages = [m for m in state["messages"] if m.type == "human"][-4:]
+    last_human_messages = [m for m in state["messages"] if m.type == "tool"][-4:]
     tool_not_executed_msgs = [
-        m for m in last_human_messages if isinstance(m.content, str) and m.content.startswith(TOOL_NOT_EXECUTED_WORD)
+        m for m in last_human_messages if isinstance(m.content, str) and m.content.startswith(WRONG_TOOL_CALL_WORD)
     ]
     if len(tool_not_executed_msgs) == 4:
         print_formatted("Seems like AI been looped. Please suggest it how to introduce change correctly:", color="yellow")
