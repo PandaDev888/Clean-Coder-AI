@@ -2,7 +2,7 @@ services:
   manager:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: non_src/docker/Dockerfile
     container_name: manager
     environment:
       - WORK_DIR=/work_dir
@@ -23,7 +23,7 @@ services:
   single_task_coder:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: non_src/docker/Dockerfile
     container_name: single_task_coder
     environment:
       - WORK_DIR=/work_dir

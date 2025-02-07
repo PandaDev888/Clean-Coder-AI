@@ -94,6 +94,23 @@ def print_code_snippet(code, extension, start_line=1, title=None):
     console.print(Padding(styled_code, 1))
 
 
+def print_text_snippet(text, title=None):
+    console = Console()
+
+    # Create styled text with background
+    styled_text = Panel(
+        Padding(
+            text,
+            1,
+            style="bright_white on #272822"  # bright white text on monokai background
+        ),
+        border_style="bold green",
+        title=title,
+        expand=False
+    )
+    
+    console.print(Padding(styled_text, 1))
+
 def print_error(message: str) -> None:
     print_formatted(content=message, color="red", bold=False)
 
@@ -101,7 +118,7 @@ def print_error(message: str) -> None:
 def print_tool_message(tool_name, tool_input=None):
     if tool_name == 'ask_human_tool':
         message = "I have a question for you:"
-        print_code_snippet(code=tool_input['prompt'], title=message, extension='text')
+        print_text_snippet(tool_input['prompt'], title=message)
     elif tool_name == 'see_file':
         message = "Looking at the file content..."
         print_formatted(content=message, color='blue', bold=True)
@@ -129,16 +146,16 @@ def print_tool_message(tool_name, tool_input=None):
     elif tool_name == 'add_task':
         message = "Let's add a task..."
         print_formatted(content=message, color='blue', bold=True)
-        print_code_snippet(code=tool_input['task_description'], title=tool_input['task_name'], extension='text')
+        print_text_snippet(tool_input['task_description'], tool_input['task_name'])
     elif tool_name == 'modify_task':
         if 'delete' in tool_input:
-            print_code_snippet(code="I want to delete task", extension='text')
+            print_text_snippet("I want to delete task")
         else:
             message = "Let's modify a task..."
             print_formatted(content=message, color='blue', bold=True)
             title = tool_input['new_task_name'] if 'new_task_name' in tool_input else f"ID: {tool_input['task_id']}"
             if 'new_task_description' in tool_input:
-                print_code_snippet(code=tool_input['new_task_description'], title=title, extension='text')
+                print_text_snippet(tool_input['new_task_description'], title=title)
     elif tool_name == 'final_response_researcher':
         json_string = json.dumps(tool_input, indent=2)
         print_code_snippet(code=json_string, extension='json', title='Files:')
@@ -146,18 +163,18 @@ def print_tool_message(tool_name, tool_input=None):
         message = "Hurray! The work is DONE!"
         print_formatted(content=message, color='cyan', bold=True)
         if isinstance(tool_input, str):
-            print_code_snippet(code=tool_input, extension='text', title='Instruction:')
+            print_text_snippet(tool_input, title='Instruction:')
         else:
-            print_code_snippet(code=tool_input["test_instruction"], extension='text', title='Instruction:')
+            print_text_snippet(tool_input["test_instruction"], title='Instruction:')
     elif tool_name == 'final_response_debugger':
         if isinstance(tool_input, str):
-            print_code_snippet(code=tool_input, extension='text', title='Instruction:')
+            print_text_snippet(tool_input, title='Instruction:')
         else:
-            print_code_snippet(code=tool_input["test_instruction"], extension='text', title='Instruction:')
+            print_text_snippet(tool_input["test_instruction"], title='Instruction:')
         print_formatted("Have any questions about Clean Coder or want to share your experience? Check out our Discord server https://discord.com/invite/8gat7Pv7QJ 😉", color='green')
     elif tool_name == 'finish_project_planning':
         message = "Planning finished! Time to execute first task from the list."
-        print_code_snippet(code=message, extension='text')
+        print_text_snippet(message)
     else:
         message = f"Calling {tool_name} tool..."
         print_formatted(content=message, color='blue', bold=True)

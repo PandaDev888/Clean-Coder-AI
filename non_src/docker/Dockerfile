@@ -27,4 +27,4 @@ ENV PYTHONUNBUFFERED=1
 ENV WORK_DIR=/work_dir
 
 # Default command
-CMD ["python", "project_manager.py"]
+#CMD ["python", "manager.py"]

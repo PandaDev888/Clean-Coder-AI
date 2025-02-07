@@ -2,7 +2,7 @@ from langchain.tools import tool
 from typing_extensions import Annotated
 from todoist_api_python.api import TodoistAPI
 import os
-from src.utilities.print_formatters import print_formatted
+from src.utilities.print_formatters import print_formatted, print_text_snippet
 from src.utilities.manager_utils import actualize_progress_description_file, move_task
 from src.utilities.user_input import user_input
 from src.utilities.graphics import task_completed_animation
@@ -60,7 +60,7 @@ def modify_task(
     try:
         task_name = todoist_api.get_task(task_id).content
     except HTTPError:
-        raise Exception(f"Are you sure Todoist project (ID: {os.getenv('TODOIST_PROJECT_ID')}) exists?")
+        raise Exception(f"Are you sure Todoist project (ID: {os.getenv('TODOIST_PROJECT_ID')}) and task (ID: {task_id}) exist?")
     human_message = user_input(f"I want to {'delete' if delete else 'modify'} task '{task_name}'. Type (o)k or provide commentary. ")
     if human_message not in ['o', 'ok']:
         return f"Action wasn't executed because of human interruption. He said: {human_message}"
@@ -111,10 +111,11 @@ overlapping scope allowed.
         return f"Human: {human_message}"
     # Get first task and it's name and description
     task = todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'))[0]
-    task_name_description = f"{task.content}\n{task.description}"
+    task_name_description = f"{task.content}\n\n{task.description}"
 
     # Execute the main pipeline to implement the task
-    print_formatted(f"\nAsked programmer to execute task: {task_name_description}\n", color="light_blue")
+    print_formatted(f"Asked programmer to execute task:", color="light_blue")
+    print_text_snippet(task.description, title=task.content)
     run_clean_coder_pipeline(task_name_description, work_dir)
 
     # ToDo: git upload
