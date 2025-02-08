@@ -3,7 +3,7 @@ from typing_extensions import Annotated
 import os
 from dotenv import load_dotenv, find_dotenv
 from src.utilities.syntax_checker_functions import check_syntax
-from src.utilities.start_work_functions import file_folder_ignored, CoderIgnore
+from src.utilities.start_work_functions import file_folder_ignored
 from src.utilities.util_functions import join_paths, WRONG_TOOL_CALL_WORD
 from src.utilities.user_input import user_input
 from src.tools.rag.retrieval import retrieve
@@ -34,7 +34,7 @@ def prepare_list_dir_tool(work_dir):
 List files in directory. Use only for dirs content of which is hidden in the project tree.
 """
         try:
-            if file_folder_ignored(directory, CoderIgnore.get_forbidden()):
+            if file_folder_ignored(directory):
                 return f"You are not allowed to work with directory {directory}."
             files = os.listdir(join_paths(work_dir, directory))
 
@@ -52,7 +52,7 @@ def prepare_see_file_tool(work_dir):
 Check contents of file.
 """
         try:
-            if file_folder_ignored(filename, CoderIgnore.get_forbidden()):
+            if file_folder_ignored(filename):
                 return f"You are not allowed to work with {filename}."
             with open(join_paths(work_dir, filename), 'r', encoding='utf-8') as file:
                 lines = file.readlines()

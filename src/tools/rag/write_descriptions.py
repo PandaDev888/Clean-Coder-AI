@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 import chromadb
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from src.utilities.util_functions import join_paths
+from src.utilities.util_functions import join_paths, read_coderrules
+from src.utilities.start_work_functions import CoderIgnore, file_folder_ignored
 from src.utilities.llms import init_llms_mini
 
 
@@ -31,20 +31,45 @@ def get_content(file_path):
     content = file_path.name + '\n' + content
     return content
 
-
-def write_descriptions(subfolders_with_files=['/']):
-    all_files = []
-
-    for folder in subfolders_with_files:
+def collect_file_pathes(subfolders, work_dir):
+    """
+    Collect and return a list of allowed code files from the given subfolders
+    under the work_dir according to is_code_file criteria and .coderignore patterns.
+    """
+    allowed_files = []
+    for folder in subfolders:
         for root, _, files in os.walk(work_dir + folder):
             for file in files:
                 file_path = Path(root) / file
-                if is_code_file(file_path):
-                    all_files.append(file_path)
+                if not is_code_file(file_path):
+                    continue
+                relative_path_str = file_path.relative_to(work_dir).as_posix()
+                if file_folder_ignored(relative_path_str):
+                    continue
+                allowed_files.append(file_path)
+    return allowed_files
+
+
+def write_descriptions(subfolders_with_files=['/']):
+    all_files = collect_file_pathes(subfolders_with_files, work_dir)
+
+    coderrules = read_coderrules()
 
     prompt = ChatPromptTemplate.from_template(
-"""Describe the following code in 4 sentences or less, focusing only on important information from integration point of view.
-Write what file is responsible for.\n\n'''\n{code}'''
+f"""First, get known with info about project (may be useful, may be not):
+
+'''
+{coderrules}
+'''
+
+Describe the code in 4 sentences or less, focusing only on important information from integration point of view.
+Write what file is responsible for.
+
+Go traight to the thing in description, without starting sentence.
+
+'''
+{{code}}
+'''
 """
     )
     llms = init_llms_mini(tools=[], run_name='File Describer')
