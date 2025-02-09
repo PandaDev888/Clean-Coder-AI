@@ -130,7 +130,7 @@ def parse_project_tasks(tasks):
     return output_string
 
 
-def actualize_progress_description_file(task_name_description, tester_response):
+def actualize_progress_description_file(task_name_description):
     progress_description = read_progress_description()
     actualize_description_prompt = PromptTemplate.from_template(actualize_progress_description_prompt_template)
     chain = actualize_description_prompt | llm | StrOutputParser()
@@ -138,7 +138,6 @@ def actualize_progress_description_file(task_name_description, tester_response):
         {
             "progress_description": progress_description,
             "task_name_description": task_name_description,
-            "tester_response": tester_response
         }
     )
     with open(os.path.join(work_dir, ".clean_coder", "manager_progress_description.txt"), "w") as f:

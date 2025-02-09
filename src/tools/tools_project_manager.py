@@ -120,14 +120,7 @@ overlapping scope allowed.
 
     # ToDo: git upload
 
-    # Ask tester to check if changes have been implemented correctly
-    tester_query = f"""Please check if the task has been implemented correctly.
-
-    Task: {task.content}
-    """
-    tester_response = user_input(tester_query)
-
-    actualize_progress_description_file(task_name_description, tester_response)
+    actualize_progress_description_file(task_name_description)
 
     # Mark task as done
     todoist_api.close_task(task_id=task.id)
