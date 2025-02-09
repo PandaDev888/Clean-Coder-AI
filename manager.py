@@ -47,6 +47,8 @@ class Manager:
         state = call_tool(state, self.tools)
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
+        print("messages:")
+        print_formatted(messages)
         print("last ai message:")
         print(last_ai_message)
         if not last_ai_message.content and not last_ai_message.tool_calls:
