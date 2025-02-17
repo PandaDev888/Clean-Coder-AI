@@ -16,7 +16,7 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue)](https://clean-coder.dev)
 [![Discord](https://img.shields.io/static/v1?logo=discord&label=discord&message=Join&color=brightgreen)](https://discord.gg/8gat7Pv7QJ)
 
-  <img src="/non_src/assets/CC_diagram_full_dark_mode.png" alt="Logo">
+  <img src="/non_src/assets/CC_diagram_light_golden.png">
 </div>
 
 ## 🏖️ Relax and watch it code
