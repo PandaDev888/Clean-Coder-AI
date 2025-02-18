@@ -4,6 +4,8 @@ Place here functions that should be called when clean coder is started.
 import os
 import fnmatch
 from termcolor import colored
+from pathspec import PathSpec
+from pathspec.patterns import GitWildMatchPattern
 
 
 def read_frontend_feedback_story():
@@ -12,12 +14,14 @@ def read_frontend_feedback_story():
         return file.read()
 
 
-def file_folder_ignored(path, ignore_patterns):
+def file_folder_ignored(path):
     path = path.rstrip('/')  # Remove trailing slash if present
-
-    for pattern in ignore_patterns:
+    spec = PathSpec.from_lines(GitWildMatchPattern, CoderIgnore.get_forbidden())
+    if spec.match_file(path):
+        return True
+    # old way of checking, to remove in future. For now still needed for checking exact folder matches
+    for pattern in CoderIgnore.get_forbidden():
         pattern = pattern.rstrip('/')  # Remove trailing slash from pattern if present
-
         if fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch(f"{path}/", f"{pattern}/"):
             return True
 

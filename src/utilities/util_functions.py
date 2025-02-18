@@ -3,7 +3,7 @@ import os
 import xml.etree.ElementTree as ET
 import base64
 import requests
-from src.utilities.start_work_functions import file_folder_ignored, CoderIgnore, Work
+from src.utilities.start_work_functions import file_folder_ignored, Work
 from src.utilities.print_formatters import print_formatted
 from dotenv import load_dotenv, find_dotenv
 from todoist_api_python.api import TodoistAPI
@@ -19,6 +19,7 @@ PROJECT_ID = os.getenv('TODOIST_PROJECT_ID')
 
 
 TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
+WRONG_TOOL_CALL_WORD = "Wrong tool call. "
 
 storyfile_template = """<This is the story of your project for a frontend feedback agent. Modify it according to commentaries provided in <> brackets.>
 
@@ -54,7 +55,7 @@ def check_file_contents(files, work_dir, line_numbers=True):
 
 
 def watch_file(filename, work_dir, line_numbers=True):
-    if file_folder_ignored(filename, CoderIgnore.get_forbidden()):
+    if file_folder_ignored(filename):
         return "You are not allowed to work with this file."
     try:
         with open(join_paths(work_dir, filename), 'r', encoding='utf-8') as file:
@@ -62,7 +63,7 @@ def watch_file(filename, work_dir, line_numbers=True):
     except FileNotFoundError:
         return "File not exists."
     if line_numbers:
-        formatted_lines = [f"{i + 1}|{line[:-1]}\n" for i, line in enumerate(lines)]
+        formatted_lines = [f"{i + 1}|{line[:-1]} |{i+1}\n" for i, line in enumerate(lines)]
     else:
         formatted_lines = [f"{line[:-1]}\n" for line in lines]
     file_content = "".join(formatted_lines)
@@ -144,8 +145,8 @@ def list_directory_tree(work_dir):
     tree = []
     for root, dirs, files in os.walk(work_dir):
         # Filter out forbidden directories and files
-        dirs[:] = [d for d in dirs if not file_folder_ignored(d, CoderIgnore.get_forbidden())]
-        files = [f for f in files if not file_folder_ignored(f, CoderIgnore.get_forbidden())]
+        dirs[:] = [d for d in dirs if not file_folder_ignored(d)]
+        files = [f for f in files if not file_folder_ignored(f)]
         rel_path = os.path.relpath(root, work_dir)
         depth = rel_path.count(os.sep)
         indent = "│ " * depth
@@ -197,9 +198,9 @@ def exchange_file_contents(state, files, work_dir):
 
 
 def bad_tool_call_looped(state):
-    last_human_messages = [m for m in state["messages"] if m.type == "human"][-4:]
+    last_tool_messages = [m for m in state["messages"] if m.type == "tool"][-4:]
     tool_not_executed_msgs = [
-        m for m in last_human_messages if isinstance(m.content, str) and m.content.startswith(TOOL_NOT_EXECUTED_WORD)
+        m for m in last_tool_messages if isinstance(m.content, str) and m.content.startswith(WRONG_TOOL_CALL_WORD)
     ]
     if len(tool_not_executed_msgs) == 4:
         print_formatted("Seems like AI been looped. Please suggest it how to introduce change correctly:", color="yellow")
@@ -230,3 +231,7 @@ def create_coderrules(coderrules_path):
         file.write(rules)
     print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
     return rules
+
+
+if __name__ == '__main__':
+    print(list_directory_tree(Work.dir()))

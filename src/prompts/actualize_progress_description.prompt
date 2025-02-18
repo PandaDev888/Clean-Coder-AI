@@ -8,7 +8,4 @@ Previous progress description, before last task execution:
 Last task been executed:
 {task_name_description}
 
-Tester response about task implementation:
-{tester_response}
-
 Return new progress description and nothing more.

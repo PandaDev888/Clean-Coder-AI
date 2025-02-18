@@ -1,7 +1,15 @@
-"""
-In manager_utils.py we are placing all functions used by manager agent only, which are not tools.
-"""
+from langchain_text_splitters import (
+    Language,
+    RecursiveCharacterTextSplitter,
+)
 
+
+python_splitter = RecursiveCharacterTextSplitter.from_language(
+    language=Language.PYTHON, chunk_size=1000, chunk_overlap=0
+)
+
+
+code = """
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
@@ -173,7 +181,6 @@ def move_task(task_id, epic_id):
     )
 
 def message_to_dict(message):
-    """Convert a BaseMessage object to a dictionary."""
     return {
         "type": message.type,
         "content": message.content,
@@ -183,7 +190,6 @@ def message_to_dict(message):
     }
 
 def dict_to_message(msg_dict):
-    """Convert a dictionary back to a BaseMessage object."""
     message_type = msg_dict["type"]
     if message_type == "human":
         return HumanMessage(type=msg_dict["type"], content=msg_dict["content"])
@@ -303,3 +309,10 @@ def load_system_message():
             project_plan=project_plan,
             project_rules=read_coderrules()
     ))
+"""
+
+splitted = python_splitter.split_text(code)
+print(RecursiveCharacterTextSplitter.get_separators_for_language(Language.PYTHON))
+for doc in splitted:
+    print(doc)
+    print("###")
