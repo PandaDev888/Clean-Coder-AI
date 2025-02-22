@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Literal
 
 import chromadb
 from dotenv import find_dotenv, load_dotenv
@@ -114,7 +115,7 @@ def output_descriptions(
 def produce_descriptions(
     directories_with_files_to_describe: list[str | Path],
     file_description_dir: str,
-    code_extensions: set[str] | None = None,
+    code_extensions: set[str] | Literal["default"] | None = "default",
 ) -> None:
     """
     Produce short descriptions of files. Store the descriptions in .clean_coder folder in WORK_DIR.
@@ -125,6 +126,8 @@ def produce_descriptions(
         ignore: files and folders to ignore.
         code_extensions: The list of file extension types accepted, if it's provided.
     """
+    if code_extensions == "default":
+        code_extensions = {".py", ".java", ".js", ".ts", ".html", ".css", ".scss", ".sql", ".json", ".xml"}
     files_to_describe = files_in_directory(
         directories_with_files_to_describe=directories_with_files_to_describe,
         code_extensions=code_extensions,
@@ -192,35 +195,9 @@ if __name__ == "__main__":
     load_dotenv(find_dotenv())
     work_dir = os.getenv("WORK_DIR")
     file_description_dir = join_paths(work_dir, ".clean_coder/workdir_file_descriptions")
-    code_extensions = {
-        ".js",
-        ".jsx",
-        ".ts",
-        ".tsx",
-        ".vue",
-        ".py",
-        ".rb",
-        ".php",
-        ".java",
-        ".c",
-        ".cpp",
-        ".cs",
-        ".go",
-        ".swift",
-        ".kt",
-        ".rs",
-        ".htm",
-        ".html",
-        ".css",
-        ".scss",
-        ".sass",
-        ".less",
-        ".prompt",
-    }
     produce_descriptions(
         directories_with_files_to_describe=[work_dir],
         file_description_dir=file_description_dir,
-        code_extensions=code_extensions,
     )
     chroma_collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
     upload_descriptions_to_vdb(
