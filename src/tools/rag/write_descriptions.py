@@ -174,6 +174,9 @@ def upload_descriptions_to_vdb(
         vdb_location: (optional) location for storing the vector database.
     """
     work_dir = os.getenv("WORK_DIR")
+    if not work_dir:
+        msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
+        raise MissingEnvironmentVariableError(msg)
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, vdb_location))
     collection = chroma_client.get_or_create_collection(
         name=chroma_collection_name,
@@ -188,9 +191,6 @@ if __name__ == "__main__":
     # load environment
     load_dotenv(find_dotenv())
     work_dir = os.getenv("WORK_DIR")
-    if not work_dir:
-        msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
-        raise MissingEnvironmentVariableError(msg)
     file_description_dir = join_paths(work_dir, ".clean_coder/workdir_file_descriptions")
     file_extension_constraint = {
         ".js",
