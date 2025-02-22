@@ -124,22 +124,6 @@ def produce_descriptions(
         file_description_dir: directory where generated file descriptions are to be saved to.
         ignore: files and folders to ignore.
         file_extension_constraint: The list of file extension types accepted, if it's provided.
-
-    Example:
-        work_dir = os.getenv("WORK_DIR") # provide your own directory of choice if WORK_DIR is not set.
-        if not work_dir:
-            msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
-            raise MissingEnvironmentVariableError(msg)
-        file_description_dir = join_paths(work_dir, ".clean_coder/workdir_file_descriptions")
-        file_extension_constraint = {
-            ".js", ".jsx", ".ts", ".tsx", ".vue", ".py", ".rb", ".php", ".java", ".c", ".cpp", ".cs", ".go", ".swift",
-            ".kt", ".rs", ".htm",".html", ".css", ".scss", ".sass", ".less", ".prompt",
-        }
-        ignore = {".clean_coder", ".coderrules"}
-        produce_descriptions(directories_with_files_to_describe=[work_dir],
-                        file_description_dir=file_description_dir,
-                        file_extension_constraint=file_extension_constraint,
-                        )
     """
     files_to_describe = files_in_directory(
         directories_with_files_to_describe=directories_with_files_to_describe,
@@ -188,29 +172,8 @@ def upload_descriptions_to_vdb(
         chroma_collection_name: name of the collection within Chroma vector database to save file descriptions in.
         file_description_dir: directory where generated file descriptions are available.
         vdb_location: (optional) location for storing the vector database.
-
-    Example:
-        work_dir = os.getenv("WORK_DIR") # provide your own directory of choice if WORK_DIR is not set.
-        if not work_dir:
-            msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
-            raise MissingEnvironmentVariableError(msg)
-        file_description_dir = join_paths(work_dir, ".clean_coder/workdir_file_descriptions")
-        file_extension_constraint = {
-            ".js", ".jsx", ".ts", ".tsx", ".vue", ".py", ".rb", ".php", ".java", ".c", ".cpp", ".cs", ".go", ".swift",
-            ".kt", ".rs", ".htm",".html", ".css", ".scss", ".sass", ".less", ".prompt",
-        }
-        ignore = {".clean_coder", ".coderrules"}
-        produce_descriptions(directories_with_files_to_describe=[work_dir],
-                        file_description_dir=file_description_dir,
-                        file_extension_constraint=file_extension_constraint,
-                        )
-        chroma_collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
-        upload_descriptions_to_vdb(chroma_collection_name=chroma_collection_name, file_description_dir=file_description_dir)
     """
     work_dir = os.getenv("WORK_DIR")
-    if not work_dir:
-        msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
-        raise MissingEnvironmentVariableError(msg)
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, vdb_location))
     collection = chroma_client.get_or_create_collection(
         name=chroma_collection_name,
