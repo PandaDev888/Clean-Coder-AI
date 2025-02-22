@@ -21,6 +21,10 @@ from src.utilities.util_functions import join_paths
 ## Configure the logging level
 logging.basicConfig(level=logging.INFO)
 
+# load environment
+load_dotenv(find_dotenv())  # load environment variables from .env file
+work_dir = os.getenv("WORK_DIR")
+
 
 def relevant_extension(file_path: Path, code_extensions: set[str]) -> bool:
     """Checker for whether file extension indicates a script."""
@@ -192,8 +196,6 @@ def upload_descriptions_to_vdb(
 if __name__ == "__main__":
     # provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
     # load environment
-    load_dotenv(find_dotenv())
-    work_dir = os.getenv("WORK_DIR")
     file_description_dir = join_paths(work_dir, ".clean_coder/workdir_file_descriptions")
     produce_descriptions(
         directories_with_files_to_describe=[work_dir],
