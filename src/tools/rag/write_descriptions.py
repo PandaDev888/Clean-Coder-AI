@@ -51,7 +51,7 @@ def add_to_indexing_if_relevant(root: str, file: str, code_extensions: set[str] 
     return None
 
 
-def files_in_directory(
+def find_files_to_describe(
     directories_with_files_to_describe: list[str | Path],
     code_extensions: set[str] | None,
 ) -> list[Path]:
@@ -92,7 +92,7 @@ def save_file_description(file_path: Path, description: str, file_description_di
         out_file.write(description)
 
 
-def output_descriptions(
+def describe_files(
     files_to_describe: list[Path], chain: RunnableSequence, file_description_dir: str,
 ) -> None:
     """Generate & output file descriptions to designated directory in WORK_DIR."""
@@ -128,7 +128,7 @@ def produce_descriptions(
     """
     if code_extensions == "default":
         code_extensions = {".py", ".java", ".js", ".ts", ".html", ".css", ".scss", ".sql", ".json", ".xml"}
-    files_to_describe = files_in_directory(
+    files_to_describe = find_files_to_describe(
         directories_with_files_to_describe=directories_with_files_to_describe,
         code_extensions=code_extensions,
     )
@@ -143,7 +143,7 @@ def produce_descriptions(
     llm = llms[0]
     chain = prompt | llm | StrOutputParser()
     Path(file_description_dir).mkdir(parents=True, exist_ok=True)
-    output_descriptions(
+    describe_files(
         files_to_describe=files_to_describe, chain=chain, file_description_dir=file_description_dir
     )
 
