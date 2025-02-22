@@ -21,10 +21,10 @@ from src.utilities.util_functions import join_paths
 logging.basicConfig(level=logging.INFO)
 
 
-def relevant_extension(file_path: Path, file_extension_constraint: set[str]) -> bool:
+def relevant_extension(file_path: Path, code_extensions: set[str]) -> bool:
     """Checker for whether file extension indicates a script."""
     # List of common code file extensions
-    return file_path.suffix.lower() in file_extension_constraint
+    return file_path.suffix.lower() in code_extensions
 
 
 # read file content. place name of file in the top
@@ -35,16 +35,16 @@ def get_content(file_path: Path) -> str:
     return file_path.name + "\n" + content
 
 
-def add_to_indexing_if_relevant(root: str, file: str, file_extension_constraint: set[str] | None) -> Path | None:
+def add_to_indexing_if_relevant(root: str, file: str, code_extensions: set[str] | None) -> Path | None:
     """Return file path if the file is to be considered."""
     file_path = Path(root).joinpath(file)
     if file_folder_ignored(str(file_path)):
         # ignore files and folders mentioned in .coderignore
         return None
-    if not file_extension_constraint:
+    if not code_extensions:
         return file_path
     if relevant_extension(
-        file_path, file_extension_constraint=file_extension_constraint,
+        file_path, code_extensions=code_extensions,
     ):
         return file_path
     return None
@@ -52,7 +52,7 @@ def add_to_indexing_if_relevant(root: str, file: str, file_extension_constraint:
 
 def files_in_directory(
     directories_with_files_to_describe: list[str | Path],
-    file_extension_constraint: set[str] | None,
+    code_extensions: set[str] | None,
 ) -> list[Path]:
     """Fetch paths of files in directory."""
     files_to_describe = []
@@ -62,7 +62,7 @@ def files_in_directory(
             add_to_indexing_if_relevant(
                 root=str(directory),
                 file=file,
-                file_extension_constraint=file_extension_constraint,
+                code_extensions=code_extensions,
             )
             for file in directory_files
         ]
@@ -72,7 +72,7 @@ def files_in_directory(
                 add_to_indexing_if_relevant(
                     root=root,
                     file=file,
-                    file_extension_constraint=file_extension_constraint,
+                    code_extensions=code_extensions,
                 )
                 for file in files
             ]
@@ -114,7 +114,7 @@ def output_descriptions(
 def produce_descriptions(
     directories_with_files_to_describe: list[str | Path],
     file_description_dir: str,
-    file_extension_constraint: set[str] | None = None,
+    code_extensions: set[str] | None = None,
 ) -> None:
     """
     Produce short descriptions of files. Store the descriptions in .clean_coder folder in WORK_DIR.
@@ -123,11 +123,11 @@ def produce_descriptions(
         directories_with_files_to_describe: directories from which files are to be described.
         file_description_dir: directory where generated file descriptions are to be saved to.
         ignore: files and folders to ignore.
-        file_extension_constraint: The list of file extension types accepted, if it's provided.
+        code_extensions: The list of file extension types accepted, if it's provided.
     """
     files_to_describe = files_in_directory(
         directories_with_files_to_describe=directories_with_files_to_describe,
-        file_extension_constraint=file_extension_constraint,
+        code_extensions=code_extensions,
     )
 
     prompt = ChatPromptTemplate.from_template(
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     load_dotenv(find_dotenv())
     work_dir = os.getenv("WORK_DIR")
     file_description_dir = join_paths(work_dir, ".clean_coder/workdir_file_descriptions")
-    file_extension_constraint = {
+    code_extensions = {
         ".js",
         ".jsx",
         ".ts",
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     produce_descriptions(
         directories_with_files_to_describe=[work_dir],
         file_description_dir=file_description_dir,
-        file_extension_constraint=file_extension_constraint,
+        code_extensions=code_extensions,
     )
     chroma_collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
     upload_descriptions_to_vdb(
