@@ -13,7 +13,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables.base import RunnableSequence
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
-from src.utilities.exceptions import MissingEnvironmentVariableError
 from src.utilities.llms import init_llms_mini
 from src.utilities.start_work_functions import file_folder_ignored
 from src.utilities.util_functions import join_paths
@@ -87,9 +86,7 @@ def find_files_to_describe(
 
 def save_file_description(file_path: Path, description: str, file_description_dir: str) -> None:
     """Save file description."""
-    if not work_dir:
-        msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
-        raise MissingEnvironmentVariableError(msg)
+    work_dir = os.getenv("WORK_DIR")
     file_name = file_path.relative_to(work_dir).as_posix().replace("/", "=")
     output_path = join_paths(file_description_dir, f"{file_name}.txt")
     with open(output_path, "w", encoding="utf-8") as out_file:
@@ -181,9 +178,6 @@ def upload_descriptions_to_vdb(
         vdb_location: (optional) location for storing the vector database.
     """
     work_dir = os.getenv("WORK_DIR")
-    if not work_dir:
-        msg = "WORK_DIR variable not provided. Please add WORK_DIR to .env file"
-        raise MissingEnvironmentVariableError(msg)
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, vdb_location))
     collection = chroma_client.get_or_create_collection(
         name=chroma_collection_name,
