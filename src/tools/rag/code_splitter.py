@@ -3,10 +3,6 @@ from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
 
-
-
-
-
 code = """
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
@@ -347,7 +343,10 @@ extension_to_language = {
     'sh': 'powershell',
     'dockerfile': 'proto',
 }
-def split_code(code, extension, chunk_size=1000):
+
+
+def split_code(code: str, extension: str, chunk_size: int = 1000):
+    """Splits code for smaller elements as functions. That allows to describe functions for semantic retrieval tool."""
     language = extension_to_language.get(extension)
     if not language:
         return
@@ -355,6 +354,7 @@ def split_code(code, extension, chunk_size=1000):
         language=Language(language), chunk_size=chunk_size, chunk_overlap=0
     )
     return splitter.split_text(code)
+
 
 splitted = split_code(code, "py")
 for doc in splitted:
