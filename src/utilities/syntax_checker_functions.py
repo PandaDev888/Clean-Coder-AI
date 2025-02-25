@@ -216,355 +216,89 @@ def parse_yaml(yaml_string):
 
 if __name__ == "__main__":
     code = """
-"use client";
+<template>
+  <div class="form-container">
+    <Notification v-show="notificationMessage" :message="notificationMessage" :type="notificationType" />
+    <h1>Change Password</h1>
+    <form @submit.prevent="handleSubmit">
+      <div>
+        <label for="current-password">Current Password:</label>
+        <input type="password" v-model="currentPassword" required />
+      </div>
+      <div>
+        <label for="new-password">New Password:</label>
+        <input type="password" v-model="newPassword" required />
+      </div>
+      <div>
+        <label for="confirm-new-password">Confirm New Password:</label>
+        <input type="password" v-model="confirmNewPassword" required />
+      </div>
+      <button type="submit">Change Password</button>
+    </form>
+  </div>
+</template>
 
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import ProfileCard from "./components/ProfileCard";
-import PopupNotification from "./components/PopupNotification";
+<script>
+import { useAuthStore } from '@/stores/auth';
+import Notification from '@/components/Notification.vue';
 
-interface ProfileItem {
-  uuid: string;
-  full_name: string;
-  short_bio?: string;
-  bio?: string;
-}
-
-export default function Home() {
-  const [activeTab, setActiveTab] = useState<'Explore' | 'Received' | 'Sent' | 'Matches'>('Explore');
-  const [exploreItems, setExploreItems] = useState<ProfileItem[]>([]);
-  const [receivedItems, setReceivedItems] = useState<ProfileItem[]>([]);
-  const [sentItems, setSentItems] = useState<ProfileItem[]>([]);
-  const [matchedItems, setMatchedItems] = useState<ProfileItem[]>([]);
-  const [error, setError] = useState('');
-  const [notification, setNotification] = useState<{ message: string, type: 'positive' | 'negative' } | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [iconLoading, setIconLoading] = useState(true);
-  const [skip, setSkip] = useState(0);
-  const [limit] = useState(10);
-  const [totalExploreItems, setTotalExploreItems] = useState(0);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
-
-  function goToProfile(uuid: string) {
-    const userRole = localStorage.getItem('role');
-    if (userRole === "intern") {
-      router.push(`/campaign/${uuid}`);
-    } else {
-      router.push(`/intern/${uuid}`);
-    }
-  }
-
-  async function handleConnect(uuid: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/create/${uuid}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to create invitation');
-      setNotification({ message: 'Invitation sent successfully', type: 'positive' });
-
-      // Optimistically update the explore list
-      setExploreItems((prevItems) => prevItems.filter(item => item.uuid !== uuid));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-
-  async function handleAccept(invitationId: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/accept/${invitationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to accept invitation');
-      setNotification({ message: 'Invitation accepted successfully', type: 'positive' });
-      setReceivedItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-
-  async function handleReject(invitationId: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/reject/${invitationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to reject invitation');
-      setNotification({ message: 'Invitation rejected successfully', type: 'positive' });
-      setReceivedItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-
-  async function handleCancel(invitationId: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/cancel/${invitationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to cancel invitation');
-      setNotification({ message: 'Invitation canceled successfully', type: 'positive' });
-      setSentItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-  async function fetchExplore() {
-    try {
-      const userRole = localStorage.getItem('role');
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
-      if (!userRole) {
-        throw new Error('User role not found');
-      }
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}${
-        userRole === "intern"
-          ? '/fetch-campaigns-for-main-page'
-          : '/fetch-interns-for-main-page'
-      }?skip=${skip}&limit=${limit}`;
-
-      console.log('Fetching from URL:', url);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to fetch explore items');
-      }
-
-      const data = await response.json();
-      setExploreItems(prev => [...prev, ...(data.items || [])]);
-      setTotalExploreItems(data.total || 0);
-    } catch (err: any) {
-      console.error('Fetch error:', err);
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-
-  async function fetchReceived() {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/received`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch received invitations');
-      const data = await response.json();
-      setReceivedItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-
-  async function fetchSent() {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/sent`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch sent invitations');
-      const data = await response.json();
-      setSentItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-  async function fetchMatches() {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch matches');
-      const data = await response.json();
-      setMatchedItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Please login first');
-      return;
-    }
-    // Initial load of the first page
-    fetchExplore().then(() => setSkip(prev => prev + limit));
-  }, []);
-
-  // Infinite scroll: Observe the sentinel at the bottom of the Explore list
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      // If sentinel is in view and we have more items to fetch
-      if (entry.isIntersecting && skip < totalExploreItems) {
-        // Fetch the next batch
-        fetchExplore().then(() => {
-          setSkip(prev => prev + limit);
-        });
-      }
-    });
-
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current);
-    }
-
-    // Cleanup
-    return () => {
-      if (sentinelRef.current) {
-        observer.unobserve(sentinelRef.current);
-      }
+export default {
+  components: {
+    Notification,
+  },
+  data() {
+    return {
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
+      apiUrl: import.meta.env.VITE_API_URL,
+      notificationMessage: '',
+      notificationType: 'positive',
     };
-  }, [skip, totalExploreItems, limit]);
+  },
+  methods: {
+    async handleSubmit() {
+      if (this.newPassword !== this.confirmNewPassword) {
+        this.notificationMessage = 'New passwords do not match';
+        this.notificationType = 'negative';
+        return;
+      }
 
-  const handleTabClick = (tab: 'Explore' | 'Received' | 'Sent' | 'Matches') => {
-    setActiveTab(tab);
-    if (tab === 'Explore') fetchExplore();
-    if (tab === 'Received') fetchReceived();
-    if (tab === 'Sent') fetchSent();
-    if (tab === 'Matches') fetchMatches();
-  };
+      const formData = new FormData();
+      formData.append('current_password', this.currentPassword);
+      formData.append('new_password', this.newPassword);
 
-  let listToRender: ProfileItem[] = [];
-  if (activeTab === 'Explore') listToRender = exploreItems;
-  if (activeTab === 'Received') listToRender = receivedItems;
-  if (activeTab === 'Sent') listToRender = sentItems;
-  if (activeTab === 'Matches') listToRender = matchedItems;
-  return (
-    <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex items-center justify-between mb-8">
-          <button className="w-10 h-10 rounded-full bg-[#EEEEEE] flex items-center justify-center">
-            <Image 
-              src="/profile.svg" 
-              alt="Profile" 
-              width={24} 
-              height={24} 
-              onError={(e) => e.currentTarget.src = '/fallback-icon.svg'} // Fallback icon
-            />
-          </button>
-        <h1 className="text-xl font-semibold">Glovn</h1>
-      </header>
+      try {
+        const response = await fetch(this.apiUrl + '/change-password', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error('Password change failed');
+        }
+        this.notificationMessage = 'Password changed successfully';
+        this.notificationType = 'positive';
+        setTimeout(() => {
+          this.notificationMessage = '';
+          this.$router.push('/');
+        }, 2000);
+      } catch (error) {
+        console.error('Error:', error);
+        this.notificationMessage = error.message;
+        this.notificationType = 'negative';
+      } finally {
+        this.currentPassword = '';
+        this.newPassword = '';
+        this.confirmNewPassword = '';
+      }
+    },
+  },
+};
+</script>
 
-      <nav className="flex p-1 mb-8 justify-center bg-[#F5F5F5]/40 rounded-full max-w-md mx-auto">
-        {["Explore", "Received", "Sent", "Matches"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => handleTabClick(tab as 'Explore' | 'Received' | 'Sent' | 'Matches')}
-            className={`flex-1 px-6 py-2.5 rounded-full text-sm transition-all duration-300 ${
-              activeTab === tab
-                ? "bg-white font-medium text-black shadow-sm text-[15px]"
-                : "text-gray-400/80 hover:text-gray-500"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </nav>
-
-      {error && (
-        <div className="mb-6 py-2 px-4 w-full text-center bg-[#FFF2F2] text-[#FF0000] text-[14px] rounded-full">
-          {error}
-        </div>
-      )}
-
-      <section className="space-y-4">
-        {listToRender.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">No items found</div>
-        ) : (
-          listToRender.map((item) => (
-            <ProfileCard
-              key={item.uuid}
-              item={item}
-              onConnect={handleConnect}
-              onAccept={handleAccept}
-              onReject={handleReject}
-              onCancel={handleCancel}
-              activeTab={activeTab}
-            />
-          ))
-        )}
-      </section>
-
-      {/*<div ref={sentinelRef} style={{ height: "1px" }} />*/}
-      {notification && (
-        <PopupNotification
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
-    </main>
-  );
-}
-
+<style scoped src="@/assets/styles/forms.css"></style>
 """
-    print(parse_tsx(code))
+    print(parse_vue_basic(code))
