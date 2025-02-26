@@ -15,7 +15,7 @@ from langchain_core.runnables.base import RunnableSequence
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 from src.utilities.llms import init_llms_mini
 from src.utilities.start_work_functions import file_folder_ignored
-from src.utilities.util_functions import join_paths
+from src.utilities.util_functions import join_paths, read_coderrules
 
 ## Configure the logging level
 logging.basicConfig(level=logging.INFO)
@@ -133,11 +133,19 @@ def produce_descriptions(
         directories_with_files_to_describe=directories_with_files_to_describe,
         code_extensions=code_extensions,
     )
-
+    coderrules = read_coderrules()
     prompt = ChatPromptTemplate.from_template(
-        """Describe the following code in 4 sentences or less, focusing only on important information from integration point of view.
-    Write what file is responsible for.\n\n'''\n{code}'''
-    """,
+f"""First, get known with info about project (may be useful, may be not):
+'''
+{coderrules}
+'''
+Describe the code in 4 sentences or less, focusing only on important information from integration point of view.
+Write what file is responsible for.
+Go traight to the thing in description, without starting sentence.
+'''
+{{code}}
+'''
+""",
     )
 
     llms = init_llms_mini(tools=[], run_name="File Describer")
