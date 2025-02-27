@@ -356,7 +356,8 @@ def split_code(code: str, extension: str, chunk_size: int = 1000):
     return splitter.split_text(code)
 
 
-splitted = split_code(code, "py")
-for doc in splitted:
-    print(doc)
-    print("###")
+if __name__ == "__main__":
+    splitted = split_code(code, "py")
+    for doc in splitted:
+        print(doc)
+        print("###")

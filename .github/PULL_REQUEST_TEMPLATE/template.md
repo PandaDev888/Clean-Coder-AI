@@ -3,6 +3,9 @@
 ### Description
 Please provide a detailed description of the changes made in this pull request.
 
+### How to use
+If you created new functionality, please describe how it could be enabled and used.
+
 ### Related Issue
 If this pull request addresses an existing issue, please reference it here (e.g., "Fixes #123").
 
