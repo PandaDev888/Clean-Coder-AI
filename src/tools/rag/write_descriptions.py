@@ -29,7 +29,7 @@ def is_code_file(file_path):
 def get_content(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
-    content = file_path.name + '\n' + content
+    content = file_path.name + '\n\n' + content
     return content
 
 def collect_file_pathes(subfolders, work_dir):
@@ -97,33 +97,13 @@ Go straight to the thing in description, without starting sentence.
 
 def write_file_chunks_descriptions(subfolders_with_files=['/']):
     all_files = collect_file_pathes(subfolders_with_files, work_dir)
-
     coderrules = read_coderrules()
 
-    prompt = ChatPromptTemplate.from_template(
-f"""First, get known with info about project (may be useful, may be not):
+    grandparent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    with open(f"{grandparent_dir}/prompts/describe_file_chunks.prompt", "r") as f:
+        chunks_describe_template = f.read()
 
-'''
-{coderrules}
-'''
-
-For the reference, you have code of whole file here:
-
-'''
-{{file_code}}
-'''
-
-Describe provided function/file_chunk in 4 sentences or less, focusing only on important information from integration point of view.
-Write what function/file chunk is responsible for.
-
-Go straight to the thing in description, without starting sentence.
-
-Here is file chunk to describe:
-'''
-{{chunk_code}}
-'''
-"""
-    )
+    prompt = ChatPromptTemplate.from_template(chunks_describe_template)
     llms = init_llms_mini(tools=[], run_name='File Describer')
     llm = llms[0]
     chain = prompt | llm | StrOutputParser()
@@ -134,18 +114,17 @@ Here is file chunk to describe:
     for file_path in all_files:
         file_content = get_content(file_path)
         # get file extenstion
-        extension = file_path.split('.')[-1]
+        extension = file_path.suffix.lstrip('.')
         file_chunks = split_code(file_content, extension)
-        descriptions = chain.batch(file_chunks)
+        descriptions = chain.batch([{'coderrules': coderrules, 'file_code': file_content, 'chunk_code': chunk} for chunk in file_chunks])
         print(descriptions)
 
-        for file_path, description in zip(files_iteration, descriptions):
-            file_name = file_path.relative_to(work_dir).as_posix().replace('/', '=')
+        for nr, description in enumerate(descriptions):
+            file_name = f"{file_path.relative_to(work_dir).as_posix().replace('/', '=')}_chunk{nr}"
             output_path = join_paths(description_folder, f"{file_name}.txt")
 
             with open(output_path, 'w', encoding='utf-8') as out_file:
                 out_file.write(description)
-
 
 
 def upload_descriptions_to_vdb():
@@ -174,5 +153,6 @@ def upload_descriptions_to_vdb():
 if __name__ == '__main__':
     #provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
     write_file_descriptions(subfolders_with_files=['/'])
+    write_file_chunks_descriptions()
 
     upload_descriptions_to_vdb()
