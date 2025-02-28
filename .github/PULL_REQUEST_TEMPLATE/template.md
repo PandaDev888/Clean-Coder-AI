@@ -11,4 +11,5 @@ If this pull request addresses an existing issue, please reference it here (e.g.
 
 ### Checklist
 - [ ] I have tested these changes locally.
+- [ ] I used docstrings on the begin of every function I created to describe it. Both humans and AI will have no problem to understand my code.
 - [ ] I'm making contribution to the `dev` branch. Direct contributions to `master` are not allowed. Don't worry, they will be merged to `master` on the nearest release.

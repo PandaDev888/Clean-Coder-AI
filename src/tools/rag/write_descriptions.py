@@ -96,6 +96,8 @@ Go straight to the thing in description, without starting sentence.
 
 
 def write_file_chunks_descriptions(subfolders_with_files=['/']):
+    """Writes descriptions of whole file chunks in codebase. Gets list of whole files to describe, divides files
+    into chunks and describes each chunk separately."""
     all_files = collect_file_pathes(subfolders_with_files, work_dir)
     coderrules = read_coderrules()
 
@@ -128,6 +130,7 @@ def write_file_chunks_descriptions(subfolders_with_files=['/']):
 
 
 def upload_descriptions_to_vdb():
+    """Uploads descriptions, created by write_file_chunks_descriptions, into vector database."""
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
     collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
