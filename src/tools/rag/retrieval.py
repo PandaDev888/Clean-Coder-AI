@@ -28,8 +28,16 @@ def vdb_available():
     return True if get_collection() else False
 
 
-def retrieve(question):
-    # collection should be initialized once, in the class init
+def retrieve(question: str) -> str:
+    """
+    Retrieve files descriptions by semantic query.
+
+    Parameters:
+    question (str): The query to retrieve information for.
+
+    Returns:
+    str: A formatted response with file descriptions of found files.
+    """
     collection = get_collection()
     retrieval = collection.query(query_texts=[question], n_results=8)
     reranked_docs = cohere_client.rerank(

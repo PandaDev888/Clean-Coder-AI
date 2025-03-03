@@ -118,6 +118,9 @@ def write_file_chunks_descriptions(subfolders_with_files=['/']):
         # get file extenstion
         extension = file_path.suffix.lstrip('.')
         file_chunks = split_code(file_content, extension)
+        # do not describe chunk of 1-chunk files
+        if len(file_chunks) <= 1:
+            continue
         descriptions = chain.batch([{'coderrules': coderrules, 'file_code': file_content, 'chunk_code': chunk} for chunk in file_chunks])
         print(descriptions)
 

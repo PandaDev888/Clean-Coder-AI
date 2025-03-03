@@ -17,7 +17,7 @@ from src.utilities.util_functions import (
     read_coderrules,
     convert_images,
 )
-from src.utilities.llms import init_llms
+from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.langgraph_common_functions import (
     call_model, call_tool, ask_human, after_ask_human_condition, multiple_tools_msg, no_tools_msg, agent_looped_human_help,
 )
@@ -50,7 +50,7 @@ class Debugger():
     def __init__(self, files, work_dir, human_feedback, image_paths, playwright_code=None):
         self.work_dir = work_dir
         self.tools = prepare_tools(work_dir)
-        self.llms = init_llms(self.tools, "Debugger")
+        self.llms = init_llms_medium_intelligence(self.tools, "Debugger")
         self.system_message = SystemMessage(
             content=system_prompt_template.format(project_rules=read_coderrules())
         )

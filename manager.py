@@ -20,7 +20,7 @@ from src.utilities.manager_utils import actualize_tasks_list_and_progress_descri
 from src.utilities.langgraph_common_functions import call_model, call_tool, multiple_tools_msg, no_tools_msg, empty_message_msg
 from src.utilities.start_project_functions import set_up_dot_clean_coder_dir
 from src.utilities.util_functions import join_paths
-from src.utilities.llms import init_llms
+from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.print_formatters import print_formatted
 import json
 import os
@@ -36,7 +36,7 @@ class Manager:
         self.work_dir = os.getenv("WORK_DIR")
         set_up_dot_clean_coder_dir(self.work_dir)
         self.tools = self.prepare_tools()
-        self.llms = init_llms(tools=self.tools, run_name="Manager")
+        self.llms = init_llms_medium_intelligence(tools=self.tools, run_name="Manager")
         self.manager = self.setup_workflow()
         self.saved_messages_path = join_paths(self.work_dir, ".clean_coder/manager_messages.json")
 

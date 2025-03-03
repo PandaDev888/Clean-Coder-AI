@@ -31,7 +31,7 @@ def llm_open_local_hosted(model):
     timeout=90,
 )
 
-def init_llms(tools=None, run_name="Clean Coder", temp=0):
+def init_llms_medium_intelligence(tools=None, run_name="Clean Coder", temp=0):
     llms = []
     if getenv("ANTHROPIC_API_KEY"):
         llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=temp, timeout=60, max_tokens=2048))

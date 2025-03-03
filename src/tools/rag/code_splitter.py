@@ -349,7 +349,6 @@ def split_code(code: str, extension: str, chunk_size: int = 1000):
     """Splits code for smaller elements as functions. That allows to describe functions for semantic retrieval tool."""
     language = extension_to_language.get(extension)
     if not language:
-        print(f'problem with extension {extension}')
         return []
     splitter = RecursiveCharacterTextSplitter.from_language(
         language=Language(language), chunk_size=chunk_size, chunk_overlap=0

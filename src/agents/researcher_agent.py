@@ -13,7 +13,7 @@ from src.utilities.langgraph_common_functions import (
     call_model, call_tool, ask_human, after_ask_human_condition, no_tools_msg
 )
 from src.utilities.print_formatters import print_formatted
-from src.utilities.llms import init_llms_mini
+from src.utilities.llms import init_llms_medium_intelligence
 import os
 
 
@@ -27,7 +27,7 @@ work_dir = os.getenv("WORK_DIR")
 @tool
 def final_response_researcher(
         files_to_work_on: Annotated[List[str], "List of existing files to potentially introduce changes"],
-        reference_files: Annotated[List[str], "List of code files useful as a reference without images"],
+        reference_files: Annotated[List[str], "List of code files useful as a reference. There are files where similar task been implemented already."],
         template_images: Annotated[List[str], "List of template images"]):
     """That tool outputs list of files programmer will need to change and paths to graphical patterns if some.
     Use that tool only when you 100% sure you found all the files programmer will need to modify.
@@ -65,7 +65,7 @@ class Researcher():
         self.tools = [see_file, list_dir, final_response_researcher]
         if vdb_available():
             self.tools.append(retrieve_files_by_semantic_query)
-        self.llms = init_llms_mini(self.tools, "Researcher")
+        self.llms = init_llms_medium_intelligence(self.tools, "Researcher")
 
         # workflow definition
         researcher_workflow = StateGraph(AgentState)

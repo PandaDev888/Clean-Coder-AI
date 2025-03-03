@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, To
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv, find_dotenv
 from langchain.tools import tool
-from src.utilities.llms import init_llms
+from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.print_formatters import print_formatted, print_error
 from src.utilities.util_functions import (
     check_file_contents, exchange_file_contents, bad_tool_call_looped
@@ -43,7 +43,7 @@ class Executor():
     def __init__(self, files, work_dir):
         self.work_dir = work_dir
         self.tools = prepare_tools(work_dir)
-        self.llms = init_llms(self.tools, "Executor")
+        self.llms = init_llms_medium_intelligence(self.tools, "Executor")
         self.system_message = SystemMessage(
             content=system_prompt_template
         )
