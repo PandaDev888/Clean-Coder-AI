@@ -43,47 +43,61 @@ def retrieve(question: str) -> str:
     """
     collection = get_collection()
     retrieval = collection.query(query_texts=[question], n_results=8)
+    
+    # Use BinaryRanker to filter relevant documents
+    binary_ranker = BinaryRanker()
+    ranking_results = binary_ranker.rank(question, retrieval)
+
+    # Filter documents that are marked as relevant (score = '1')
     response = ""
-    for i, description in enumerate(retrieval["documents"][0]):
-        filename = retrieval["ids"][0][i]
-        response += f"{filename}:\n\n{description}\n\n###\n\n"
+    for filename, score in ranking_results:
+        if score == '1':
+            # Find the corresponding document in the retrieval results
+            idx = retrieval["ids"][0].index(filename)
+            description = retrieval["documents"][0][idx]
+            response += f"{filename}:\n\n{description}\n\n###\n\n"
+
+    # If no relevant documents found, return a message
+    if not response:
+        return "No relevant documents found for your query."
+
     response += "\n\nRemember to see files before adding to final response!"
     return response
 
-    reranked_docs = cohere_client.rerank(
-        query=question,
-        documents=retrieval["documents"][0],
-        top_n=4,
-        model="rerank-english-v3.0",
-        #return_documents=True,
-    )
-    reranked_indexes = [result.index for result in reranked_docs.results]
 
-    for index in reranked_indexes:
-        filename = retrieval["ids"][0][index]
-        description = retrieval["documents"][0][index]
-        response += f"{filename}:\n{description}\n\n###"
-    response += "\n\nRemember to see files before adding to final response!"
-
-    return response
 # New class added for binary ranking with lazy loading.
 class BinaryRanker:
+    """
+    A binary document ranker that uses LLM to determine document relevance.
+    
+    This class implements lazy loading of the LLM chain, meaning the chain
+    is only initialized when the rank method is called. It evaluates whether
+    each document is relevant to a given question, returning a binary score
+    (0 or 1) for each document.
+    """
     def __init__(self):
+        """
+        Initialize the BinaryRanker with lazy loading.
+        
+        The LLM chain is not created until the rank method is called.
+        """
         # Lazy-loaded chain; not initialized until rank() is called.
         self.chain = None
 
     def initialize_chain(self):
+        """
+        Initialize the LLM chain if it hasn't been initialized yet.
+        
+        This method loads the prompt template from an external file, initializes the LLM,
+        and builds the chain used for binary document ranking.
+        """
         if self.chain is None:
-            # Define prompt template for binary ranking.
-            template = (
-                "You are a binary ranker. Evaluate the relevance of a document to a given question.\n"
-                "Question: {question}\n"
-                "Document: {document}\n\n"
-                "If the document is relevant to the question, output only '1'. "
-                "If it may be useful for programmer as contains similar code, but no relevant directly, also output '1'. "
-                "If it is not relevant at all, output only '0'."
-            )
-            prompt = ChatPromptTemplate.from_template(template)
+            # Load the binary ranker prompt from an external file.
+            grandparent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+            file_path = f"{grandparent_dir}/prompts/binary_ranker.prompt"
+            with open(file_path, 'r') as file_handle:
+                template_text = file_handle.read()
+            prompt = ChatPromptTemplate.from_template(template_text)
             # Initialize LLMs with minimal intelligence and set run name to 'BinaryRanker'
             llms = init_llms_mini(tools=[], run_name='BinaryRanker')
             llm = llms[0].with_fallbacks(llms[1:])
@@ -91,32 +105,42 @@ class BinaryRanker:
             self.chain = prompt | llm | StrOutputParser()
 
     def rank(self, question: str, retrieval: dict) -> list:
+        """
+        Rank documents based on their relevance to the question.
+
+        Parameters:
+        question (str): The query to evaluate document relevance against.
+        retrieval (dict): The retrieval results from a vector database query.
+
+        Returns:
+        list: A list of tuples containing document IDs and their binary relevance scores ('0' or '1').
+        """
         # Ensure the chain is initialized (lazy loading)
         self.initialize_chain()
         # Extract list of documents and their ids from the retrieval result.
         documents_list = retrieval["documents"][0]
-        id_list = retrieval["ids"][0]
-        # Build input for batch processing: list of dicts containing question and document.
+        filenames_list = retrieval["ids"][0]
+        # Build input for batch processing: list of dicts containing question, filename, and document.
         batch_inputs = []
-        for doc in documents_list:
-            batch_inputs.append({"question": question, "document": doc})
+        for idx, doc in enumerate(documents_list):
+            batch_inputs.append({
+                "question": question,
+                "filename": filenames_list[idx],
+                "document": doc
+            })
         # Use the chain batch function to get binary outputs.
         results = self.chain.batch(batch_inputs)
         # Pair each document id with its binary ranking result.
         ranking = []
         for idx, result in enumerate(results):
-            ranking.append((id_list[idx], result.strip()))
+            ranking.append((filenames_list[idx], result.strip()))
         return ranking
 
 
 if __name__ == "__main__":
     # Example usage of BinaryRanker for testing.
-    question = "Common styles, used in the main page"
-    collection = get_collection()
-    retrieval = collection.query(query_texts=[question], n_results=8)
-    binary_ranker = BinaryRanker()
-    ranking = binary_ranker.rank(question, retrieval)
-    print("Binary Ranking Results:", ranking)
+    question = "Some tool that can change files"
+
     
     # Test the retrieve function
     results = retrieve(question)
