@@ -41,9 +41,9 @@ def retrieve(question: str) -> str:
     collection = get_collection()
     retrieval = collection.query(query_texts=[question], n_results=8)
     response = ""
-    for i, description in enumerate(retrieval["documents"]):
+    for i, description in enumerate(retrieval["documents"][0]):
         filename = retrieval["ids"][0][i]
-        response += f"{filename}:\n\n{description}\n\n"
+        response += f"{filename}:\n\n{description}\n\n###\n\n"
     response += "\n\nRemember to see files before adding to final response!"
     return response
 
@@ -59,7 +59,7 @@ def retrieve(question: str) -> str:
     for index in reranked_indexes:
         filename = retrieval["ids"][0][index]
         description = retrieval["documents"][0][index]
-        response += f"{filename}:\n\n{description}\n\n"
+        response += f"{filename}:\n{description}\n\n###"
     response += "\n\nRemember to see files before adding to final response!"
 
     return response
