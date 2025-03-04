@@ -40,6 +40,13 @@ def retrieve(question: str) -> str:
     """
     collection = get_collection()
     retrieval = collection.query(query_texts=[question], n_results=8)
+    response = ""
+    for i, description in enumerate(retrieval["documents"]):
+        filename = retrieval["ids"][0][i]
+        response += f"{filename}:\n\n{description}\n\n"
+    response += "\n\nRemember to see files before adding to final response!"
+    return response
+
     reranked_docs = cohere_client.rerank(
         query=question,
         documents=retrieval["documents"][0],
@@ -48,7 +55,7 @@ def retrieve(question: str) -> str:
         #return_documents=True,
     )
     reranked_indexes = [result.index for result in reranked_docs.results]
-    response = ""
+
     for index in reranked_indexes:
         filename = retrieval["ids"][0][index]
         description = retrieval["documents"][0][index]

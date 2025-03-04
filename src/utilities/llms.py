@@ -34,9 +34,9 @@ def llm_open_local_hosted(model):
 def init_llms_medium_intelligence(tools=None, run_name="Clean Coder", temp=0):
     llms = []
     if getenv("ANTHROPIC_API_KEY"):
-        llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=temp, timeout=60, max_tokens=2048))
+        llms.append(ChatAnthropic(model='claude-3-7-sonnet-latest', temperature=temp, timeout=60, max_tokens=2048))
     if getenv("OPENROUTER_API_KEY"):
-        llms.append(llm_open_router("anthropic/claude-3.5-sonnet"))
+        llms.append(llm_open_router("anthropic/claude-3.7-sonnet"))
     if getenv("OPENAI_API_KEY"):
         llms.append(ChatOpenAI(model="gpt-4o", temperature=temp, timeout=60))
     # if os.getenv("GOOGLE_API_KEY"):
@@ -79,12 +79,13 @@ def init_llms_high_intelligence(tools=None, run_name="Clean Coder", temp=0.2):
         llms.append(ChatOpenAI(model="o3-mini", temperature=1, timeout=60, reasoning_effort="high"))
     if os.getenv("OPENAI_API_KEY"):
         llms.append(ChatOpenAI(model="o1", temperature=1, timeout=60))
+
     if os.getenv("OPENROUTER_API_KEY"):
         llms.append(llm_open_router("openai/gpt-4o"))
     if os.getenv("OPENAI_API_KEY"):
         llms.append(ChatOpenAI(model="gpt-4o", temperature=temp, timeout=60))
     if os.getenv("ANTHROPIC_API_KEY"):
-        llms.append(ChatAnthropic(model='claude-3-5-sonnet-20241022', temperature=temp, timeout=60, max_tokens=2048))
+        llms.append(ChatAnthropic(model='claude-3-7-sonnet-latest', temperature=temp, timeout=60, max_tokens=2048))
     # if os.getenv("GOOGLE_API_KEY"):
     #     llms.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=temp, timeout=60))
     if os.getenv("OLLAMA_MODEL"):

@@ -10,6 +10,7 @@ from src.utilities.util_functions import join_paths, read_coderrules
 from src.utilities.start_work_functions import CoderIgnore, file_folder_ignored
 from src.utilities.llms import init_llms_mini
 from src.tools.rag.code_splitter import split_code
+from src.utilities.print_formatters import print_formatted
 
 
 load_dotenv(find_dotenv())
@@ -74,7 +75,7 @@ Go straight to the thing in description, without starting sentence.
 """
     )
     llms = init_llms_mini(tools=[], run_name='File Describer')
-    llm = llms[0]
+    llm = llms[0].with_fallbacks(llms[1:])
     chain = prompt | llm | StrOutputParser()
 
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
@@ -134,6 +135,7 @@ def write_file_chunks_descriptions(subfolders_with_files=['/']):
 
 def upload_descriptions_to_vdb():
     """Uploads descriptions, created by write_file_chunks_descriptions, into vector database."""
+    print_formatted("Uploading file descriptions to vector storage...", color='magenta')
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
     collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
