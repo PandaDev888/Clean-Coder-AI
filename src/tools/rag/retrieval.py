@@ -10,21 +10,19 @@ from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
-cohere_key = os.getenv("COHERE_API_KEY")
-if cohere_key:
-    cohere_client = cohere.Client(cohere_key)
+# cohere_key = os.getenv("COHERE_API_KEY")
+# if cohere_key:
+#     cohere_client = cohere.Client(cohere_key)
 collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
 
 def get_collection():
-    if cohere_key:
-        chroma_client = chromadb.PersistentClient(path=os.getenv('WORK_DIR') + '/.clean_coder/chroma_base')
-        try:
-            return chroma_client.get_collection(name=collection_name)
-        except:
-            # print("Vector database does not exist. (Optional) create it by running src/tools/rag/write_descriptions.py to improve file research capabilities")
-            return False
-    return False
+    chroma_client = chromadb.PersistentClient(path=os.getenv('WORK_DIR') + '/.clean_coder/chroma_base')
+    try:
+        return chroma_client.get_collection(name=collection_name)
+    except:
+        # print("Vector database does not exist. (Optional) create it by running src/tools/rag/write_descriptions.py to improve file research capabilities")
+        return False
 
 
 def vdb_available():
@@ -68,7 +66,7 @@ def retrieve(question: str) -> str:
 # New class added for binary ranking with lazy loading.
 class BinaryRanker:
     """
-    A binary document ranker that uses LLM to determine document relevance.
+    A binary document ranker that uses LLM to determine if a document is relevant.
     
     This class implements lazy loading of the LLM chain, meaning the chain
     is only initialized when the rank method is called. It evaluates whether

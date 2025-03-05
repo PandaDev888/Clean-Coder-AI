@@ -5,13 +5,15 @@ from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv, find_dotenv
 import chromadb
 import sys
+import questionary
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from src.utilities.util_functions import join_paths, read_coderrules
-from src.utilities.start_work_functions import CoderIgnore, file_folder_ignored
+from src.utilities.start_work_functions import file_folder_ignored
 from src.utilities.llms import init_llms_mini
 from src.tools.rag.code_splitter import split_code
 from src.utilities.print_formatters import print_formatted
-
+from src.tools.rag.retrieval import vdb_available
+from src.utilities.manager_utils import QUESTIONARY_STYLE
 
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
@@ -158,9 +160,30 @@ def upload_descriptions_to_vdb():
             )
 
 
-if __name__ == '__main__':
+def prompt_index_project_files():
+    """
+    Checks if the vector database (VDB) is available.
+    If not, prompts the user via questionary to index project files for better search.
+    On a "Yes" answer, triggers write_and_index_descriptions().
+    """
+    if not vdb_available():
+        answer = questionary.select(
+            "Do you want to index your project files for better search?",
+            choices=["Index", "Skip"],
+            style=QUESTIONARY_STYLE,
+            instruction="\nHint: Skip if you're running Clean Coder for the first time and testing, index if you're working on a real project"
+        ).ask()
+        if answer == "Index":
+            write_and_index_descriptions()
+
+
+def write_and_index_descriptions():
     #provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
     write_file_descriptions(subfolders_with_files=['/'])
     write_file_chunks_descriptions()
 
     upload_descriptions_to_vdb()
+
+
+if __name__ == "__main__":
+    write_and_index_descriptions()

@@ -34,7 +34,11 @@ class Manager:
     def __init__(self):
         load_dotenv(find_dotenv())
         self.work_dir = os.getenv("WORK_DIR")
+        # initial project setup
         set_up_dot_clean_coder_dir(self.work_dir)
+        setup_todoist_project_if_needed()
+
+
         self.tools = self.prepare_tools()
         self.llms = init_llms_medium_intelligence(tools=self.tools, run_name="Manager")
         self.manager = self.setup_workflow()
@@ -113,7 +117,6 @@ class Manager:
 
     def run(self):
         print_formatted("😀 Hello! I'm Manager agent. Let's plan your project together!", color="green")
-        setup_todoist_project_if_needed()
 
         messages = get_manager_messages(self.saved_messages_path)
         inputs = {"messages": messages}
