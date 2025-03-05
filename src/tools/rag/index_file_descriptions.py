@@ -171,7 +171,7 @@ def prompt_index_project_files():
             "Do you want to index your project files for better search?",
             choices=["Index", "Skip"],
             style=QUESTIONARY_STYLE,
-            instruction="\nHint: Skip if you're running Clean Coder for the first time and testing, index if you're working on a real project"
+            instruction="\nHint: Skip for testing Clean Coder; index for real projects."
         ).ask()
         if answer == "Index":
             write_and_index_descriptions()
