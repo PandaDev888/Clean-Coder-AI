@@ -6,6 +6,7 @@ from dotenv import load_dotenv, find_dotenv
 import chromadb
 import sys
 import questionary
+from rich.progress import Progress
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from src.utilities.util_functions import join_paths, read_coderrules
 from src.utilities.start_work_functions import file_folder_ignored
@@ -54,9 +55,9 @@ def collect_file_pathes(subfolders, work_dir):
     return allowed_files
 
 
-def write_file_descriptions(subfolders_with_files=['/']):
+def write_file_descriptions(subfolders_with_files=['/']): 
     all_files = collect_file_pathes(subfolders_with_files, work_dir)
-
+    progress = Progress()
     coderrules = read_coderrules()
 
     prompt = ChatPromptTemplate.from_template(
@@ -82,12 +83,13 @@ Go straight to the thing in description, without starting sentence.
 
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
     Path(description_folder).mkdir(parents=True, exist_ok=True)
-    # iterate over all files, take 8 files at once and descrive files in batch
     batch_size = 8
+    task_progress = progress.add_task("[gold1]Describing files (0/{})".format(len(all_files)), total=len(all_files))
+    progress.start()
+
     for i in range(0, len(all_files), batch_size):
         files_iteration = all_files[i:i + batch_size]
         descriptions = chain.batch([get_content(file_path) for file_path in files_iteration])
-        print(descriptions)
 
         for file_path, description in zip(files_iteration, descriptions):
             file_name = file_path.relative_to(work_dir).as_posix().replace('/', '=')
@@ -95,6 +97,9 @@ Go straight to the thing in description, without starting sentence.
 
             with open(output_path, 'w', encoding='utf-8') as out_file:
                 out_file.write(description)
+            files_processed = progress.tasks[task_progress].completed + 1
+            progress.update(task_progress, advance=1, description=f"[gold1]Describing files ({files_processed}/{len(all_files)})")
+    progress.stop()
 
 
 
