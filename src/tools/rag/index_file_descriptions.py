@@ -6,7 +6,6 @@ from dotenv import load_dotenv, find_dotenv
 import chromadb
 import sys
 import questionary
-from rich.progress import Progress
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from src.utilities.util_functions import join_paths, read_coderrules
 from src.utilities.start_work_functions import file_folder_ignored
@@ -15,10 +14,21 @@ from src.tools.rag.code_splitter import split_code
 from src.utilities.print_formatters import print_formatted
 from src.tools.rag.retrieval import vdb_available
 from src.utilities.manager_utils import QUESTIONARY_STYLE
+from tqdm import tqdm
 
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
 
+GOLDEN = "\033[38;5;220m"
+MAGENTA = "\033[95m"
+RESET = "\033[0m"
+
+# Customize tqdm's bar format with golden and magenta colors
+bar_format = (
+    f"{GOLDEN}{{desc}}: {MAGENTA}{{percentage:3.0f}}%{GOLDEN}|"
+    f"{{bar}}| {MAGENTA}{{n_fmt}}/{{total_fmt}} files "
+    f"{GOLDEN}[{{elapsed}}<{{remaining}}, {{rate_fmt}}{{postfix}}]{RESET}"
+)
 
 def is_code_file(file_path):
     # List of common code file extensions
@@ -57,7 +67,6 @@ def collect_file_pathes(subfolders, work_dir):
 
 def write_file_descriptions(subfolders_with_files=['/']): 
     all_files = collect_file_pathes(subfolders_with_files, work_dir)
-    progress = Progress()
     coderrules = read_coderrules()
 
     prompt = ChatPromptTemplate.from_template(
@@ -84,8 +93,7 @@ Go straight to the thing in description, without starting sentence.
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
     Path(description_folder).mkdir(parents=True, exist_ok=True)
     batch_size = 8
-    task_progress = progress.add_task("[gold1]Describing files (0/{})".format(len(all_files)), total=len(all_files))
-    progress.start()
+    pbar = tqdm(total=len(all_files), desc=f"[1/2]Describing files", bar_format=bar_format)
 
     for i in range(0, len(all_files), batch_size):
         files_iteration = all_files[i:i + batch_size]
@@ -97,9 +105,11 @@ Go straight to the thing in description, without starting sentence.
 
             with open(output_path, 'w', encoding='utf-8') as out_file:
                 out_file.write(description)
-            files_processed = progress.tasks[task_progress].completed + 1
-            progress.update(task_progress, advance=1, description=f"[gold1]Describing files ({files_processed}/{len(all_files)})")
-    progress.stop()
+
+        # Update by actual number of files processed in this batch
+        pbar.update(len(files_iteration))
+
+    pbar.close()  # Don't forget to close the progress bar when done
 
 
 
@@ -120,8 +130,10 @@ def write_file_chunks_descriptions(subfolders_with_files=['/']):
 
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
     Path(description_folder).mkdir(parents=True, exist_ok=True)
+
     # iterate chunks inside of the file
-    for file_path in all_files:
+    for file_path in tqdm(all_files, desc=f"[2/2]Describing file chunks",
+                 bar_format=bar_format):
         file_content = get_content(file_path)
         # get file extenstion
         extension = file_path.suffix.lstrip('.')
@@ -130,7 +142,6 @@ def write_file_chunks_descriptions(subfolders_with_files=['/']):
         if len(file_chunks) <= 1:
             continue
         descriptions = chain.batch([{'coderrules': coderrules, 'file_code': file_content, 'chunk_code': chunk} for chunk in file_chunks])
-        print(descriptions)
 
         for nr, description in enumerate(descriptions):
             file_name = f"{file_path.relative_to(work_dir).as_posix().replace('/', '=')}_chunk{nr}"
