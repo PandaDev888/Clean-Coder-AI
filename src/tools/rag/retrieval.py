@@ -1,5 +1,4 @@
 import os
-import cohere
 import chromadb
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
@@ -10,9 +9,6 @@ from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
-# cohere_key = os.getenv("COHERE_API_KEY")
-# if cohere_key:
-#     cohere_client = cohere.Client(cohere_key)
 collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
 
@@ -138,8 +134,6 @@ class BinaryRanker:
 if __name__ == "__main__":
     # Example usage of BinaryRanker for testing.
     question = "Some tool that can change files"
-
-    
     # Test the retrieve function
     results = retrieve(question)
     print("\n\n")
