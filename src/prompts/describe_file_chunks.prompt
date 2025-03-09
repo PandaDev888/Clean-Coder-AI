@@ -1,0 +1,19 @@
+First, get known with info about project (may be useful, may be not):
+'''
+{coderrules}
+'''
+
+For the reference, you have code of whole file here:
+'''
+{file_code}
+'''
+
+Describe provided function/file_chunk in 4 sentences or less, focusing only on important information from integration point of view.
+Write what function/file chunk is responsible for.
+
+Go straight to the thing in description, without starting sentence.
+
+Here is file chunk to describe:
+'''
+{chunk_code}
+'''

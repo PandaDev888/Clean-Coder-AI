@@ -3,12 +3,6 @@ from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
 
-
-python_splitter = RecursiveCharacterTextSplitter.from_language(
-    language=Language.PYTHON, chunk_size=1000, chunk_overlap=0
-)
-
-
 code = """
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
@@ -310,9 +304,60 @@ def load_system_message():
             project_rules=read_coderrules()
     ))
 """
+extension_to_language = {
+    'cpp': 'cpp',
+    'go': 'go',
+    'java': 'java',
+    'kt': 'kotlin',
+    'js': 'js',
+    'jsx': 'js',
+    'vue': 'js',
+    'ts': 'ts',
+    'tsx': 'ts',
+    'mjs': 'js',
+    'cjs': 'js',
+    'php': 'php',
+    'proto': 'proto',
+    'py': 'python',
+    'rst': 'rst',
+    'rb': 'ruby',
+    'rs': 'rust',
+    'scala': 'scala',
+    'swift': 'swift',
+    'md': 'markdown',
+    'tex': 'latex',
+    'html': 'html',
+    'sol': 'sol',
+    'cs': 'csharp',
+    'cob': 'cobol',
+    'c': 'c',
+    'lua': 'lua',
+    'pl': 'perl',
+    'hs': 'haskell',
+    'ex': 'elixir',
+    'ps1': 'powershell',
+    'json': 'json',
+    'xml': 'xml',
+    'bash': 'powershell',
+    'zsh': 'powershell',
+    'sh': 'powershell',
+    'dockerfile': 'proto',
+}
 
-splitted = python_splitter.split_text(code)
-print(RecursiveCharacterTextSplitter.get_separators_for_language(Language.PYTHON))
-for doc in splitted:
-    print(doc)
-    print("###")
+
+def split_code(code: str, extension: str, chunk_size: int = 1000):
+    """Splits code for smaller elements as functions. That allows to describe functions for semantic retrieval tool."""
+    language = extension_to_language.get(extension)
+    if not language:
+        return []
+    splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language(language), chunk_size=chunk_size, chunk_overlap=0
+    )
+    return splitter.split_text(code)
+
+
+if __name__ == "__main__":
+    splitted = split_code(code, "py")
+    for doc in splitted:
+        print(doc)
+        print("###")

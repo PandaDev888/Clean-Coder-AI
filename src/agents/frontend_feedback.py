@@ -1,6 +1,6 @@
 import os
 from langchain_core.messages import HumanMessage
-from src.utilities.llms import init_llms
+from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.start_work_functions import read_frontend_feedback_story
 import base64
 import textwrap
@@ -9,7 +9,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-llms = init_llms(run_name="Frontend Feedback")
+llms = init_llms_medium_intelligence(run_name="Frontend Feedback")
 
 llm = llms[0].with_fallbacks(llms[1:])
 

@@ -6,7 +6,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
-from src.utilities.llms import init_llms
+from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.util_functions import join_paths, read_coderrules, list_directory_tree
 from src.utilities.start_project_functions import create_project_plan_file
 from langchain_core.output_parsers import StrOutputParser
@@ -41,7 +41,7 @@ QUESTIONARY_STYLE = questionary.Style([
     ('highlighted', 'fg:green bold'),   # Highlighted choice
     ('selected', 'fg:green bold'),      # Selected choice
     ('separator', 'fg:magenta'),        # Separator between choices
-    ('instruction', 'fg:white'),        # Additional instructions
+    ('instruction', 'fg:#FFD700'),      # Additional instructions now in golden yellow (hex color)
 ])
 
 
@@ -52,7 +52,7 @@ with open(f"{parent_dir}/prompts/actualize_progress_description.prompt", "r") as
 with open(f"{parent_dir}/prompts/manager_progress.prompt", "r") as f:
     tasks_progress_template = f.read()
 
-llms = init_llms(run_name="Progress description")
+llms = init_llms_medium_intelligence(run_name="Progress description")
 llm = llms[0].with_fallbacks(llms[1:])
 
 
@@ -76,6 +76,7 @@ def fetch_epics():
 
 
 def fetch_tasks():
+    print("pies")
     return todoist_api.get_tasks(project_id=os.getenv('TODOIST_PROJECT_ID'))
 
 

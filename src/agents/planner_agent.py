@@ -7,7 +7,7 @@ from src.utilities.util_functions import check_file_contents, convert_images, ge
 from src.utilities.langgraph_common_functions import after_ask_human_condition
 from src.utilities.user_input import user_input
 from src.utilities.graphics import LoadingAnimation
-from src.utilities.llms import init_llms_high_intelligence, init_llms_mini, init_llms
+from src.utilities.llms import init_llms_high_intelligence, init_llms_mini, init_llms_medium_intelligence
 import os
 
 
@@ -15,7 +15,7 @@ load_dotenv(find_dotenv())
 
 llms_planners = init_llms_high_intelligence(run_name="Planner")
 llm_strong = llms_planners[0].with_fallbacks(llms_planners[1:])
-llms_middle_strength = init_llms(run_name="Plan finalizer")
+llms_middle_strength = init_llms_medium_intelligence(run_name="Plan finalizer")
 llm_middle_strength = llms_middle_strength[0].with_fallbacks(llms_middle_strength[1:])
 llms_controller = init_llms_mini(run_name="Plan Files Controller")
 llm_controller = llms_controller[0].with_fallbacks(llms_controller[1:])
@@ -67,7 +67,7 @@ def call_advanced_planner(state):
     logic_pseudocode = llm_strong.invoke(logic_planner_messages)
     print_formatted("\nIntermediate planning done. Finalizing plan...", color="light_magenta")
     if os.getenv("SHOW_LOGIC_PLAN"):
-        print(logic_pseudocode.content)
+        print_formatted(logic_pseudocode.content, color="light_yellow")
 
     state["plan_finalizer_messages"].append(HumanMessage(content=f"Logic pseudocode plan to follow:\n\n{logic_pseudocode.content}"))
     plan_finalizer_messages = state["plan_finalizer_messages"]

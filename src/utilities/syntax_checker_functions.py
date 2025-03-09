@@ -216,355 +216,134 @@ def parse_yaml(yaml_string):
 
 if __name__ == "__main__":
     code = """
-"use client";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import ProfileCard from "./components/ProfileCard";
-import PopupNotification from "./components/PopupNotification";
-
-interface ProfileItem {
-  uuid: string;
-  full_name: string;
-  short_bio?: string;
-  bio?: string;
-}
-
-export default function Home() {
-  const [activeTab, setActiveTab] = useState<'Explore' | 'Received' | 'Sent' | 'Matches'>('Explore');
-  const [exploreItems, setExploreItems] = useState<ProfileItem[]>([]);
-  const [receivedItems, setReceivedItems] = useState<ProfileItem[]>([]);
-  const [sentItems, setSentItems] = useState<ProfileItem[]>([]);
-  const [matchedItems, setMatchedItems] = useState<ProfileItem[]>([]);
-  const [error, setError] = useState('');
-  const [notification, setNotification] = useState<{ message: string, type: 'positive' | 'negative' } | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [iconLoading, setIconLoading] = useState(true);
-  const [skip, setSkip] = useState(0);
-  const [limit] = useState(10);
-  const [totalExploreItems, setTotalExploreItems] = useState(0);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
-
-  function goToProfile(uuid: string) {
-    const userRole = localStorage.getItem('role');
-    if (userRole === "intern") {
-      router.push(`/campaign/${uuid}`);
-    } else {
-      router.push(`/intern/${uuid}`);
-    }
-  }
-
-  async function handleConnect(uuid: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/create/${uuid}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to create invitation');
-      setNotification({ message: 'Invitation sent successfully', type: 'positive' });
-
-      // Optimistically update the explore list
-      setExploreItems((prevItems) => prevItems.filter(item => item.uuid !== uuid));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-
-  async function handleAccept(invitationId: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/accept/${invitationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to accept invitation');
-      setNotification({ message: 'Invitation accepted successfully', type: 'positive' });
-      setReceivedItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-
-  async function handleReject(invitationId: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/reject/${invitationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to reject invitation');
-      setNotification({ message: 'Invitation rejected successfully', type: 'positive' });
-      setReceivedItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-
-  async function handleCancel(invitationId: string) {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/cancel/${invitationId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to cancel invitation');
-      setNotification({ message: 'Invitation canceled successfully', type: 'positive' });
-      setSentItems((prevItems) => prevItems.filter(item => item.invitation_id !== invitationId));
-    } catch (err: any) {
-      setNotification({ message: err.message, type: 'negative' });
-    } finally {
-      setLoading(false);
-      setTimeout(() => setNotification(null), 3000);
-    }
-  }
-  async function fetchExplore() {
-    try {
-      const userRole = localStorage.getItem('role');
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
-      if (!userRole) {
-        throw new Error('User role not found');
-      }
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}${
-        userRole === "intern"
-          ? '/fetch-campaigns-for-main-page'
-          : '/fetch-interns-for-main-page'
-      }?skip=${skip}&limit=${limit}`;
-
-      console.log('Fetching from URL:', url);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to fetch explore items');
-      }
-
-      const data = await response.json();
-      setExploreItems(prev => [...prev, ...(data.items || [])]);
-      setTotalExploreItems(data.total || 0);
-    } catch (err: any) {
-      console.error('Fetch error:', err);
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-
-  async function fetchReceived() {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/received`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch received invitations');
-      const data = await response.json();
-      setReceivedItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-
-  async function fetchSent() {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/sent`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch sent invitations');
-      const data = await response.json();
-      setSentItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-  async function fetchMatches() {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Authentication token not found');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch matches');
-      const data = await response.json();
-      setMatchedItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  }
-
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Please login first');
-      return;
-    }
-    // Initial load of the first page
-    fetchExplore().then(() => setSkip(prev => prev + limit));
-  }, []);
-
-  // Infinite scroll: Observe the sentinel at the bottom of the Explore list
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      // If sentinel is in view and we have more items to fetch
-      if (entry.isIntersecting && skip < totalExploreItems) {
-        // Fetch the next batch
-        fetchExplore().then(() => {
-          setSkip(prev => prev + limit);
-        });
-      }
-    });
-
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current);
-    }
-
-    // Cleanup
-    return () => {
-      if (sentinelRef.current) {
-        observer.unobserve(sentinelRef.current);
-      }
-    };
-  }, [skip, totalExploreItems, limit]);
-
-  const handleTabClick = (tab: 'Explore' | 'Received' | 'Sent' | 'Matches') => {
-    setActiveTab(tab);
-    if (tab === 'Explore') fetchExplore();
-    if (tab === 'Received') fetchReceived();
-    if (tab === 'Sent') fetchSent();
-    if (tab === 'Matches') fetchMatches();
-  };
-
-  let listToRender: ProfileItem[] = [];
-  if (activeTab === 'Explore') listToRender = exploreItems;
-  if (activeTab === 'Received') listToRender = receivedItems;
-  if (activeTab === 'Sent') listToRender = sentItems;
-  if (activeTab === 'Matches') listToRender = matchedItems;
-  return (
-    <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex items-center justify-between mb-8">
-          <button className="w-10 h-10 rounded-full bg-[#EEEEEE] flex items-center justify-center">
-            <Image 
-              src="/profile.svg" 
-              alt="Profile" 
-              width={24} 
-              height={24} 
-              onError={(e) => e.currentTarget.src = '/fallback-icon.svg'} // Fallback icon
-            />
-          </button>
-        <h1 className="text-xl font-semibold">Glovn</h1>
-      </header>
-
-      <nav className="flex p-1 mb-8 justify-center bg-[#F5F5F5]/40 rounded-full max-w-md mx-auto">
-        {["Explore", "Received", "Sent", "Matches"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => handleTabClick(tab as 'Explore' | 'Received' | 'Sent' | 'Matches')}
-            className={`flex-1 px-6 py-2.5 rounded-full text-sm transition-all duration-300 ${
-              activeTab === tab
-                ? "bg-white font-medium text-black shadow-sm text-[15px]"
-                : "text-gray-400/80 hover:text-gray-500"
-            }`}
+// Scale indicator component showing agreement levels from 1-5
+const ScaleIndicator = () => (
+  <div className="flex flex-col items-center mb-12">
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="flex justify-between text-sm text-gray-600 mb-1">
+        <span>Highly disagree</span>
+        <span>Highly agree</span>
+      </div>
+      <div className="relative w-full h-[2px] bg-gray-200 mb-8">
+        {Array.from({ length: 5 }, (_, i) => i + 1).map((num) => (
+          <div
+            key={num}
+            className="absolute -translate-x-1/2"
+            style={{ left: `${((num - 1) * 100) / 4}%` }}
           >
-            {tab}
-          </button>
+            <div className="absolute -top-3 w-[2px] h-[6px] bg-gray-300" />
+            <div className="absolute top-4 text-sm text-gray-600">
+              {num}
+            </div>
+          </div>
         ))}
-      </nav>
+      </div>
+    </div>
+  </div>
+);
 
-      {error && (
-        <div className="mb-6 py-2 px-4 w-full text-center bg-[#FFF2F2] text-[#FF0000] text-[14px] rounded-full">
-          {error}
-        </div>
-      )}
-
-      <section className="space-y-4">
-        {listToRender.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">No items found</div>
-        ) : (
-          listToRender.map((item) => (
-            <ProfileCard
-              key={item.uuid}
-              item={item}
-              onConnect={handleConnect}
-              onAccept={handleAccept}
-              onReject={handleReject}
-              onCancel={handleCancel}
-              activeTab={activeTab}
-            />
-          ))
-        )}
-      </section>
-
-      {/*<div ref={sentinelRef} style={{ height: "1px" }} />*/}
-      {notification && (
-        <PopupNotification
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
-    </main>
+function NavHeader() {
+  const router = useRouter();
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex items-center justify-start w-full mb-2">
+        <button
+          className="text-gray-700 hover:text-gray-900 mr-4"
+          onClick={() => router.back()}
+          aria-label="Go back"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+        <h1 className="flex-grow text-center text-xl font-bold">Survey Results</h1>
+      </div>
+    </div>
   );
 }
 
+export default function Page({ params }: { params: Promise<{ uuid: string }> }) {
+  const { uuid } = React.use(params);
+  const [profile, setProfile] = useState<any>(null);
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/profile/${uuid}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile data');
+        }
+        const data = await response.json();
+        setProfile(data);
+      } catch (err: any) {
+        console.error('Error details:', err);
+        setError(err.message || 'An error occurred');
+      }
+    };
+
+    fetchProfile();
+  }, [uuid]);
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="p-4">
+        Loading profile data...
+      </div>
+    );
+  }
+
+  if (!profile.survey_data) {
+    return <div className="p-4 text-gray-700">No survey data available.</div>;
+  }
+
+  return (
+    <div className="px-4 py-2 text-gray-900 max-w-4xl mx-auto">
+      <div className="mb-8">
+        <NavHeader />
+        <ScaleIndicator />
+      </div>
+
+      {profile.survey_data.map((category) => (
+        <div key={category.name} className="mb-10">
+          <h2 className="text-base font-semibold text-gray-800 mb-4">
+            {category.name}
+          </h2>
+          {category.statements.map((statement: any) => (
+            <div key={statement.id} className="flex items-start py-4 border-b border-gray-200 last:border-b-0">
+              <span className="text-2xl font-semibold text-gray-900 w-8 text-center">
+                {statement.value}
+              </span>
+              <p className="text-base text-gray-700 leading-relaxed flex-1 ml-6">
+                {statement.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
 """
     print(parse_tsx(code))
