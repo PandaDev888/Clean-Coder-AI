@@ -10,6 +10,9 @@ from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
 
 
 def print_formatted_content_planner(content):
+    """
+    Prints output of planner module. Highlights code snippets in diff.
+    """
     parts = content.split('```')
     outside_texts = parts[::2]
     code_snippets = parts[1::2]

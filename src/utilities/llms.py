@@ -75,7 +75,7 @@ def init_llms_mini(tools=None, run_name="Clean Coder", temp=0):
 def init_llms_high_intelligence(tools=None, run_name="Clean Coder", temp=0.2):
     llms = []
     if os.getenv("ANTHROPIC_API_KEY"):
-        llms.append(ChatAnthropic(model='claude-3-7-sonnet-latest', temperature=temp, timeout=60, max_tokens=2048))
+        llms.append(ChatAnthropic(model='claude-3-7-sonnet-latest', temperature=temp, timeout=60, max_tokens=4096))
     if getenv("OPENROUTER_API_KEY"):
         llms.append(llm_open_router("anthropic/claude-3.7-sonnet"))
     if os.getenv("OPENAI_API_KEY"):
