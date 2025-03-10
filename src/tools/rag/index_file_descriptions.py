@@ -180,14 +180,23 @@ def prompt_index_project_files():
     """
     Checks if the vector database (VDB) is available.
     If not, prompts the user via questionary to index project files for better search.
-    On a "Yes" answer, triggers write_and_index_descriptions().
+    Then asks if yous sure he want to do indexing. Then triggers write_and_index_descriptions().
     """
-    if not vdb_available():
+    if vdb_available():
+        return
+    answer = questionary.select(
+        "Do you want to index your project files for improving file search?",
+        choices=["Proceed", "Skip"],
+        style=QUESTIONARY_STYLE,
+        instruction="\nHint: Skip for testing Clean Coder; index for real projects."
+    ).ask()
+    if answer == "Proceed":
+        nr_of_files = len(collect_file_pathes(['/'], work_dir))
         answer = questionary.select(
-            "Do you want to index your project files for better search?",
+            f"Going to index {nr_of_files} files. Indexing could be time-consuming and costly. Are you ready to go?",
             choices=["Index", "Skip"],
             style=QUESTIONARY_STYLE,
-            instruction="\nHint: Skip for testing Clean Coder; index for real projects."
+            instruction="\nHint: Ensure you provided all files and directories you don't want to index in {WORK_DIR}/.clean_coder/.coderignore to avoid describing trashy files."
         ).ask()
         if answer == "Index":
             write_and_index_descriptions()
