@@ -30,6 +30,7 @@ bar_format = (
     f"{GOLDEN}[{{elapsed}}<{{remaining}}, {{rate_fmt}}{{postfix}}]{RESET}"
 )
 
+
 def is_code_file(file_path):
     # List of common code file extensions
     code_extensions = {
@@ -46,46 +47,34 @@ def get_content(file_path):
     content = file_path.name + '\n\n' + content
     return content
 
-def collect_file_pathes(subfolders, work_dir):
+
+def collect_file_pathes(work_dir):
     """
     Collect and return a list of allowed code files from the given subfolders
     under the work_dir according to is_code_file criteria and .coderignore patterns.
     """
     allowed_files = []
-    for folder in subfolders:
-        for root, _, files in os.walk(work_dir + folder):
-            for file in files:
-                file_path = Path(root) / file
-                if not is_code_file(file_path):
-                    continue
-                relative_path_str = file_path.relative_to(work_dir).as_posix()
-                if file_folder_ignored(relative_path_str):
-                    continue
-                allowed_files.append(file_path)
+    for root, _, files in os.walk(work_dir):
+        for file in files:
+            file_path = Path(root) / file
+            if not is_code_file(file_path):
+                continue
+            relative_path_str = file_path.relative_to(work_dir).as_posix()
+            if file_folder_ignored(relative_path_str):
+                continue
+            allowed_files.append(file_path)
     return allowed_files
 
 
-def write_file_descriptions(subfolders_with_files=['/']): 
-    all_files = collect_file_pathes(subfolders_with_files, work_dir)
+def write_file_descriptions(file_list):
+    """Writes descriptions of whole files in codebase. Gets list of files to describe and describes files in batches."""
     coderrules = read_coderrules()
 
-    prompt = ChatPromptTemplate.from_template(
-f"""First, get known with info about project (may be useful, may be not):
+    grandparent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    with open(f"{grandparent_dir}/prompts/describe_files.prompt", "r") as f:
+        files_describe_template = f.read()
+    prompt = ChatPromptTemplate.from_template(files_describe_template)
 
-'''
-{coderrules}
-'''
-
-Describe the code in 4 sentences or less, focusing only on important information from integration point of view.
-Write what file is responsible for.
-
-Go straight to the thing in description, without starting sentence.
-
-'''
-{{code}}
-'''
-"""
-    )
     llms = init_llms_mini(tools=[], run_name='File Describer')
     llm = llms[0].with_fallbacks(llms[1:])
     chain = prompt | llm | StrOutputParser()
@@ -93,11 +82,11 @@ Go straight to the thing in description, without starting sentence.
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
     Path(description_folder).mkdir(parents=True, exist_ok=True)
     batch_size = 8
-    pbar = tqdm(total=len(all_files), desc=f"[1/2]Describing files", bar_format=bar_format)
+    pbar = tqdm(total=len(file_list), desc=f"[1/2]Describing files", bar_format=bar_format)
 
-    for i in range(0, len(all_files), batch_size):
-        files_iteration = all_files[i:i + batch_size]
-        descriptions = chain.batch([get_content(file_path) for file_path in files_iteration])
+    for i in range(0, len(file_list), batch_size):
+        files_iteration = file_list[i:i + batch_size]
+        descriptions = chain.batch([{'coderrules': coderrules, 'code': get_content(file_path)} for file_path in files_iteration])
 
         for file_path, description in zip(files_iteration, descriptions):
             file_name = file_path.relative_to(work_dir).as_posix().replace('/', '=')
@@ -112,11 +101,9 @@ Go straight to the thing in description, without starting sentence.
     pbar.close()  # Don't forget to close the progress bar when done
 
 
-
-def write_file_chunks_descriptions(subfolders_with_files=['/']):
-    """Writes descriptions of whole file chunks in codebase. Gets list of whole files to describe, divides files
+def write_file_chunks_descriptions(file_list):
+    """Writes descriptions of file chunks in codebase. Gets list of whole files to describe, divides files
     into chunks and describes each chunk separately."""
-    all_files = collect_file_pathes(subfolders_with_files, work_dir)
     coderrules = read_coderrules()
 
     grandparent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -132,7 +119,7 @@ def write_file_chunks_descriptions(subfolders_with_files=['/']):
     Path(description_folder).mkdir(parents=True, exist_ok=True)
 
     # iterate chunks inside of the file
-    for file_path in tqdm(all_files, desc=f"[2/2]Describing file chunks",
+    for file_path in tqdm(file_list, desc=f"[2/2]Describing file chunks",
                  bar_format=bar_format):
         file_content = get_content(file_path)
         # get file extenstion
@@ -157,8 +144,17 @@ def upload_descriptions_to_vdb():
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
     collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
+    from chromadb.utils import embedding_functions
+    # embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+    #     model_name="all-mpnet-base-v2"
+    # )
+    embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                model_name="text-embedding-3-small"
+            )
     collection = chroma_client.get_or_create_collection(
-        name=collection_name
+        name=collection_name,
+        #embedding_function=embedding_function
     )
 
     # read files and upload to base
@@ -191,24 +187,24 @@ def prompt_index_project_files():
         instruction="\nHint: Skip for testing Clean Coder; index for real projects."
     ).ask()
     if answer == "Proceed":
-        nr_of_files = len(collect_file_pathes(['/'], work_dir))
+        all_files = collect_file_pathes(work_dir)
         answer = questionary.select(
-            f"Going to index {nr_of_files} files. Indexing could be time-consuming and costly. Are you ready to go?",
+            f"Going to index {len(all_files)} files. Indexing could be time-consuming and costly. Are you ready to go?",
             choices=["Index", "Skip"],
             style=QUESTIONARY_STYLE,
             instruction="\nHint: Ensure you provided all files and directories you don't want to index in {WORK_DIR}/.clean_coder/.coderignore to avoid describing trashy files."
         ).ask()
         if answer == "Index":
-            write_and_index_descriptions()
+            write_and_index_descriptions(all_files)
 
 
-def write_and_index_descriptions():
+def write_and_index_descriptions(file_list):
     #provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
-    write_file_descriptions(subfolders_with_files=['/'])
-    write_file_chunks_descriptions()
+    write_file_descriptions(file_list)
+    write_file_chunks_descriptions(file_list)
 
     upload_descriptions_to_vdb()
 
 
 if __name__ == "__main__":
-    write_and_index_descriptions()
+    upload_descriptions_to_vdb()
