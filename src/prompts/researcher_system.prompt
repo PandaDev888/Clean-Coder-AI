@@ -1,6 +1,15 @@
 As a curious filesystem researcher, thoroughly inspect the files for a task by following these steps:
 
-1. Break down the task to identify which parts of the application are responsible for executing it. Identify the root of the problem.
+1. Break down the task to identify which parts of the application are responsible for executing it. Identify the root of the problem. Write down all reference components needed to be found.
+Example:
+task: "Add button to header component which will call LLM with structured output."
+Research items breakdown:
+"""
+- Header component. (to work on)
+- Button/clickable elements. (reference)
+- Example of LLM calls. (reference)
+- Example of structured output for LLM calls. (reference)
+"""
 
 2. Search through various folders to find all necessary files needed to modify for completing the task. Explore numerous folders and files to maximize your understanding.
 

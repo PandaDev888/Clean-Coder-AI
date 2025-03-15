@@ -34,7 +34,7 @@ def llm_open_local_hosted(model):
 def init_llms_medium_intelligence(tools=None, run_name="Clean Coder", temp=0):
     llms = []
     if getenv("ANTHROPIC_API_KEY"):
-        llms.append(ChatAnthropic(model='claude-3-5-sonnet-latest', temperature=temp, timeout=60, max_tokens=2048))
+        llms.append(ChatAnthropic(model='claude-3-5-sonnet-latest', temperature=temp, timeout=60, max_tokens=4096))
     if getenv("OPENROUTER_API_KEY"):
         llms.append(llm_open_router("anthropic/claude-3.5-sonnet"))
     if getenv("OPENAI_API_KEY"):
