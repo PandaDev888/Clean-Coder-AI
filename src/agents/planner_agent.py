@@ -43,7 +43,7 @@ animation = LoadingAnimation()
 # node functions
 def call_simple_planer(state):
     messages = state["messages"]
-    print_formatted(get_joke(), color="green")
+    print_formatted(get_joke(), color="magenta")
     animation.start()
     response = llm_strong.invoke(messages)
     animation.stop()
@@ -62,7 +62,7 @@ def call_simple_planer(state):
 
 def call_advanced_planner(state):
     logic_planner_messages = state["logic_planner_messages"]
-    print_formatted(get_joke(), color="green")
+    print_formatted(get_joke(), color="magenta")
     animation.start()
     logic_pseudocode = llm_strong.invoke(logic_planner_messages)
     print_formatted("\nIntermediate planning done. Finalizing plan...", color="light_magenta")

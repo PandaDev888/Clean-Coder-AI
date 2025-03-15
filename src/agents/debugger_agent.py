@@ -16,6 +16,7 @@ from src.utilities.util_functions import (
     bad_tool_call_looped,
     read_coderrules,
     convert_images,
+    list_directory_tree,
 )
 from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.langgraph_common_functions import (
@@ -150,6 +151,7 @@ class Debugger():
         inputs = {"messages": [
             self.system_message,
             HumanMessage(content=f"Task: {task}\n\n######\n\nPlan which developer implemented already:\n\n{plan}"),
+            HumanMessage(content=list_directory_tree(self.work_dir)),
             HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True),
             HumanMessage(content=f"Human feedback: {self.human_feedback}"),
         ]}
