@@ -15,10 +15,10 @@ from src.utilities.util_functions import (
 from src.utilities.langgraph_common_functions import (
     call_model, call_tool, multiple_tools_msg, no_tools_msg, agent_looped_human_help
 )
+from src.utilities.objects import CodeFile
 
 
 load_dotenv(find_dotenv())
-
 
 @tool
 def final_response_executor(test_instruction):
@@ -64,8 +64,15 @@ class Executor():
 
     # node functions
     def call_model_executor(self, state):
+        """
+        Calls of Executor's LLM and after receiving its response calls tools. Next performs alluaxury actions
+        depending on last message from LLM. After it exchanges contents of files in agent's context to provide him with
+        updated version after inserting changes into file.
+        """
         state = call_model(state, self.llms)
         state = call_tool(state, self.tools)
+
+        # auxiliary actions depending on tools called
         messages = [msg for msg in state["messages"] if msg.type == "ai"]
         last_ai_message = messages[-1]
         if len(last_ai_message.tool_calls) > 1:
@@ -76,8 +83,17 @@ class Executor():
             state["messages"].append(HumanMessage(content=no_tools_msg))
         for tool_call in last_ai_message.tool_calls:
             if tool_call["name"] == "create_file_with_code":
-                self.files.add(tool_call["args"]["filename"])
+                new_file = CodeFile(tool_call["args"]["filename"], is_modified=True)
+                self.files.add(new_file)
+            elif tool_call["name"] in ["replace_code", "insert_code"]:
+                filename = tool_call["args"]["filename"]
+                for file in self.files:
+                    if file.filename == filename:
+                        file.is_modified = True
+                        break
+
         state = exchange_file_contents(state, self.files, self.work_dir)
+
         return state
 
     # Conditional edge functions

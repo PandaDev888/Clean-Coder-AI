@@ -1,4 +1,5 @@
 from typing import TypedDict, Sequence, List
+from src.utilities.objects import CodeFile
 from typing_extensions import Annotated
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import StateGraph
@@ -106,7 +107,7 @@ class Researcher():
             "messages": [SystemMessage(content=system_message), HumanMessage(content=list_directory_tree(work_dir))]}
         researcher_response = self.researcher.invoke(inputs, {"recursion_limit": 100})["messages"][-3]
         response_args = researcher_response.tool_calls[0]["args"]
-        text_files = set(response_args["files_to_work_on"] + response_args["reference_files"])
+        text_files = set(CodeFile(f) for f in response_args["files_to_work_on"] + response_args["reference_files"])
         image_paths = response_args["template_images"]
 
         return text_files, image_paths

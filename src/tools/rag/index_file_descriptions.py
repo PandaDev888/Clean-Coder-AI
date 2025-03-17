@@ -15,6 +15,9 @@ from src.utilities.print_formatters import print_formatted
 from src.tools.rag.retrieval import vdb_available
 from src.utilities.manager_utils import QUESTIONARY_STYLE
 from tqdm import tqdm
+import glob
+from chromadb.utils import embedding_functions
+
 
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
@@ -30,6 +33,13 @@ bar_format = (
     f"{GOLDEN}[{{elapsed}}<{{remaining}}, {{rate_fmt}}{{postfix}}]{RESET}"
 )
 
+# embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+#     model_name="all-mpnet-base-v2"
+# )
+embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model_name="text-embedding-3-small"
+)
 
 def is_code_file(file_path):
     # List of common code file extensions
@@ -144,14 +154,6 @@ def upload_descriptions_to_vdb():
     chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
     collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
-    from chromadb.utils import embedding_functions
-    # embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-    #     model_name="all-mpnet-base-v2"
-    # )
-    embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=os.getenv("OPENAI_API_KEY"),
-                model_name="text-embedding-3-small"
-            )
     collection = chroma_client.get_or_create_collection(
         name=collection_name,
         #embedding_function=embedding_function
@@ -159,17 +161,48 @@ def upload_descriptions_to_vdb():
 
     # read files and upload to base
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+    docs = []
+    ids = []
     for root, _, files in os.walk(description_folder):
         for file in files:
             file_path = Path(root) / file
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
-            collection.upsert(
-                documents=[
-                    content
-                ],
-                ids=[file_path.name.replace('=', '/').removesuffix(".txt")],
-            )
+            docs.append(content)
+            ids.append(file_path.name.replace('=', '/').removesuffix(".txt"))
+        # upsert to vector storage by butches of 100
+        if len(docs) >= 100:
+            collection.upsert(documents=docs, ids=ids)
+            # Clear the batch lists
+            docs = []
+            ids = []
+    # upsert remaining docs
+    collection.upsert(documents=docs, ids=ids)
+
+
+def upsert_file_list(file_list):
+    chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
+    collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
+    collection = chroma_client.get_or_create_collection(
+        name=collection_name,
+        #embedding_function=embedding_function
+    )
+
+    descriptions_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+
+    docs = []
+    ids = []
+    # open every file starting with descriptions_folder/file and add content to list
+    for file_name in file_list:
+        pattern = os.path.join(descriptions_folder, f"{file_name.removesuffix('.txt')}*")
+        for file_path in glob.glob(pattern):
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+            file_path = Path(file_path)
+            docs.append(content)
+            ids.append(file_path.name.replace('=', '/').removesuffix(".txt"))
+
+    collection.upsert(documents=docs, ids=ids)
 
 
 def prompt_index_project_files():

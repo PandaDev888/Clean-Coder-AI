@@ -17,7 +17,8 @@ from src.utilities.user_input import user_input
 from src.utilities.start_project_functions import set_up_dot_clean_coder_dir
 from src.utilities.util_functions import create_frontend_feedback_story
 from concurrent.futures import ThreadPoolExecutor
-from src.tools.rag.index_file_descriptions import prompt_index_project_files
+from src.tools.rag.index_file_descriptions import prompt_index_project_files, upsert_file_list
+from src.tools.rag.retrieval import vdb_available
 
 
 use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
@@ -25,32 +26,38 @@ use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 
 def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False):
     researcher = Researcher(work_dir)
-    file_paths, image_paths = researcher.research_task(task)
+    files, image_paths = researcher.research_task(task)
     documentation = None
     if doc_harvest:
         harvester = Doc_harvester()
         documentation = harvester.find_documentation(task, work_dir)
 
-    plan = planning(task, file_paths, image_paths, work_dir, documentation=documentation)
+    plan = planning(task, files, image_paths, work_dir, documentation=documentation)
 
-    executor = Executor(file_paths, work_dir)
+    executor = Executor(files, work_dir)
 
     playwright_codes = None
     if use_frontend_feedback:
         create_frontend_feedback_story()
         with ThreadPoolExecutor() as executor_thread:
             future = executor_thread.submit(write_screenshot_codes, task, plan, work_dir)
-            file_paths = executor.do_task(task, plan)
+            files = executor.do_task(task, plan)
             playwright_codes = future.result()
     else:
-        file_paths = executor.do_task(task, plan)
+        files = executor.do_task(task, plan)
 
     human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed. ")
     if human_message in ['o', 'ok']:
+        # update descriptions for changed files
+        if vdb_available():
+            upsert_file_list([file for file in files if file.is_modified])
         return
     debugger = Debugger(
-        file_paths, work_dir, human_message,image_paths,  playwright_codes)
-    debugger.do_task(task, plan)
+        files, work_dir, human_message,image_paths,  playwright_codes)
+    files = debugger.do_task(task, plan)
+    # update descriptions for changed files
+    if vdb_available():
+        upsert_file_list([file for file in files if file.is_modified])
 
 
 if __name__ == "__main__":
