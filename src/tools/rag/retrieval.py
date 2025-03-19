@@ -29,7 +29,7 @@ def get_collection():
         model_name="text-embedding-3-small"
     )
     try:
-        return chroma_client.get_collection(name=collection_name, embedding_function=embedding_function)
+        return chroma_client.get_collection(name=collection_name)#, embedding_function=embedding_function)
     except:
         # print("Vector database does not exist. (Optional) create it by running src/tools/rag/write_descriptions.py to improve file research capabilities")
         return False
