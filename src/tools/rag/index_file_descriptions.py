@@ -193,11 +193,11 @@ def upsert_file_list(file_list):
     docs = []
     ids = []
     # open every file starting with descriptions_folder/file and add content to list
-    for file_name in file_list:
-        pattern = os.path.join(descriptions_folder, f"{file_name.removesuffix('.txt')}*")
+    for file in file_list:
+        pattern = os.path.join(descriptions_folder, f"{file.filename.removesuffix('.txt')}*")
         for file_path in glob.glob(pattern):
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()
+            with open(file_path, 'r', encoding='utf-8') as file_content:
+                content = file_content.read()
             file_path = Path(file_path)
             docs.append(content)
             ids.append(file_path.name.replace('=', '/').removesuffix(".txt"))
