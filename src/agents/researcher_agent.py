@@ -9,7 +9,7 @@ from src.tools.tools_coder_pipeline import (
      prepare_see_file_tool, prepare_list_dir_tool, retrieve_files_by_semantic_query
 )
 from src.tools.rag.retrieval import vdb_available
-from src.utilities.util_functions import list_directory_tree, read_coderrules
+from src.utilities.util_functions import list_directory_tree, read_coderrules, load_prompt
 from src.utilities.langgraph_common_functions import (
     call_model, call_tool, ask_human, after_ask_human_condition, no_tools_msg
 )
@@ -41,9 +41,7 @@ class AgentState(TypedDict):
     messages: Sequence[BaseMessage]
 
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-with open(f"{parent_dir}/prompts/researcher_system.prompt", "r") as f:
-    system_prompt_template = f.read()
+
 
 
 # Logic for conditional edges
@@ -102,6 +100,7 @@ class Researcher():
         print_formatted("Researcher starting its work", color="green")
         print_formatted("👋 Hey! I'm looking for files on which we will work on together!", color="light_blue")
 
+        system_prompt_template = load_prompt("researcher_system")
         system_message = system_prompt_template.format(task=task, project_rules=read_coderrules())
         inputs = {
             "messages": [SystemMessage(content=system_message), HumanMessage(content=list_directory_tree(work_dir))]}

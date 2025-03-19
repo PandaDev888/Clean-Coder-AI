@@ -233,7 +233,10 @@ def create_coderrules(coderrules_path):
     return rules
 
 def load_prompt(prompt_name):
-    """Load a prompt file"""
+    """Load a prompt file
+
+    prompt_name: name of the prompt file, without .prompt extension.
+    """
     parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     prompt_path = os.path.join(parent_dir, "prompts", f"{prompt_name}.prompt")
     with open(prompt_path, "r") as f:
