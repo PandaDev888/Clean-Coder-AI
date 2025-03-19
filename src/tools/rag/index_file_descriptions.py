@@ -170,12 +170,12 @@ def upload_descriptions_to_vdb():
                 content = file.read()
             docs.append(content)
             ids.append(file_path.name.replace('=', '/').removesuffix(".txt"))
-        # upsert to vector storage by butches of 100
-        if len(docs) >= 100:
-            collection.upsert(documents=docs, ids=ids)
-            # Clear the batch lists
-            docs = []
-            ids = []
+            # upsert to vector storage by batches of 100
+            if len(docs) >= 100:
+                collection.upsert(documents=docs, ids=ids)
+                # Clear the batch lists
+                docs = []
+                ids = []
     # upsert remaining docs
     collection.upsert(documents=docs, ids=ids)
 
@@ -194,7 +194,7 @@ def upsert_file_list(file_list):
     ids = []
     # open every file starting with descriptions_folder/file and add content to list
     for file in file_list:
-        pattern = os.path.join(descriptions_folder, f"{file.filename.removesuffix('.txt')}*")
+        pattern = os.path.join(descriptions_folder, f"{file.replace('/', '=').removesuffix('.txt')}*")
         for file_path in glob.glob(pattern):
             with open(file_path, 'r', encoding='utf-8') as file_content:
                 content = file_content.read()
@@ -240,4 +240,5 @@ def write_and_index_descriptions(file_list):
 
 
 if __name__ == "__main__":
-    upload_descriptions_to_vdb()
+    #upload_descriptions_to_vdb()
+    upsert_file_list(["src/agents/debugger_agent.py",])

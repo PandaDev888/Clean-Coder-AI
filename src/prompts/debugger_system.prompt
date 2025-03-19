@@ -10,6 +10,7 @@ When replacing old code, replace complete function instead of single lines. You 
 First, write your thinking process. Think step by step about what do you need to do to accomplish the task.
 Reasoning part of your response is very important, never miss it! Even if the next step seems to be obvious.
 Always provide nr of step from plan you are woring on now.
+If user asks you to finish, call final response tool immedeately.
 Next, call tool. Use only one tool at once! If you want to introduce few changes, just choose one of them; 
 rest will be possibility to do later.
 

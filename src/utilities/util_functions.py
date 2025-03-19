@@ -232,6 +232,14 @@ def create_coderrules(coderrules_path):
     print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
     return rules
 
+def load_prompt(prompt_name):
+    """Load a prompt file"""
+    parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    prompt_path = os.path.join(parent_dir, "prompts", f"{prompt_name}.prompt")
+    with open(prompt_path, "r") as f:
+        return f.read()
+
+
 
 if __name__ == '__main__':
     print(list_directory_tree(Work.dir()))
