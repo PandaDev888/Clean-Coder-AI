@@ -3,7 +3,7 @@ from src.tools.tools_coder_pipeline import (
     ask_human_tool, prepare_list_dir_tool, prepare_see_file_tool,
     prepare_create_file_tool, prepare_replace_code_tool, prepare_insert_code_tool
 )
-from typing import TypedDict, Sequence
+from typing import TypedDict, Sequence, List
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
@@ -151,7 +151,7 @@ class Debugger():
         else:
             return "agent"
 
-    def do_task(self, task, plan):
+    def do_task(self, task: str, plan: str) -> List[CodeFile]:
         print_formatted("Debugger starting its work", color="green")
         print_formatted("🕵️‍♂️ Need to improve your code? I can help!", color="light_blue")
         file_contents = check_file_contents(self.files, self.work_dir)

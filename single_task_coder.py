@@ -53,7 +53,7 @@ def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False
             upsert_file_list([file for file in files if file.is_modified])
         return
     debugger = Debugger(
-        files, work_dir, human_message,image_paths,  playwright_codes)
+        files, work_dir, human_message, image_paths,  playwright_codes)
     files = debugger.do_task(task, plan)
     # update descriptions for changed files
     if vdb_available():

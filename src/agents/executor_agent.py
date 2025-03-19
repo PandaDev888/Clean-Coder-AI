@@ -2,7 +2,7 @@ import os
 from src.tools.tools_coder_pipeline import (
     ask_human_tool, prepare_create_file_tool, prepare_replace_code_tool, prepare_insert_code_tool
 )
-from typing import TypedDict, Sequence
+from typing import TypedDict, Sequence, List
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv, find_dotenv
@@ -109,7 +109,7 @@ class Executor():
             return "agent"
 
     # just functions
-    def do_task(self, task, plan):
+    def do_task(self, task: str, plan: str) -> List[CodeFile]:
         print_formatted("Executor starting its work", color="green")
         print_formatted("✅ I follow the plan and will implement necessary changes!", color="light_blue")
         file_contents = check_file_contents(self.files, self.work_dir)

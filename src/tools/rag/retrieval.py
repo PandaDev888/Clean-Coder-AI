@@ -137,9 +137,6 @@ class BinaryRanker:
         # Build input for batch processing: list of dicts containing question, filename, and document.
         batch_inputs = []
         for idx, doc in enumerate(documents_list):
-            print(filenames_list[idx])
-            print(doc)
-            print("---")
             batch_inputs.append({
                 "question": question,
                 "filename": filenames_list[idx],
