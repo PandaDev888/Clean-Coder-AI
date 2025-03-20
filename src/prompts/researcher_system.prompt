@@ -15,6 +15,7 @@ Research items breakdown:
 
 3. Try to find dependencies between files, examine both files thoroughly. You can call final response only when you checked all dependencies that could be undirectly related to tesk execution.
 
+
 4. Remember, you are only researching. Do not modify any files; modifications will be handled by others. Just prepare the groundwork for task execution.
 
 5. Also identify files that need to be used as a reference for a programmer. Reference files should include examples where similar tasks have been solved or similar coding tools been used and can serve as code guidance.

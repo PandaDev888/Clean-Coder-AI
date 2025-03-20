@@ -33,6 +33,7 @@ bar_format = (
     f"{GOLDEN}[{{elapsed}}<{{remaining}}, {{rate_fmt}}{{postfix}}]{RESET}"
 )
 
+
 # embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
 #     model_name="all-mpnet-base-v2"
 # )
@@ -40,6 +41,7 @@ embedding_function = embedding_functions.OpenAIEmbeddingFunction(
     api_key=os.getenv("OPENAI_API_KEY"),
     model_name="text-embedding-3-small"
 )
+
 
 def is_code_file(file_path):
     # List of common code file extensions
@@ -98,6 +100,7 @@ def write_file_descriptions(file_list):
         files_iteration = file_list[i:i + batch_size]
         descriptions = chain.batch([{'coderrules': coderrules, 'code': get_content(file_path)} for file_path in files_iteration])
 
+
         for file_path, description in zip(files_iteration, descriptions):
             file_name = file_path.relative_to(work_dir).as_posix().replace('/', '=')
             output_path = join_paths(description_folder, f"{file_name}.txt")
@@ -114,6 +117,7 @@ def write_file_descriptions(file_list):
 def write_file_chunks_descriptions(file_list):
     """Writes descriptions of file chunks in codebase. Gets list of whole files to describe, divides files
     into chunks and describes each chunk separately."""
+
     coderrules = read_coderrules()
 
     grandparent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -130,6 +134,7 @@ def write_file_chunks_descriptions(file_list):
 
     # iterate chunks inside of the file
     for file_path in tqdm(file_list, desc=f"[2/2]Describing file chunks",
+
                  bar_format=bar_format):
         file_content = get_content(file_path)
         # get file extenstion
@@ -157,12 +162,15 @@ def upload_descriptions_to_vdb():
     collection = chroma_client.get_or_create_collection(
         name=collection_name,
         #embedding_function=embedding_function
+
     )
 
     # read files and upload to base
     description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+
     docs = []
     ids = []
+
     for root, _, files in os.walk(description_folder):
         for file in files:
             file_path = Path(root) / file
@@ -237,9 +245,11 @@ def write_and_index_descriptions(file_list):
     write_file_descriptions(file_list)
     write_file_chunks_descriptions(file_list)
 
+
     upload_descriptions_to_vdb()
 
 
 if __name__ == "__main__":
     #upload_descriptions_to_vdb()
     upsert_file_list(["src/agents/debugger_agent.py",])
+

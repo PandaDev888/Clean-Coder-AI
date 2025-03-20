@@ -7,6 +7,7 @@ from langchain.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
 
+
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
 collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
@@ -116,6 +117,8 @@ class BinaryRanker:
             
             # Build the chain with structured output
             self.chain = prompt | llm_structured
+            
+            
     def rank(self, question: str, retrieval: dict) -> list:
         """
         Rank documents based on their relevance to the question.
@@ -157,6 +160,7 @@ class BinaryRanker:
 if __name__ == "__main__":
     # Example usage of BinaryRanker for testing.
     question = "Example of structured output of llm response."
+
     # Test the retrieve function
     results = retrieve(question)
     #print("\n\n")
