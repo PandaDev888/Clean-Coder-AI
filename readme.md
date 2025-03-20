@@ -16,9 +16,7 @@
   <img src="/non_src/assets/CC_diagram_light_golden.png">
 </div>
 
-<p align="center">
-  <video src="https://www.youtube.com/embed/MbQv8zoNEfY" width="100%" />
-</p>
+
 
 ## 🏖️ Relax and watch it code
 
@@ -34,7 +32,7 @@ or check detailed instructions [how to start in documentation](https://clean-cod
 
 You can also [deploy with Docker](https://clean-coder.dev/getting_started/run_with_docker/).
 
-
+https://www.youtube.com/embed/MbQv8zoNEfY
 ## 📺 Demo videos
 
 Create an entire web app ~~with~~ by Clean Coder:
