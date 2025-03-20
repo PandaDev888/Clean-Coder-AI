@@ -1,8 +1,5 @@
 <div align="center">
-  <img
-    src="/non_src/assets/starting_video.gif"
-    alt="Starting video"
-  >
+  <video src="/non_src/assets/trailer.mp4" />
   <br>
   <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
   <h2>Probably the most intelligent AI coder out there.</h2>
