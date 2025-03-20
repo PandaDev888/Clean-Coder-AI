@@ -17,7 +17,7 @@
 </div>
 
 <p align="center">
-  <video src="/non_src/assets/trailer.mp4" width="100%" />
+  <video src="https://github.com/Grigorij-Dudnik/Clean-Coder-AI/non_src/assets/trailer.mp4" width="100%" />
 </p>
 
 ## 🏖️ Relax and watch it code
