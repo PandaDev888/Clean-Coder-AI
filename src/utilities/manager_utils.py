@@ -1,22 +1,15 @@
 """
 In manager_utils.py we are placing all functions used by manager agent only, which are not tools.
 """
-
-from langchain_openai.chat_models import ChatOpenAI
-from langchain_community.chat_models import ChatOllama
-from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from src.utilities.llms import init_llms_medium_intelligence
-from src.utilities.util_functions import join_paths, read_coderrules, list_directory_tree
+from src.utilities.util_functions import join_paths, read_coderrules, list_directory_tree, load_prompt
 from src.utilities.start_project_functions import create_project_plan_file
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.load import loads
 from todoist_api_python.api import TodoistAPI
 import questionary
-import concurrent.futures
-from dotenv import load_dotenv, find_dotenv
-import os
 import concurrent.futures
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -46,11 +39,8 @@ QUESTIONARY_STYLE = questionary.Style([
 
 
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-with open(f"{parent_dir}/prompts/actualize_progress_description.prompt", "r") as f:
-    actualize_progress_description_prompt_template = f.read()
-with open(f"{parent_dir}/prompts/manager_progress.prompt", "r") as f:
-    tasks_progress_template = f.read()
+actualize_progress_description_prompt_template = load_prompt("actualize_progress_description")
+tasks_progress_template = load_prompt("manager_progress")
 
 llms = init_llms_medium_intelligence(run_name="Progress description")
 llm = llms[0].with_fallbacks(llms[1:])
@@ -292,8 +282,7 @@ def actualize_tasks_list_and_progress_description(state):
 
 
 def load_system_message():
-    with open(f"{parent_dir}/prompts/manager_system.prompt", "r") as f:
-        system_prompt_template = f.read()
+    system_prompt_template = load_prompt("manager_system")
 
     if os.path.exists(os.path.join(work_dir, '.clean_coder/project_plan.txt')):
         project_plan = read_project_plan()

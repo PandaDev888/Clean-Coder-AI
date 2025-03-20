@@ -46,9 +46,9 @@ For being logged in as admin user, use username="frontend.feedback@admin", passw
 
 
 def check_file_contents(files, work_dir, line_numbers=True):
-    file_contents = f"Files shown: {files}\n\n"
+    file_contents = f"Files shown: {[str(f) for f in files]}\n\n"
     for file_name in files:
-        file_content = watch_file(file_name, work_dir, line_numbers)
+        file_content = watch_file(file_name.filename, work_dir, line_numbers)
         file_contents += file_content + "\n\n###\n\n"
 
     return file_contents
@@ -231,6 +231,17 @@ def create_coderrules(coderrules_path):
         file.write(rules)
     print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
     return rules
+
+def load_prompt(prompt_name):
+    """Load a prompt file
+
+    prompt_name: name of the prompt file, without .prompt extension.
+    """
+    parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    prompt_path = os.path.join(parent_dir, "prompts", f"{prompt_name}.prompt")
+    with open(prompt_path, "r") as f:
+        return f.read()
+
 
 
 if __name__ == '__main__':
