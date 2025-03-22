@@ -1,5 +1,7 @@
 <div align="center">
-  <video src="/non_src/assets/trailer.mp4" />
+  <a href="https://cleancoder.byst.re/Trailer.mp4" title="Greg's Tech video">
+      <img src="https://img.youtube.com/vi/aNpB-Tw-YPw/maxresdefault.jpg" width="600" alt="Demo video">
+    </a>
   <br>
   <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
   <h2>Probably the most intelligent AI coder out there.</h2>
@@ -16,8 +18,6 @@
   <img src="/non_src/assets/CC_diagram_light_golden.png">
 </div>
 
-
-
 ## 🏖️ Relax and watch it code
 
 ```
@@ -32,7 +32,7 @@ or check detailed instructions [how to start in documentation](https://clean-cod
 
 You can also [deploy with Docker](https://clean-coder.dev/getting_started/run_with_docker/).
 
-https://www.youtube.com/embed/MbQv8zoNEfY
+
 ## 📺 Demo videos
 
 Create an entire web app ~~with~~ by Clean Coder:
