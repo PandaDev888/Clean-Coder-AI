@@ -1,6 +1,6 @@
 <div align="center">
-  <a href="https://cleancoder.byst.re/Trailer.mp4" title="Greg's Tech video">
-      <img src="https://img.youtube.com/vi/aNpB-Tw-YPw/maxresdefault.jpg" width="600" alt="Demo video">
+  <a href="https://cleancoder.byst.re/Trailer.mp4" target="_blank" title="Trailer">
+      <img src="/non_src/assets/Miniature_trailer.png" width="600" alt="Trailer">
     </a>
   <br>
   <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
