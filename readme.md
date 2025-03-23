@@ -8,7 +8,7 @@
   <br>
 
 <a href="https://cleancoder.byst.re/Trailer.mp4" target="_blank" title="Trailer">
-    <img src="/non_src/assets/Miniature_trailer.png" width="600" alt="Trailer">
+    <img src="/non_src/assets/Miniature_trailer.png" width="550" alt="Trailer">
   </a>
   <br>
   <h3>⭐️ Your star motivates us to introduce new cool features! ⭐️</h3>  
