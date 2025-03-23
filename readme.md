@@ -1,13 +1,11 @@
 <div align="center">
   <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
-  <br>
-  <br>
-  
+  <br> 
   <h2>Probably the most intelligent AI coder out there.</h2>
   <br>
   Clean Coder is your 2-in-1 AI Scrum Master and Developer. Delegate planning, managing, and coding to AI. Agents create tasks within Todoist, write code, and test it, helping you create great projects with minimal effort!
   <br>
-  <br>  <br>
+  <br>
 
 <a href="https://cleancoder.byst.re/Trailer.mp4" target="_blank" title="Trailer">
     <img src="/non_src/assets/Miniature_trailer.png" width="600" alt="Trailer">
