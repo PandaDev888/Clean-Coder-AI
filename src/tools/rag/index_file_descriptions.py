@@ -6,7 +6,8 @@ from dotenv import load_dotenv, find_dotenv
 import chromadb
 import sys
 import questionary
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 from src.utilities.util_functions import join_paths, read_coderrules
 from src.utilities.start_work_functions import file_folder_ignored
 from src.utilities.llms import init_llms_mini
@@ -38,25 +39,45 @@ bar_format = (
 #     model_name="all-mpnet-base-v2"
 # )
 embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model_name="text-embedding-3-small"
+    api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
 )
 
 
 def is_code_file(file_path):
     # List of common code file extensions
     code_extensions = {
-        '.js', '.jsx', '.ts', '.tsx', '.vue', '.py', '.rb', '.php', '.java', '.c', '.cpp', '.cs', '.go', '.swift',
-        '.kt', '.rs', '.htm','.html', '.css', '.scss', '.sass', '.less', '.prompt',
+        ".js",
+        ".jsx",
+        ".ts",
+        ".tsx",
+        ".vue",
+        ".py",
+        ".rb",
+        ".php",
+        ".java",
+        ".c",
+        ".cpp",
+        ".cs",
+        ".go",
+        ".swift",
+        ".kt",
+        ".rs",
+        ".htm",
+        ".html",
+        ".css",
+        ".scss",
+        ".sass",
+        ".less",
+        ".prompt",
     }
     return file_path.suffix.lower() in code_extensions
 
 
 # read file content. place name of file in the top
 def get_content(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         content = file.read()
-    content = file_path.name + '\n\n' + content
+    content = file_path.name + "\n\n" + content
     return content
 
 
@@ -87,25 +108,26 @@ def write_file_descriptions(file_list):
         files_describe_template = f.read()
     prompt = ChatPromptTemplate.from_template(files_describe_template)
 
-    llms = init_llms_mini(tools=[], run_name='File Describer')
+    llms = init_llms_mini(tools=[], run_name="File Describer")
     llm = llms[0].with_fallbacks(llms[1:])
     chain = prompt | llm | StrOutputParser()
 
-    description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+    description_folder = join_paths(work_dir, ".clean_coder/files_and_folders_descriptions")
     Path(description_folder).mkdir(parents=True, exist_ok=True)
     batch_size = 8
-    pbar = tqdm(total=len(file_list), desc=f"[1/2]Describing files", bar_format=bar_format)
+    pbar = tqdm(total=len(file_list), desc="[1/2]Describing files", bar_format=bar_format)
 
     for i in range(0, len(file_list), batch_size):
-        files_iteration = file_list[i:i + batch_size]
-        descriptions = chain.batch([{'coderrules': coderrules, 'code': get_content(file_path)} for file_path in files_iteration])
-
+        files_iteration = file_list[i : i + batch_size]
+        descriptions = chain.batch(
+            [{"coderrules": coderrules, "code": get_content(file_path)} for file_path in files_iteration]
+        )
 
         for file_path, description in zip(files_iteration, descriptions):
-            file_name = file_path.relative_to(work_dir).as_posix().replace('/', '=')
+            file_name = file_path.relative_to(work_dir).as_posix().replace("/", "=")
             output_path = join_paths(description_folder, f"{file_name}.txt")
 
-            with open(output_path, 'w', encoding='utf-8') as out_file:
+            with open(output_path, "w", encoding="utf-8") as out_file:
                 out_file.write(description)
 
         # Update by actual number of files processed in this batch
@@ -125,48 +147,47 @@ def write_file_chunks_descriptions(file_list):
         chunks_describe_template = f.read()
 
     prompt = ChatPromptTemplate.from_template(chunks_describe_template)
-    llms = init_llms_mini(tools=[], run_name='File Describer')
+    llms = init_llms_mini(tools=[], run_name="File Describer")
     llm = llms[0]
     chain = prompt | llm | StrOutputParser()
 
-    description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+    description_folder = join_paths(work_dir, ".clean_coder/files_and_folders_descriptions")
     Path(description_folder).mkdir(parents=True, exist_ok=True)
 
     # iterate chunks inside of the file
-    for file_path in tqdm(file_list, desc=f"[2/2]Describing file chunks",
-
-                 bar_format=bar_format):
+    for file_path in tqdm(file_list, desc="[2/2]Describing file chunks", bar_format=bar_format):
         file_content = get_content(file_path)
         # get file extenstion
-        extension = file_path.suffix.lstrip('.')
+        extension = file_path.suffix.lstrip(".")
         file_chunks = split_code(file_content, extension)
         # do not describe chunk of 1-chunk files
         if len(file_chunks) <= 1:
             continue
-        descriptions = chain.batch([{'coderrules': coderrules, 'file_code': file_content, 'chunk_code': chunk} for chunk in file_chunks])
+        descriptions = chain.batch(
+            [{"coderrules": coderrules, "file_code": file_content, "chunk_code": chunk} for chunk in file_chunks]
+        )
 
         for nr, description in enumerate(descriptions):
             file_name = f"{file_path.relative_to(work_dir).as_posix().replace('/', '=')}_chunk{nr}"
             output_path = join_paths(description_folder, f"{file_name}.txt")
 
-            with open(output_path, 'w', encoding='utf-8') as out_file:
+            with open(output_path, "w", encoding="utf-8") as out_file:
                 out_file.write(description)
 
 
 def upload_descriptions_to_vdb():
     """Uploads descriptions, created by write_file_chunks_descriptions, into vector database."""
-    print_formatted("Uploading file descriptions to vector storage...", color='magenta')
-    chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
+    print_formatted("Uploading file descriptions to vector storage...", color="magenta")
+    chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, ".clean_coder/chroma_base"))
     collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
 
     collection = chroma_client.get_or_create_collection(
         name=collection_name,
-        #embedding_function=embedding_function
-
+        # embedding_function=embedding_function
     )
 
     # read files and upload to base
-    description_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+    description_folder = join_paths(work_dir, ".clean_coder/files_and_folders_descriptions")
 
     docs = []
     ids = []
@@ -174,10 +195,10 @@ def upload_descriptions_to_vdb():
     for root, _, files in os.walk(description_folder):
         for file in files:
             file_path = Path(root) / file
-            with open(file_path, 'r', encoding='utf-8') as file:
+            with open(file_path, "r", encoding="utf-8") as file:
                 content = file.read()
             docs.append(content)
-            ids.append(file_path.name.replace('=', '/').removesuffix(".txt"))
+            ids.append(file_path.name.replace("=", "/").removesuffix(".txt"))
             # upsert to vector storage by batches of 100
             if len(docs) >= 100:
                 collection.upsert(documents=docs, ids=ids)
@@ -189,14 +210,14 @@ def upload_descriptions_to_vdb():
 
 
 def upsert_file_list(file_list):
-    chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, '.clean_coder/chroma_base'))
+    chroma_client = chromadb.PersistentClient(path=join_paths(work_dir, ".clean_coder/chroma_base"))
     collection_name = f"clean_coder_{Path(work_dir).name}_file_descriptions"
     collection = chroma_client.get_or_create_collection(
         name=collection_name,
-        #embedding_function=embedding_function
+        # embedding_function=embedding_function
     )
 
-    descriptions_folder = join_paths(work_dir, '.clean_coder/files_and_folders_descriptions')
+    descriptions_folder = join_paths(work_dir, ".clean_coder/files_and_folders_descriptions")
 
     docs = []
     ids = []
@@ -204,14 +225,14 @@ def upsert_file_list(file_list):
     for file in file_list:
         pattern = os.path.join(descriptions_folder, f"{file.filename.replace('/', '=').removesuffix('.txt')}*")
         for file_path in glob.glob(pattern):
-            with open(file_path, 'r', encoding='utf-8') as file_content:
+            with open(file_path, "r", encoding="utf-8") as file_content:
                 content = file_content.read()
             file_path = Path(file_path)
             docs.append(content)
-            ids.append(file_path.name.replace('=', '/').removesuffix(".txt"))
+            ids.append(file_path.name.replace("=", "/").removesuffix(".txt"))
 
     collection.upsert(documents=docs, ids=ids)
-    print_formatted("Re-indexing of modified files completed.", color='green')
+    print_formatted("Re-indexing of modified files completed.", color="green")
 
 
 def prompt_index_project_files():
@@ -226,7 +247,7 @@ def prompt_index_project_files():
         "Do you want to index your project files for improving file search?",
         choices=["Proceed", "Skip"],
         style=QUESTIONARY_STYLE,
-        instruction="\nHint: Skip for testing Clean Coder; index for real projects."
+        instruction="\nHint: Skip for testing Clean Coder; index for real projects.",
     ).ask()
     if answer == "Proceed":
         all_files = collect_file_pathes(work_dir)
@@ -234,22 +255,24 @@ def prompt_index_project_files():
             f"Going to index {len(all_files)} files. Indexing could be time-consuming and costly. Are you ready to go?",
             choices=["Index", "Skip"],
             style=QUESTIONARY_STYLE,
-            instruction="\nHint: Ensure you provided all files and directories you don't want to index in {WORK_DIR}/.clean_coder/.coderignore to avoid describing trashy files."
+            instruction="\nHint: Ensure you provided all files and directories you don't want to index in {WORK_DIR}/.clean_coder/.coderignore to avoid describing trashy files.",
         ).ask()
         if answer == "Index":
             write_and_index_descriptions(all_files)
 
 
 def write_and_index_descriptions(file_list):
-    #provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
+    # provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
     write_file_descriptions(file_list)
     write_file_chunks_descriptions(file_list)
-
 
     upload_descriptions_to_vdb()
 
 
 if __name__ == "__main__":
-    #upload_descriptions_to_vdb()
-    upsert_file_list(["src/agents/debugger_agent.py",])
-
+    # upload_descriptions_to_vdb()
+    upsert_file_list(
+        [
+            "src/agents/debugger_agent.py",
+        ]
+    )

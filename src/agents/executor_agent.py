@@ -1,6 +1,9 @@
 import os
 from src.tools.tools_coder_pipeline import (
-    ask_human_tool, prepare_create_file_tool, prepare_replace_code_tool, prepare_insert_code_tool
+    ask_human_tool,
+    prepare_create_file_tool,
+    prepare_replace_code_tool,
+    prepare_insert_code_tool,
 )
 from typing import TypedDict, Sequence, List
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
@@ -8,24 +11,27 @@ from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv, find_dotenv
 from langchain.tools import tool
 from src.utilities.llms import init_llms_medium_intelligence
-from src.utilities.print_formatters import print_formatted, print_error
-from src.utilities.util_functions import (
-    check_file_contents, exchange_file_contents, bad_tool_call_looped
-)
+from src.utilities.print_formatters import print_formatted
+from src.utilities.util_functions import check_file_contents, exchange_file_contents, bad_tool_call_looped
 from src.utilities.langgraph_common_functions import (
-    call_model, call_tool, multiple_tools_msg, no_tools_msg, agent_looped_human_help
+    call_model,
+    call_tool,
+    multiple_tools_msg,
+    no_tools_msg,
+    agent_looped_human_help,
 )
 from src.utilities.objects import CodeFile
 
 
 load_dotenv(find_dotenv())
 
+
 @tool
 def final_response_executor(test_instruction):
     """Call that tool when all plan steps are implemented to finish your job.
-tool input:
-:param test_instruction: write detailed instruction for human what actions he need to do in order to check if
-implemented changes work correctly."""
+    tool input:
+    :param test_instruction: write detailed instruction for human what actions he need to do in order to check if
+    implemented changes work correctly."""
     pass
 
 
@@ -39,14 +45,12 @@ with open(f"{parent_dir}/prompts/executor_system.prompt", "r") as f:
     system_prompt_template = f.read()
 
 
-class Executor():
+class Executor:
     def __init__(self, files, work_dir):
         self.work_dir = work_dir
         self.tools = prepare_tools(work_dir)
         self.llms = init_llms_medium_intelligence(self.tools, "Executor")
-        self.system_message = SystemMessage(
-            content=system_prompt_template
-        )
+        self.system_message = SystemMessage(content=system_prompt_template)
         self.files = files
 
         # workflow definition
@@ -103,7 +107,11 @@ class Executor():
 
         if bad_tool_call_looped(state):
             return "human_help"
-        elif hasattr(last_message, "tool_calls") and len(last_message.tool_calls) > 0 and last_message.tool_calls[0]["name"] == "final_response_executor":
+        elif (
+            hasattr(last_message, "tool_calls")
+            and len(last_message.tool_calls) > 0
+            and last_message.tool_calls[0]["name"] == "final_response_executor"
+        ):
             return END
         else:
             return "agent"
@@ -113,11 +121,13 @@ class Executor():
         print_formatted("Executor starting its work", color="green")
         print_formatted("✅ I follow the plan and will implement necessary changes!", color="light_blue")
         file_contents = check_file_contents(self.files, self.work_dir)
-        inputs = {"messages": [
-            self.system_message,
-            HumanMessage(content=f"Task: {task}\n\n######\n\nPlan:\n\n{plan}"),
-            HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True)
-        ]}
+        inputs = {
+            "messages": [
+                self.system_message,
+                HumanMessage(content=f"Task: {task}\n\n######\n\nPlan:\n\n{plan}"),
+                HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True),
+            ]
+        }
         self.executor.invoke(inputs, {"recursion_limit": 150})
 
         return self.files

@@ -1,7 +1,11 @@
 import os
 from src.tools.tools_coder_pipeline import (
-    ask_human_tool, prepare_list_dir_tool, prepare_see_file_tool,
-    prepare_create_file_tool, prepare_replace_code_tool, prepare_insert_code_tool
+    ask_human_tool,
+    prepare_list_dir_tool,
+    prepare_see_file_tool,
+    prepare_create_file_tool,
+    prepare_replace_code_tool,
+    prepare_insert_code_tool,
 )
 from typing import TypedDict, Sequence, List
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
@@ -12,7 +16,6 @@ from src.utilities.print_formatters import print_formatted
 from src.utilities.util_functions import (
     check_file_contents,
     check_application_logs,
-    exchange_file_contents,
     bad_tool_call_looped,
     read_coderrules,
     convert_images,
@@ -20,7 +23,13 @@ from src.utilities.util_functions import (
 )
 from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.langgraph_common_functions import (
-    call_model, call_tool, ask_human, after_ask_human_condition, multiple_tools_msg, no_tools_msg, agent_looped_human_help,
+    call_model,
+    call_tool,
+    ask_human,
+    after_ask_human_condition,
+    multiple_tools_msg,
+    no_tools_msg,
+    agent_looped_human_help,
 )
 from src.utilities.objects import CodeFile
 from src.agents.frontend_feedback import execute_screenshot_codes
@@ -33,10 +42,11 @@ frontend_url = os.getenv("FRONTEND_URL")
 @tool
 def final_response_debugger(test_instruction):
     """Call that tool when all changes are implemented to tell the job is done.
-tool input:
-:param test_instruction: write detailed instruction for human what actions he need to do in order to check if
-implemented changes work correctly."""
+    tool input:
+    :param test_instruction: write detailed instruction for human what actions he need to do in order to check if
+    implemented changes work correctly."""
     pass
+
 
 class AgentState(TypedDict):
     messages: Sequence[BaseMessage]
@@ -48,14 +58,12 @@ with open(f"{parent_dir}/prompts/debugger_system.prompt", "r") as f:
     system_prompt_template = f.read()
 
 
-class Debugger():
+class Debugger:
     def __init__(self, files, work_dir, human_feedback, image_paths, playwright_code=None):
         self.work_dir = work_dir
         self.tools = prepare_tools(work_dir)
         self.llms = init_llms_medium_intelligence(self.tools, "Debugger")
-        self.system_message = SystemMessage(
-            content=system_prompt_template.format(project_rules=read_coderrules())
-        )
+        self.system_message = SystemMessage(content=system_prompt_template.format(project_rules=read_coderrules()))
         self.files = files
         self.images = convert_images(image_paths)
         self.human_feedback = human_feedback
@@ -155,13 +163,15 @@ class Debugger():
         print_formatted("Debugger starting its work", color="green")
         print_formatted("🕵️‍♂️ Need to improve your code? I can help!", color="light_blue")
         file_contents = check_file_contents(self.files, self.work_dir)
-        inputs = {"messages": [
-            self.system_message,
-            HumanMessage(content=f"Task: {task}\n\n######\n\nPlan which developer implemented already:\n\n{plan}"),
-            HumanMessage(content=list_directory_tree(self.work_dir)),
-            HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True),
-            HumanMessage(content=f"Human feedback: {self.human_feedback}"),
-        ]}
+        inputs = {
+            "messages": [
+                self.system_message,
+                HumanMessage(content=f"Task: {task}\n\n######\n\nPlan which developer implemented already:\n\n{plan}"),
+                HumanMessage(content=list_directory_tree(self.work_dir)),
+                HumanMessage(content=f"File contents: {file_contents}", contains_file_contents=True),
+                HumanMessage(content=f"Human feedback: {self.human_feedback}"),
+            ]
+        }
         if self.images:
             inputs["messages"].append(HumanMessage(content=self.images))
         if self.playwright_code:

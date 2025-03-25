@@ -1,8 +1,10 @@
 if __name__ == "__main__":
     from src.utilities.start_work_functions import print_ascii_logo
+
     print_ascii_logo()
 from dotenv import find_dotenv
 from src.utilities.set_up_dotenv import set_up_env_coder_pipeline
+
 if not find_dotenv():
     set_up_env_coder_pipeline()
 
@@ -47,13 +49,12 @@ def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False
         files = executor.do_task(task, plan)
 
     human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed. ")
-    if human_message in ['o', 'ok']:
+    if human_message in ["o", "ok"]:
         # update descriptions for changed files
         if vdb_available():
             upsert_file_list([file for file in files if file.is_modified])
         return
-    debugger = Debugger(
-        files, work_dir, human_message, image_paths,  playwright_codes)
+    debugger = Debugger(files, work_dir, human_message, image_paths, playwright_codes)
     files = debugger.do_task(task, plan)
     # update descriptions for changed files
     if vdb_available():

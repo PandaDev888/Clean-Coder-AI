@@ -14,8 +14,8 @@ import click
 load_dotenv(find_dotenv())
 work_dir = os.getenv("WORK_DIR")
 log_file_path = os.getenv("LOG_FILE")
-todoist_api = TodoistAPI(os.getenv('TODOIST_API_KEY'))
-PROJECT_ID = os.getenv('TODOIST_PROJECT_ID')
+todoist_api = TodoistAPI(os.getenv("TODOIST_API_KEY"))
+PROJECT_ID = os.getenv("TODOIST_PROJECT_ID")
 
 
 TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
@@ -58,7 +58,7 @@ def watch_file(filename, work_dir, line_numbers=True):
     if file_folder_ignored(filename):
         return "You are not allowed to work with this file."
     try:
-        with open(join_paths(work_dir, filename), 'r', encoding='utf-8') as file:
+        with open(join_paths(work_dir, filename), "r", encoding="utf-8") as file:
             lines = file.readlines()
     except FileNotFoundError:
         return "File not exists."
@@ -73,11 +73,11 @@ def watch_file(filename, work_dir, line_numbers=True):
 
 
 def find_tool_xml(input_str):
-    match = re.search('```xml(.*?)```', input_str, re.DOTALL)
+    match = re.search("```xml(.*?)```", input_str, re.DOTALL)
     if match:
         root = ET.fromstring(match.group(1).strip())
-        tool = root.find('tool').text.strip()
-        tool_input_element = root.find('tool_input')
+        tool = root.find("tool").text.strip()
+        tool_input_element = root.find("tool_input")
         tool_input = {}
         for child in tool_input_element:
             child.text = child.text.strip()
@@ -94,7 +94,7 @@ def find_tool_xml(input_str):
 def check_application_logs():
     """Check out logs to see if application works correctly."""
     try:
-        with open(log_file_path, 'r') as file:
+        with open(log_file_path, "r") as file:
             logs = file.read()
         if logs.strip().endswith("No messages found"):
             print("Logs are correct")
@@ -106,7 +106,7 @@ def check_application_logs():
 
 
 def see_image(filename, work_dir):
-    with open(join_paths(work_dir, filename), 'rb') as image_file:
+    with open(join_paths(work_dir, filename), "rb") as image_file:
         img_encoded = base64.b64encode(image_file.read()).decode("utf-8")
     return img_encoded
 
@@ -117,17 +117,22 @@ def convert_images(image_paths):
         if not os.path.exists(join_paths(work_dir, image_path)):
             print_formatted(f"Image not exists: {image_path}", color="yellow")
             continue
-        images.extend([
-                 {"type": "text", "text": f"I###\n{image_path}"},
-                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"}}
-             ])
+        images.extend(
+            [
+                {"type": "text", "text": f"I###\n{image_path}"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{see_image(image_path, work_dir)}"},
+                },
+            ]
+        )
 
     return images
 
 
 def join_paths(*args):
-    leading_slash = '/' if args[0].startswith('/') else ''
-    joined = leading_slash + '/'.join(p.strip('/') for p in args)
+    leading_slash = "/" if args[0].startswith("/") else ""
+    joined = leading_slash + "/".join(p.strip("/") for p in args)
     return os.path.normpath(joined)
 
 
@@ -136,8 +141,8 @@ def get_joke():
         response = requests.get("https://v2.jokeapi.dev/joke/Programming?type=single")
         # response = requests.get("https://uselessfacts.jsph.pl//api/v2/facts/random")
         joke = response.json()["joke"] + "\n"
-    except Exception as e:
-        joke = f"Failed to receive joke :/"
+    except Exception:
+        joke = "Failed to receive joke :/"
     return joke
 
 
@@ -203,34 +208,40 @@ def bad_tool_call_looped(state):
         m for m in last_tool_messages if isinstance(m.content, str) and m.content.startswith(WRONG_TOOL_CALL_WORD)
     ]
     if len(tool_not_executed_msgs) == 4:
-        print_formatted("Seems like AI been looped. Please suggest it how to introduce change correctly:", color="yellow")
+        print_formatted(
+            "Seems like AI been looped. Please suggest it how to introduce change correctly:", color="yellow"
+        )
         return True
 
 
 def create_frontend_feedback_story():
-    frontend_feedback_story_path = os.path.join(Work.dir(), '.clean_coder', 'frontend_feedback_story.txt')
+    frontend_feedback_story_path = os.path.join(Work.dir(), ".clean_coder", "frontend_feedback_story.txt")
     if not os.path.exists(frontend_feedback_story_path):
-        with open(frontend_feedback_story_path, 'w') as file:
+        with open(frontend_feedback_story_path, "w") as file:
             file.write(storyfile_template)
         click.launch(frontend_feedback_story_path)
         input("Fulfill file with informations needed for a frontend feedback agent to know. Save file and hit Enter.")
 
 
 def read_coderrules():
-    project_rules_path = os.path.join(Work.dir(), '.coderrules')
+    project_rules_path = os.path.join(Work.dir(), ".coderrules")
     if not os.path.exists(project_rules_path):
         return create_coderrules(project_rules_path)
-    with open(project_rules_path, 'r') as file:
+    with open(project_rules_path, "r") as file:
         return file.read()
 
 
 def create_coderrules(coderrules_path):
-    print_formatted("(Optional) Describe your project rules and structure to give AI more context about it. Learn how to do it: https://clean-coder.dev/features/coderrules/. ", color="light_blue")
+    print_formatted(
+        "(Optional) Describe your project rules and structure to give AI more context about it. Learn how to do it: https://clean-coder.dev/features/coderrules/. ",
+        color="light_blue",
+    )
     rules = input()
-    with open(coderrules_path, 'w', encoding='utf-8') as file:
+    with open(coderrules_path, "w", encoding="utf-8") as file:
         file.write(rules)
-    print_formatted(f"Project rules saved. You can edit it in .coderrules file.", color="green")
+    print_formatted("Project rules saved. You can edit it in .coderrules file.", color="green")
     return rules
+
 
 def load_prompt(prompt_name):
     """Load a prompt file
@@ -243,6 +254,5 @@ def load_prompt(prompt_name):
         return f.read()
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(list_directory_tree(Work.dir()))
