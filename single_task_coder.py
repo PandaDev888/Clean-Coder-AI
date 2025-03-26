@@ -67,6 +67,7 @@ def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False
         human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed. ")
         if human_message in ["o", "ok"]:
             _update_file_descriptions(files)
+        return 
 
     _update_file_descriptions(files)
 
