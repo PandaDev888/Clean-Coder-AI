@@ -96,6 +96,7 @@ class Executor:
                         file.is_modified = True
                         break
 
+
         state = exchange_file_contents(state, self.files, self.work_dir)
 
         return state
@@ -107,6 +108,7 @@ class Executor:
 
         if bad_tool_call_looped(state):
             return "human_help"
+        # final response case
         elif (
             hasattr(last_message, "tool_calls")
             and len(last_message.tool_calls) > 0

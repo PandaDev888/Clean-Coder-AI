@@ -33,6 +33,7 @@ from src.utilities.langgraph_common_functions import (
 )
 from src.utilities.objects import CodeFile
 from src.agents.frontend_feedback import execute_screenshot_codes
+from src.linters.static_analisys import python_static_analysis
 
 load_dotenv(find_dotenv())
 log_file_path = os.getenv("LOG_FILE")
@@ -112,6 +113,12 @@ class Debugger:
                     if file.filename == filename:
                         file.is_modified = True
                         break
+            elif tool_call["name"] == "final_response_debugger":
+                files_to_check = [file for file in self.files if file.filename.endswith(".py") and file.is_modified]
+                analysis_result = python_static_analysis(files_to_check)
+                if analysis_result:
+                    state["messages"].append(HumanMessage(content=analysis_result))
+
         return state
 
     def check_log(self, state):
@@ -163,6 +170,10 @@ class Debugger:
         print_formatted("Debugger starting its work", color="green")
         print_formatted("🕵️‍♂️ Need to improve your code? I can help!", color="light_blue")
         file_contents = check_file_contents(self.files, self.work_dir)
+        # static analysis
+        files_to_check = [file for file in self.files if file.filename.endswith(".py") and file.is_modified]
+        analysis_result = python_static_analysis(files_to_check)
+
         inputs = {
             "messages": [
                 self.system_message,
@@ -178,6 +189,8 @@ class Debugger:
             print_formatted("Making screenshots, please wait a while...", color="light_blue")
             screenshot_msg = execute_screenshot_codes(self.playwright_code)
             inputs["messages"].append(screenshot_msg)
+        if analysis_result:
+            inputs["messages"].append(HumanMessage(content=analysis_result))
         self.debugger.invoke(inputs, {"recursion_limit": 150})
 
         return self.files
