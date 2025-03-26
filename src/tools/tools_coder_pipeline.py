@@ -2,7 +2,7 @@ from langchain_core.tools import tool
 from typing_extensions import Annotated
 import os
 from dotenv import load_dotenv, find_dotenv
-from src.utilities.syntax_checker_functions import check_syntax
+from src.linters.syntax_checker_functions import check_syntax
 from src.utilities.start_work_functions import file_folder_ignored
 from src.utilities.util_functions import join_paths, WRONG_TOOL_CALL_WORD
 from src.utilities.user_input import user_input

@@ -170,9 +170,6 @@ class Debugger:
         print_formatted("Debugger starting its work", color="green")
         print_formatted("🕵️‍♂️ Need to improve your code? I can help!", color="light_blue")
         file_contents = check_file_contents(self.files, self.work_dir)
-        # static analysis
-        files_to_check = [file for file in self.files if file.filename.endswith(".py") and file.is_modified]
-        analysis_result = python_static_analysis(files_to_check)
 
         inputs = {
             "messages": [
@@ -189,8 +186,6 @@ class Debugger:
             print_formatted("Making screenshots, please wait a while...", color="light_blue")
             screenshot_msg = execute_screenshot_codes(self.playwright_code)
             inputs["messages"].append(screenshot_msg)
-        if analysis_result:
-            inputs["messages"].append(HumanMessage(content=analysis_result))
         self.debugger.invoke(inputs, {"recursion_limit": 150})
 
         return self.files
