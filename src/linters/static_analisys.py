@@ -17,7 +17,7 @@ def python_static_analysis(files):
         result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
         if result.stdout.strip() != "All checks passed!":
             outputs += f"\n\n---\n{file.filename}:\n\n{result.stdout}"
-            print("all checks passed - debug")
+            print("not all checks passed - debug")
 
     return outputs
 
@@ -28,5 +28,7 @@ def python_static_analysis(files):
 # print("Exit Code:", result.returncode)
 
 if __name__ == "__main__":
-    file_list = ["manager.py",]
+    from src.utilities.objects import CodeFile
+    manager_file = CodeFile("manager.py")
+    file_list = [manager_file]
     print(python_static_analysis(file_list))
