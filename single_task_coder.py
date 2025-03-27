@@ -29,9 +29,7 @@ use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 def _update_file_descriptions(files):
     """Update vector database with descriptions of modified files."""
     if vdb_available():
-        modified_files = [file for file in files if file.is_modified]
-        if modified_files:
-            upsert_file_list(modified_files)
+        upsert_file_list([file for file in files if file.is_modified])
 
 
 def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False):
@@ -67,9 +65,7 @@ def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False
         human_message = user_input("Please test app and provide commentary if debugging/additional refinement is needed. ")
         if human_message in ["o", "ok"]:
             _update_file_descriptions(files)
-        return 
-
-    _update_file_descriptions(files)
+            return
 
     debugger = Debugger(files, work_dir, human_message, image_paths, playwright_codes)
     files = debugger.do_task(task, plan)
