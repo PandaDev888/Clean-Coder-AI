@@ -38,9 +38,9 @@ bar_format = (
 # embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
 #     model_name="all-mpnet-base-v2"
 # )
-embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-    api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
-)
+# embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+#     api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
+# )
 
 
 def is_code_file(file_path):

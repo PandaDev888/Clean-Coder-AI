@@ -17,7 +17,10 @@ def python_static_analysis(files):
         result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
         if result.stdout.strip() != "All checks passed!":
             outputs += f"\n\n---\n{file.filename}:\n\n{result.stdout}"
+<<<<<<< HEAD
             print("not all checks passed - debug")
+=======
+>>>>>>> bbaca63c50e08eafbbcc932c9a63b80a910f0202
 
     return outputs
 
