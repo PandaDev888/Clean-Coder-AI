@@ -27,9 +27,9 @@ def get_collection():
     chroma_client = chromadb.PersistentClient(path=os.getenv("WORK_DIR") + "/.clean_coder/chroma_base")
     from chromadb.utils import embedding_functions
 
-    embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-        api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
-    )
+    # embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+    #     api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"
+    # )
     try:
         return chroma_client.get_collection(name=collection_name)  # , embedding_function=embedding_function)
     except ValueError:
