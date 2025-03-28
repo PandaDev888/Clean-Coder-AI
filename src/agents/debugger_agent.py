@@ -8,6 +8,7 @@ from src.tools.tools_coder_pipeline import (
     prepare_insert_code_tool,
 )
 from typing import TypedDict, Sequence, List
+from typing_extensions import Annotated
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv, find_dotenv
@@ -34,6 +35,7 @@ from src.utilities.langgraph_common_functions import (
 from src.utilities.objects import CodeFile
 from src.agents.frontend_feedback import execute_screenshot_codes
 from src.linters.static_analisys import python_static_analysis
+from src.utilities.util_functions import load_prompt
 
 load_dotenv(find_dotenv())
 log_file_path = os.getenv("LOG_FILE")
@@ -41,11 +43,10 @@ frontend_url = os.getenv("FRONTEND_URL")
 
 
 @tool
-def final_response_debugger(test_instruction):
-    """Call that tool when all changes are implemented to tell the job is done.
-    tool input:
-    :param test_instruction: write detailed instruction for human what actions he need to do in order to check if
-    implemented changes work correctly."""
+def final_response_debugger(
+    test_instruction: Annotated[str, "Detailed instructions for human to test implemented changes"]
+):
+    """Call that tool when all changes are implemented to tell the job is done."""
     pass
 
 
@@ -53,10 +54,7 @@ class AgentState(TypedDict):
     messages: Sequence[BaseMessage]
 
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-
-with open(f"{parent_dir}/prompts/debugger_system.prompt", "r") as f:
-    system_prompt_template = f.read()
+system_prompt_template = load_prompt("debugger_system")
 
 
 class Debugger:
