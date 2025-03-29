@@ -8,9 +8,6 @@ load_dotenv(find_dotenv())
 
 
 def python_static_analysis(files):
-    # Run Ruff to lint a /directory
-    #result = subprocess.run(["ruff", "check", os.getenv("WORK_DIR"), "--config", "ruff-rules.toml"], capture_output=True, text=True, encoding="utf-8")
-    # Run Ruff to lint a files
     outputs = ""
     for file in files:
         command = ["ruff", "check", join_paths(os.getenv("WORK_DIR"), file.filename), "--config", "src/linters/ruff-rules.toml"]

@@ -230,7 +230,6 @@ def upsert_file_list(file_list):
             file_path = Path(file_path)
             docs.append(content)
             ids.append(file_path.name.replace("=", "/").removesuffix(".txt"))
-
     collection.upsert(documents=docs, ids=ids)
     print_formatted("Re-indexing of modified files completed.", color="green")
 
