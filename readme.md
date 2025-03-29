@@ -49,11 +49,11 @@ Create an entire web app ~~with~~ by Clean Coder:
 
 - Get project supervised by [Manager agent](https://clean-coder.dev/usage/manager/) with thoroughly-described tasks organized in Todoist, just like with a human scrum master.
 - Two-step planning module makes Clean Coder probably most intelligent [AI coder](https://clean-coder.dev/usage/programmer_pipeline/) available.
+- [Semantic search (RAG)](https://clean-coder.dev/advanced_features_installation/similarity_search_for_researcher/) for effective navigating even large codebases.
 - Allow AI to see frontend it creates with [frontend feedback feature](https://clean-coder.dev/features/frontend_feedback/). At the day of writing no other AI coder has that feature.
 - Create a [frontend based on images](https://clean-coder.dev/features/working_with_images/) with designs.
 - [Speak to Clean Coder](https://clean-coder.dev/features/talk_to_cc/) instead of writing.
 - Automatic file linting prevents from introducing incorrect changes and [log check for self-debug](https://clean-coder.dev/advanced_features_installation/logs_check/).
-- File Researcher agent with (but not only) [RAG tool](https://clean-coder.dev/advanced_features_installation/similarity_search_for_researcher/) for effective searching of project files.
 - [Sensitive files protection](https://clean-coder.dev/features/sensitive_file_protection/) from being watched by AI.
 
 
