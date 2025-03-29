@@ -117,6 +117,7 @@ class Debugger:
                 if analysis_result:
                     state["messages"].append(HumanMessage(content=analysis_result))
 
+
         return state
 
     def check_log(self, state):
@@ -178,6 +179,7 @@ class Debugger:
                 HumanMessage(content=f"Human feedback: {self.human_feedback}"),
             ]
         }
+
         if self.images:
             inputs["messages"].append(HumanMessage(content=self.images))
         if self.playwright_code:

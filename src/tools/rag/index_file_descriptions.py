@@ -264,7 +264,6 @@ def write_and_index_descriptions(file_list):
     # provide optionally which subfolders needs to be checked, if you don't want to describe all project folder
     write_file_descriptions(file_list)
     write_file_chunks_descriptions(file_list)
-
     upload_descriptions_to_vdb()
 
 

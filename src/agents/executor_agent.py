@@ -25,7 +25,6 @@ from src.utilities.objects import CodeFile
 
 load_dotenv(find_dotenv())
 
-
 @tool
 def final_response_executor(
     test_instruction: Annotated[str, "Detailed instructions for human to test implemented changes"]
@@ -90,7 +89,6 @@ class Executor:
                     if file.filename == filename:
                         file.is_modified = True
                         break
-
 
         state = exchange_file_contents(state, self.files, self.work_dir)
 

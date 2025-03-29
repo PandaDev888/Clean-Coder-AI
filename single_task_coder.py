@@ -72,6 +72,7 @@ def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False
     _update_file_descriptions(files)
 
 
+
 if __name__ == "__main__":
     work_dir = os.getenv("WORK_DIR")
     if not work_dir:
