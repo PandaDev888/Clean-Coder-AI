@@ -130,6 +130,7 @@ def planning(task, text_files, image_paths, work_dir, documentation=None, dir_tr
             file_contents=file_contents,
         )
     )
+
     print_formatted("👨‍💼📈 Planner here! Create plan of changes with me!", color="light_blue")
     images = convert_images(image_paths)
     message_content_without_imgs = f"Task:\n'''{task}'''"
