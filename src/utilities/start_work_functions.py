@@ -1,6 +1,7 @@
 """
 Place here functions that should be called when clean coder is started.
 """
+
 import os
 import fnmatch
 from termcolor import colored
@@ -9,19 +10,23 @@ from pathspec.patterns import GitWildMatchPattern
 
 
 def read_frontend_feedback_story():
-    frontend_feedback_story_path = os.path.join(Work.dir(), '.clean_coder', 'frontend_feedback_story.txt')
-    with open(frontend_feedback_story_path, 'r') as file:
+    frontend_feedback_story_path = os.path.join(Work.dir(), ".clean_coder", "frontend_feedback_story.txt")
+    with open(frontend_feedback_story_path, "r") as file:
         return file.read()
 
 
 def file_folder_ignored(path):
-    path = path.rstrip('/')  # Remove trailing slash if present
+    """
+    Determines if a file or folder should be ignored based on patterns in .coderignore.
+    Uses both PathSpec matching and fnmatch pattern matching for backwards compatibility.
+    """
+    path = path.rstrip("/")  # Remove trailing slash if present
     spec = PathSpec.from_lines(GitWildMatchPattern, CoderIgnore.get_forbidden())
     if spec.match_file(path):
         return True
     # old way of checking, to remove in future. For now still needed for checking exact folder matches
     for pattern in CoderIgnore.get_forbidden():
-        pattern = pattern.rstrip('/')  # Remove trailing slash from pattern if present
+        pattern = pattern.rstrip("/")  # Remove trailing slash from pattern if present
         if fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch(f"{path}/", f"{pattern}/"):
             return True
 
@@ -33,9 +38,9 @@ class CoderIgnore:
 
     @staticmethod
     def read_coderignore():
-        coderignore_path = os.path.join(Work.dir(), '.clean_coder', '.coderignore')
-        with open(coderignore_path, 'r') as file:
-            return [line.strip() for line in file if line.strip() and not line.startswith('#')]
+        coderignore_path = os.path.join(Work.dir(), ".clean_coder", ".coderignore")
+        with open(coderignore_path, "r") as file:
+            return [line.strip() for line in file if line.strip() and not line.startswith("#")]
 
     @staticmethod
     def get_forbidden():
@@ -70,5 +75,5 @@ def print_ascii_logo():
     print(colored(writing, color="white"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     read_frontend_feedback_story()

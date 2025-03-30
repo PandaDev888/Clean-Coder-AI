@@ -3,12 +3,12 @@ import yaml
 import sass
 from lxml import etree
 import re
-from src.utilities.print_formatters import print_formatted
+import esprima
 
 
 def check_syntax(file_content, filename):
     parts = filename.split(".")
-    extension = parts[-1] if len(parts) > 1 else ''
+    extension = parts[-1] if len(parts) > 1 else ""
     if extension == "py":
         return parse_python(file_content)
     elif extension in ["html", "htm"]:
@@ -40,12 +40,13 @@ def parse_python(code):
 def parse_html(html_content):
     parser = etree.HTMLParser(recover=True)  # Enable recovery mode
     try:
-        html_tree = etree.fromstring(html_content, parser)
+        etree.fromstring(html_content, parser)
         significant_errors = [
-            error for error in parser.error_log
+            error
+            for error in parser.error_log
             # Shut down some error types to be able to parse html from vue
-            #if not error.message.startswith('Tag')
-            #and "error parsing attribute name" not in error.message
+            # if not error.message.startswith('Tag')
+            # and "error parsing attribute name" not in error.message
         ]
         if not significant_errors:
             return "Valid syntax"
@@ -57,14 +58,15 @@ def parse_html(html_content):
 
 
 def parse_template(code):
-    for tag in ['div', 'p', 'span', 'main']:
-        function_response = check_template_tag_balance(code, f'<{tag}', f'</{tag}>')
+    for tag in ["div", "p", "span", "main"]:
+        function_response = check_template_tag_balance(code, f"<{tag}", f"</{tag}>")
         if function_response != "Valid syntax":
             return function_response
     return "Valid syntax"
 
 
-def parse_javascript(js_content):
+# simple way of parsing js, to remove
+def parse_javascript_basic(js_content):
     script_part_response = check_bracket_balance(js_content)
     if script_part_response != "Valid syntax":
         return script_part_response
@@ -79,10 +81,10 @@ def check_template_tag_balance(code, open_tag, close_tag):
     i = 0
     while i < len(code):
         # check for open tag plus '>' or space after
-        if code[i:i + open_tag_len] == open_tag and code[i + open_tag_len] in [' ', '>', '\n']:
+        if code[i : i + open_tag_len] == open_tag and code[i + open_tag_len] in [" ", ">", "\n"]:
             opened_tags_count += 1
             i += open_tag_len
-        elif code[i:i + close_tag_len] == close_tag:
+        elif code[i : i + close_tag_len] == close_tag:
             opened_tags_count -= 1
             i += close_tag_len
             if opened_tags_count < 0:
@@ -96,7 +98,7 @@ def check_template_tag_balance(code, open_tag, close_tag):
         return f"Invalid syntax, mismatch of {open_tag} and {close_tag}"
 
 
-def bracket_balance(code, beginnig_bracket='{', end_bracket='}'):
+def bracket_balance(code, beginnig_bracket="{", end_bracket="}"):
     opened_brackets_count = 0
 
     for char in code:
@@ -114,13 +116,13 @@ def bracket_balance(code, beginnig_bracket='{', end_bracket='}'):
 
 
 def check_bracket_balance(code):
-    bracket_response = bracket_balance(code, beginnig_bracket='(', end_bracket=')')
+    bracket_response = bracket_balance(code, beginnig_bracket="(", end_bracket=")")
     if bracket_response != "Valid syntax":
         return bracket_response
-    bracket_response = bracket_balance(code, beginnig_bracket='[', end_bracket=']')
+    bracket_response = bracket_balance(code, beginnig_bracket="[", end_bracket="]")
     if bracket_response != "Valid syntax":
         return bracket_response
-    bracket_response = bracket_balance(code, beginnig_bracket='{', end_bracket='}')
+    bracket_response = bracket_balance(code, beginnig_bracket="{", end_bracket="}")
     if bracket_response != "Valid syntax":
         return bracket_response
     return "Valid syntax"
@@ -128,7 +130,7 @@ def check_bracket_balance(code):
 
 def parse_scss(scss_code):
     # removing import statements as they cousing error, because function has no access to filesystem
-    scss_code = re.sub(r'@import\s+[\'"].*?[\'"];', '', scss_code)
+    scss_code = re.sub(r'@import\s+[\'"].*?[\'"];', "", scss_code)
     try:
         sass.compile(string=scss_code)
         return "Valid syntax"
@@ -138,25 +140,25 @@ def parse_scss(scss_code):
 
 # That function does not guarantee finding all the syntax errors in template and script part; but mostly works
 def parse_vue_basic(content):
-    start_tag_template = re.search(r'<template>', content).end()
-    end_tag_template = content.rindex('</template>')
+    start_tag_template = re.search(r"<template>", content).end()
+    end_tag_template = content.rindex("</template>")
     template = content[start_tag_template:end_tag_template]
     template_part_response = parse_template(template)
     if template_part_response != "Valid syntax":
         return template_part_response
 
     try:
-        script = re.search(r'<script[^>]*>(.*?)</script>', content, re.DOTALL).group(1)
+        script = re.search(r"<script[^>]*>(.*?)</script>", content, re.DOTALL).group(1)
     except AttributeError:
         return "Script part has no valid open/closing tags."
     script_part_response = check_bracket_balance(script)
     if script_part_response != "Valid syntax":
         return script_part_response
 
-    style_match = re.search(r'<style[^>]*>(.*?)</style>', content, re.DOTALL)
+    style_match = re.search(r"<style[^>]*>(.*?)</style>", content, re.DOTALL)
     if style_match:
         css = style_match.group(1)
-        if css:     # if for the case of empty css block
+        if css:  # if for the case of empty css block
             style_part_response = parse_scss(style_match.group(1))
             if style_part_response != "Valid syntax":
                 return style_part_response
@@ -164,9 +166,7 @@ def parse_vue_basic(content):
     return "Valid syntax"
 
 
-# function works, but not used by default as there could be problems with esprima installation
-def parse_javascript_esprima(js_content):
-    import esprima
+def parse_javascript(js_content):
     try:
         esprima.parseModule(js_content)
         return "Valid syntax"
@@ -179,14 +179,20 @@ def parse_javascript_esprima(js_content):
 def lint_vue_code(code_string):
     import subprocess
     import os
-    eslint_config_path = '.eslintrc.js'
+
+    eslint_config_path = ".eslintrc.js"
     temp_file_path = "dzik.vue"
     # Create a temporary file
-    with open(temp_file_path, 'w', encoding='utf-8') as file:
+    with open(temp_file_path, "w", encoding="utf-8") as file:
         file.write(code_string)
     try:
         # Run ESLint on the temporary file
-        result = subprocess.run(['D:\\NodeJS\\npx.cmd', 'eslint', '--config', eslint_config_path, temp_file_path, '--fix'], check=True, text=True, capture_output=True)
+        result = subprocess.run(
+            ["D:\\NodeJS\\npx.cmd", "eslint", "--config", eslint_config_path, temp_file_path, "--fix"],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
         print("Linting successful:", result.stdout)
     except subprocess.CalledProcessError as e:
         print("Error during linting:", e.stderr)
@@ -213,137 +219,42 @@ def parse_yaml(yaml_string):
         return f"YAML error: {e}"
 
 
-
 if __name__ == "__main__":
     code = """
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+  <div class="contact-image mobile"></div>
 
-// Scale indicator component showing agreement levels from 1-5
-const ScaleIndicator = () => (
-  <div className="flex flex-col items-center mb-12">
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="flex justify-between text-sm text-gray-600 mb-1">
-        <span>Highly disagree</span>
-        <span>Highly agree</span>
-      </div>
-      <div className="relative w-full h-[2px] bg-gray-200 mb-8">
-        {Array.from({ length: 5 }, (_, i) => i + 1).map((num) => (
-          <div
-            key={num}
-            className="absolute -translate-x-1/2"
-            style={{ left: `${((num - 1) * 100) / 4}%` }}
-          >
-            <div className="absolute -top-3 w-[2px] h-[6px] bg-gray-300" />
-            <div className="absolute top-4 text-sm text-gray-600">
-              {num}
-            </div>
-          </div>
-        ))}
+  <div class="static-page">
+    <div class="content contact-page">
+
+      <div class="contact-details-wrapper">
+        <div class="contact-details">
+          <h1 class="static-page-header">Kontakt</h1>
+
+          <p class="static-page-paragraph">
+            <span class="contact-box">
+              Masz sugestie dotyczące profilu lub potrzebujesz naszego wsparcia?<br>
+              Skontaktuj się z nami!
+
+              <span class="content-wrapper">
+                <v-icon>mdi-email-outline</v-icon>
+                <a class="link" href="mailto:biuro@takzyli.pl">biuro@takzyli.pl</a>
+              </span>
+
+              <span class="content-wrapper">
+                <v-icon>mdi-phone</v-icon>
+                <a class="link" href="tel:+48533769790">+48 533 769 790</a>
+              </span>
+            </span>
+          </p>
+
+          <p class="static-page-paragraph">Zapraszamy do kontaktu!</p>
+
+          <img src="@/assets/images/logo-sign.svg" class="logo-sign" alt="Logo Sign" />
+        </div>
+
+        <div class="contact-image"></div>
       </div>
     </div>
   </div>
-);
-
-function NavHeader() {
-  const router = useRouter();
-  return (
-    <div className="flex flex-col items-center">
-      <div className="flex items-center justify-start w-full mb-2">
-        <button
-          className="text-gray-700 hover:text-gray-900 mr-4"
-          onClick={() => router.back()}
-          aria-label="Go back"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </button>
-        <h1 className="flex-grow text-center text-xl font-bold">Survey Results</h1>
-      </div>
-    </div>
-  );
-}
-
-export default function Page({ params }: { params: Promise<{ uuid: string }> }) {
-  const { uuid } = React.use(params);
-  const [profile, setProfile] = useState<any>(null);
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/profile/${uuid}`
-        );
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile data');
-        }
-        const data = await response.json();
-        setProfile(data);
-      } catch (err: any) {
-        console.error('Error details:', err);
-        setError(err.message || 'An error occurred');
-      }
-    };
-
-    fetchProfile();
-  }, [uuid]);
-
-  if (error) {
-    return (
-      <div className="p-4 text-red-500">
-        {error}
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="p-4">
-        Loading profile data...
-      </div>
-    );
-  }
-
-  if (!profile.survey_data) {
-    return <div className="p-4 text-gray-700">No survey data available.</div>;
-  }
-
-  return (
-    <div className="px-4 py-2 text-gray-900 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <NavHeader />
-        <ScaleIndicator />
-      </div>
-
-      {profile.survey_data.map((category) => (
-        <div key={category.name} className="mb-10">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">
-            {category.name}
-          </h2>
-          {category.statements.map((statement: any) => (
-            <div key={statement.id} className="flex items-start py-4 border-b border-gray-200 last:border-b-0">
-              <span className="text-2xl font-semibold text-gray-900 w-8 text-center">
-                {statement.value}
-              </span>
-              <p className="text-base text-gray-700 leading-relaxed flex-1 ml-6">
-                {statement.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
 """
-    print(parse_tsx(code))
+    print(parse_html(code))

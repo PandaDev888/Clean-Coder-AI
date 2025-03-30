@@ -1,4 +1,9 @@
-from src.tools.rag.index_file_descriptions import write_file_descriptions, write_file_chunks_descriptions, upsert_file_list
+from src.tools.rag.index_file_descriptions import (
+    write_file_descriptions,
+    write_file_chunks_descriptions,
+    upsert_file_list,
+)
+
 
 def update_descriptions(file_list):
     """
