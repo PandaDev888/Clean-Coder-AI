@@ -7,7 +7,7 @@
   <br>
   <br>
   <a href="https://cleancoder.byst.re/Agent_nr.6-Trailer.mp4" target="_blank" title="Trailer">
-    <img src="/non_src/assets/Miniature_trailer.png" width="600" alt="Trailer">
+    <img src="/non_src/assets/Miniature_trailer.jpg" width="600" alt="Trailer">
   </a>
   <br>
   <h3>⭐️ Your star motivates us to introduce new cool features! ⭐️</h3>  
