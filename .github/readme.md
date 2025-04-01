@@ -45,6 +45,17 @@ Create an entire web app ~~with~~ by Clean Coder:
 </div>
 
 
+## 📊 Why Clean Coder?
+
+| Feature | Clean Coder | Cline | Aider | Cursor |
+|---------|-------------|--------|-------|---------|
+| Intelligence | 🟢 Two-step Planer agent for thinking only  | 🟡 One-step Plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
+| Codebase Research | 🟢 File descriptions RAG, codebase size independent | ❌ Simple file browsing approach only | 🟡 Repo map | 🟡 Also RAG, but not describes code before indexing  |
+| Project Management | 🟢 Todoist integration | ❌ No | ❌ No | ❌ No |
+| Frontend Visual testing | 🟢 Frontend Feedback agent | 🟢 Webview | ❌ No | ❌ No |
+| UI | ❌ Terminal only | 🟢 IDE | 🟢 Webchat | 🟢 IDE |
+
+
 ## ✨ Key advantages:
 
 - Get project supervised by [Manager agent](https://clean-coder.dev/usage/manager/) with thoroughly-described tasks organized in Todoist, just like with a human scrum master.
@@ -56,15 +67,6 @@ Create an entire web app ~~with~~ by Clean Coder:
 - Automatic file linting prevents from introducing incorrect changes and [log check for self-debug](https://clean-coder.dev/advanced_features_installation/logs_check/).
 - [Sensitive files protection](https://clean-coder.dev/features/sensitive_file_protection/) from being watched by AI.
 
-## 🔄 Comparison with Other AI Coders
-
-| Feature | Clean Coder | Cline | Aider | Cursor |
-|---------|-------------|--------|-------|---------|
-| Intelligence | 🟢 Two-step Planer agent for thinking only  | 🟡 One-step Plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
-| Codebase Research | 🟢 File descriptions RAG, codebase size independent | ❌ Simple file browsing approach only | 🟡 Repo map | 🟡 Also RAG, but not describes code before indexing  |
-| Project Management | 🟢 Todoist integration | ❌ No | ❌ No | ❌ No |
-| Frontend Visual testing | 🟢 Frontend Feedback agent | 🟢 Webview | ❌ No | ❌ No |
-| UI | ❌ Terminal only | 🟢 Webchat | 🟢 IDE | 🟢 IDE |
 
 ## ⛓️‍💥 Something got broken?
 
