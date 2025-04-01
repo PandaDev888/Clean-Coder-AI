@@ -60,10 +60,11 @@ Create an entire web app ~~with~~ by Clean Coder:
 
 | Feature | Clean Coder | Cline | Aider | Cursor |
 |---------|-------------|--------|-------|---------|
-| Intelligence | 🟢 Separate, Two-step Planer agent for thinking only  | ❌ No thinking agent | 🟡 One-step Architect agent | ❌ No thinking agent |
-| Codebase Research | 🟢 Codebase size independent semantic search | ❌ Simple go-through-files-and-folders approach | 🟡 Repo map | 🟢 Codebase size independent semantic search  |
+| Intelligence | 🟢 Two-step Planer agent for thinking only  | 🟡 One-step Plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
+| Codebase Research | 🟢 File descriptions RAG, codebase size independent | ❌ Simple file browsing approach only | 🟡 Repo map | 🟡 Also RAG, but not describes code before indexing  |
 | Project Management | 🟢 Todoist integration | ❌ No | ❌ No | ❌ No |
-| Frontend Visual testing | 🟢 Frontend Feedback agent | ❌ No | ❌ No | ❌ No |
+| Frontend Visual testing | 🟢 Frontend Feedback agent | 🟢 Webview | ❌ No | ❌ No |
+| UI | ❌ Terminal only | 🟢 Webchat | 🟢 IDE | 🟢 IDE |
 
 ## ⛓️‍💥 Something got broken?
 
