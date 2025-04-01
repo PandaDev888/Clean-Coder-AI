@@ -56,6 +56,16 @@ Create an entire web app ~~with~~ by Clean Coder:
 - Automatic file linting prevents from introducing incorrect changes and [log check for self-debug](https://clean-coder.dev/advanced_features_installation/logs_check/).
 - [Sensitive files protection](https://clean-coder.dev/features/sensitive_file_protection/) from being watched by AI.
 
+## 🔄 Comparison with Other AI Coders
+
+| Feature | Clean Coder | Cline | Aider | Cursor |
+|---------|-------------|--------|-------|---------|
+| Intelligence | 🟢 Separate, Two-step Planer agent for thinking only  | ❌ No thinking agent | 🟡 One-step Architect agent | ❌ No thinking agent |
+| Codebase Research | 🟢 RAG-powered semantic search | ❌ No | 🟡 Limited | 🟡 Limited |
+| Project Management | 🟢 Full Todoist integration | ❌ No | ❌ No | ❌ No |
+| Frontend Feedback | 🟢 Visual testing capability | ❌ No | ❌ No | ❌ No |
+| Image-based Development | 🟢 Design to code conversion | ❌ No | ❌ No | 🟡 Limited |
+| Voice Interaction | 🟢 Full voice command support | ❌ No | ❌ No | ❌ No |
 
 ## ⛓️‍💥 Something got broken?
 

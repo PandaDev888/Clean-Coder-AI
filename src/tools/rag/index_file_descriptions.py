@@ -221,6 +221,7 @@ def upsert_file_list(file_list):
 
     docs = []
     ids = []
+    print(f"file_list: {file_list}")
     # open every file starting with descriptions_folder/file and add content to list
     for file in file_list:
         pattern = os.path.join(descriptions_folder, f"{file.filename.replace('/', '=').removesuffix('.txt')}*")
@@ -230,6 +231,7 @@ def upsert_file_list(file_list):
             file_path = Path(file_path)
             docs.append(content)
             ids.append(file_path.name.replace("=", "/").removesuffix(".txt"))
+    print(f"ids: {ids}")
     collection.upsert(documents=docs, ids=ids)
     print_formatted("Re-indexing of modified files completed.", color="green")
 
