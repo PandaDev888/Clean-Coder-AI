@@ -49,11 +49,11 @@ Create an entire web app ~~with~~ by Clean Coder:
 
 | Feature | Clean Coder | Cline | Aider | Cursor |
 |---------|-------------|--------|-------|---------|
-| Intelligence | 🟢 Two-step Planer agent for thinking only  | 🟡 One-step Plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
-| Codebase Research | 🟢 File descriptions RAG, codebase size independent | ❌ Simple file browsing approach only | 🟡 Repo map | 🟡 Also RAG, but not describes code before indexing  |
-| Project Management | 🟢 Todoist integration | ❌ No | ❌ No | ❌ No |
-| Frontend Visual testing | 🟢 Frontend Feedback agent | 🟢 Webview | ❌ No | ❌ No |
-| UI | ❌ Terminal only | 🟢 IDE | 🟢 Webchat | 🟢 IDE |
+| Intelligence | ✅ Two-step Planer agent for thinking only  | 🟡 One-step Plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
+| Codebase Research | ✅ File descriptions RAG, codebase size independent | ❌ Simple file browsing approach only | 🟡 Repo map | 🟡 Also RAG, but not describes code before indexing  |
+| Project Management | ✅ Todoist integration | ❌ No | ❌ No | ❌ No |
+| Frontend Visual testing | ✅ Frontend Feedback agent | ✅ Webview | ❌ No | ❌ No |
+| UI | ❌ Terminal only | ✅ IDE | ✅ Webchat | ✅ IDE |
 
 
 ## ✨ Key advantages:
