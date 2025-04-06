@@ -1,4 +1,6 @@
 <div align="center">
+  <img src="/non_src/assets/starting_video.gif" alt="Demo">
+  <br>
   <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
   <br> 
   <h2>Probably the most intelligent AI coder out there.</h2>
@@ -43,6 +45,17 @@ Create an entire web app ~~with~~ by Clean Coder:
   <img src="https://img.youtube.com/vi/aNpB-Tw-YPw/maxresdefault.jpg" width="600" alt="Demo video">
 </a>
 </div>
+
+
+## 📊 Why Clean Coder?
+
+| Feature | Clean Coder | Cline | Aider | Cursor |
+|---------|-------------|--------|-------|---------|
+| **Intelligence** | ✅ Two-step Planer agent for thinking only  | 🟡 One-step plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
+| **Codebase Research** | ✅ File descriptions RAG, codebase size independent | ❌ Simple file browsing approach only | 🟡 Repo map | 🟡 Also RAG, but not describes code before indexing  |
+| **Project Management** | ✅ Full Todoist integration | ❌ No | ❌ No | ❌ No |
+| **Frontend Visual testing** | ✅ Frontend Feedback agent | ✅ Webview | ❌ No | ❌ No |
+| **UI** | ❌ Terminal only | ✅ IDE | ✅ Webchat | ✅ IDE |
 
 
 ## ✨ Key advantages:
