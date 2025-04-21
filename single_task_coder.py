@@ -28,7 +28,7 @@ use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 
 
 def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False):
-    researcher = Researcher(work_dir)
+    researcher = Researcher()
     files, image_paths = researcher.research_task(task)
     # documentation = None
     # if doc_harvest:
