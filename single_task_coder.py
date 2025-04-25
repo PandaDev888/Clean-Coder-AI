@@ -26,15 +26,11 @@ from src.linters.static_analisys import python_static_analysis
 use_frontend_feedback = bool(os.getenv("FRONTEND_URL"))
 
 
-def run_clean_coder_pipeline(task: str, work_dir: str, doc_harvest: bool = False):
-    researcher = Researcher()
+def run_clean_coder_pipeline(task: str, work_dir: str, task_id: str=None):
+    researcher = Researcher(task_id=task_id)
     files, image_paths = researcher.research_task(task)
-    # documentation = None
-    # if doc_harvest:
-    #     harvester = Doc_harvester()
-    #     documentation = harvester.find_documentation(task, work_dir)
 
-    plan = planning(task, files, image_paths, work_dir) #, documentation=documentation)
+    plan = planning(task, files, image_paths, work_dir)
 
     executor = Executor(files, work_dir)
 
