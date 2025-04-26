@@ -13,12 +13,13 @@ elif load_dotenv(find_dotenv()) and not os.getenv("TODOIST_API_KEY"):
     add_todoist_envs()
 
 from typing import TypedDict, Sequence
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langchain_core.load import dumps
 from langgraph.graph import StateGraph
 from src.tools.tools_project_manager import add_task, modify_task, finish_project_planning, reorder_tasks
-from src.tools.tools_coder_pipeline import prepare_list_dir_tool, prepare_see_file_tool, ask_human_tool
+from src.tools.tools_coder_pipeline import prepare_list_dir_tool, prepare_see_file_tool, ask_human_tool, retrieve_files_by_semantic_query
 from src.tools.rag.index_file_descriptions import prompt_index_project_files
+from src.utilities.util_functions import save_state_history_to_disk, join_paths
 from src.utilities.manager_utils import (
     actualize_tasks_list_and_progress_description,
     setup_todoist_project_if_needed,
@@ -29,14 +30,14 @@ from src.utilities.langgraph_common_functions import (
     call_tool,
     multiple_tools_msg,
     no_tools_msg,
-    empty_message_msg,
 )
 from src.utilities.start_project_functions import set_up_dot_clean_coder_dir
-from src.utilities.util_functions import join_paths
 from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.print_formatters import print_formatted
+from src.tools.rag.retrieval import vdb_available
 import json
 import os
+import uuid
 
 
 class AgentState(TypedDict):
@@ -58,20 +59,33 @@ class Manager:
         self.saved_messages_path = join_paths(self.work_dir, ".clean_coder/manager_messages.json")
 
     def call_model_manager(self, state):
-        self.save_messages_to_disk(state)
+        save_state_history_to_disk(state, self.saved_messages_path)
         state = call_model(state, self.llms)
         state = self.cut_off_context(state)
-        state = call_tool(state, self.tools)
-        messages = [msg for msg in state["messages"] if msg.type == "ai"]
-        last_ai_message = messages[-1]
+
+        ai_messages = [msg for msg in state["messages"] if msg.type == "ai"]
+        last_ai_message = ai_messages[-1]
+        # in case model will return empty message (that strange thing happens for 3.5 and 3.7 sonnet after task execution),
+        # we will replace it with tool call message to go with next task
         if not last_ai_message.content and not last_ai_message.tool_calls:
             state["messages"].pop()
-            state["messages"].append(HumanMessage(content=empty_message_msg))
-        elif len(last_ai_message.tool_calls) == 0:
+            state["messages"].append(AIMessage(
+                content="Proceeding with next task.",
+                tool_calls=[
+                    {
+                        "name": "finish_project_planning",
+                        "args": {"dummy": "ok"},
+                        "id": str(uuid.uuid4()),
+                        "type": "tool_call",
+                    }
+                ]
+            ))
+        state = call_tool(state, self.tools)
+        if len(last_ai_message.tool_calls) == 0:
             state["messages"].append(HumanMessage(content=no_tools_msg))
-
         state = actualize_tasks_list_and_progress_description(state)
         return state
+
 
     # Logic for conditional edges
     def after_agent_condition(self, state):
@@ -116,11 +130,13 @@ class Manager:
             add_task,
             modify_task,
             reorder_tasks,
-            list_dir,
-            see_file,
             ask_human_tool,
             finish_project_planning,
+            list_dir,
+            see_file,
         ]
+        if vdb_available():
+            tools.append(retrieve_files_by_semantic_query)
         return tools
 
     # workflow definition
@@ -133,7 +149,7 @@ class Manager:
 
     def run(self):
         print_formatted("😀 Hello! I'm Manager agent. Let's plan your project together!", color="green")
-
+        
         messages = get_manager_messages(self.saved_messages_path)
         inputs = {"messages": messages}
         self.manager.invoke(inputs, {"recursion_limit": 1000})

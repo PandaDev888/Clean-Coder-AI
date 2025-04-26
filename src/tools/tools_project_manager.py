@@ -3,7 +3,7 @@ from typing_extensions import Annotated
 from todoist_api_python.api import TodoistAPI
 import os
 from src.utilities.print_formatters import print_formatted, print_text_snippet
-from src.utilities.manager_utils import actualize_progress_description_file
+from src.utilities.manager_utils import actualize_progress_description_file, research_second_task
 from src.utilities.user_input import user_input
 from src.utilities.graphics import task_completed_animation
 from src.utilities.util_functions import join_paths
@@ -13,6 +13,7 @@ import uuid
 import requests
 from requests.exceptions import HTTPError
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 
 load_dotenv(find_dotenv())
@@ -23,6 +24,8 @@ load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
 todoist_api_key = os.getenv("TODOIST_API_KEY")
 todoist_api = TodoistAPI(todoist_api_key)
 
+# Create a persistent ThreadPoolExecutor for background tasks
+background_executor = ThreadPoolExecutor(max_workers=1)
 
 @tool
 def add_task(
@@ -114,28 +117,38 @@ def reorder_tasks(
 
 @tool
 def finish_project_planning(dummy: Annotated[str, "Type 'ok' to proceed."]):
-    """Call that tool to fire execution of top task from list. Use tool when all task in Todoist correctly reflect work. No extra tasks or tasks with
-    overlapping scope allowed.
-    """
+    """Call that tool to fire execution of top task from list. Use tool when all task in Todoist correctly reflect work."""
     human_message = user_input(
         "Project planning finished. Provide your proposition of changes in task list or type (o)k to continue...\n"
     )
     if human_message not in ["o", "ok"]:
         return f"Human: {human_message}"
-    # Get first task and it's name and description
-    task = todoist_api.get_tasks(project_id=os.getenv("TODOIST_PROJECT_ID"))[0]
-    task_name_description = f"{task.content}\n\n{task.description}"
+        
+    # Get tasks
+    tasks = todoist_api.get_tasks(project_id=os.getenv("TODOIST_PROJECT_ID"))
+    if not tasks:
+        return "No tasks to execute"
+        
+    first_task = tasks[0]
+    task_name_description = f"{first_task.content}\n\n{first_task.description}"
+
+    # Start background research of second task if available and not researched yet
+    if len(tasks) >= 2:
+        second_task = tasks[1]
+        history_file = join_paths(work_dir, ".clean_coder", f"research_history_task_{second_task.id}.json")
+        if not os.path.exists(history_file):
+            background_executor.submit(research_second_task, second_task)
 
     # Execute the main pipeline to implement the task
     print_formatted("Asked programmer to execute task:", color="light_blue")
-    print_text_snippet(task.description, title=task.content)
-    run_clean_coder_pipeline(task_name_description, work_dir)
-
-    # ToDo: git upload
+    print_text_snippet(first_task.description, title=first_task.content)
+    run_clean_coder_pipeline(task_name_description, work_dir, task_id=first_task.id)
 
     actualize_progress_description_file(task_name_description)
 
     # Mark task as done
-    todoist_api.close_task(task_id=task.id)
+    todoist_api.close_task(task_id=first_task.id)
 
     task_completed_animation()
+
+    return "Task completed successfully"

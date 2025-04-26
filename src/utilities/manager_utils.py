@@ -1,6 +1,7 @@
 """
 In manager_utils.py we are placing all functions used by manager agent only, which are not tools.
 """
+# imports
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage, AIMessage
 from src.utilities.llms import init_llms_medium_intelligence
 from src.utilities.util_functions import join_paths, read_coderrules, list_directory_tree, load_prompt
@@ -101,12 +102,7 @@ def get_project_tasks_and_epics():
     tasks_without_epic = [task for task in tasks if task.section_id is None]
     if tasks_without_epic:
         output_string += "## Tasks without epic:\n\n"
-        output_string += "\n".join(
-            f"Task:\nid: {task.id}, \nName: {task.content}, \nDescription: \n'''{task.description}''', \nOrder: {task.order}\n"
-            for task in tasks_without_epic
-        )
-    output_string += "\n###\n"
-    if not tasks:
+
         output_string = "<empty>"
     return output_string
 
@@ -277,7 +273,8 @@ def actualize_tasks_list_and_progress_description(state):
         content=tasks_progress_template.format(tasks=project_tasks, progress_description=progress_description),
         tasks_and_progress_message=True,
     )
-    state["messages"].insert(1, tasks_and_progress_msg)
+    # insert tasks message near the end of conversation to ensure AI task list is most actual
+    state["messages"].insert(-2, tasks_and_progress_msg)
     return state
 
 
@@ -291,4 +288,28 @@ def load_system_message():
 
     return SystemMessage(
         content=system_prompt_template.format(project_plan=project_plan, project_rules=read_coderrules())
+    )
+
+
+def research_second_task(task) -> None:
+    """Research provided task and add results to its description."""
+    from src.agents.researcher_agent import Researcher  # Import here to avoid circular imports
+
+    # Run researcher on task
+    researcher = Researcher(silent=True, task_id=task.id)
+    files, image_paths = researcher.research_task(
+        f"{task.content}\n\n{task.description}"
+    )
+
+    # Format researched files
+    files_text = "\n".join(f"- {f.filename}" for f in files)
+    images_text = "\n".join(f"- {img}" for img in image_paths)
+    researched_files_text = f"Files to modify:\n{files_text}\n\nTemplate images:\n{images_text}"
+
+    # Update task description
+    new_description = task.description + f"\n\n<researched_files>\n{researched_files_text}\n</researched_files>"
+
+    todoist_api.update_task(
+        task_id=task.id,
+        description=new_description
     )

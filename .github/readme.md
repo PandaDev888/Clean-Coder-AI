@@ -1,11 +1,11 @@
 <div align="center">
   <img src="/non_src/assets/starting_video.gif" alt="Demo">
   <br>
-  <img src="/non_src/assets/logo_wide_2.png" alt="Logo">
+  <img src="/non_src/assets/logo_wide_3.jpg" alt="Logo">
   <br> 
   <h2>Probably the most intelligent AI coder out there.</h2>
   <br>
-  Clean Coder is your 2-in-1 AI Scrum Master and Developer. Delegate planning, managing, and coding to AI. Agents create tasks within Todoist, write code, and test it, helping you create great projects with minimal effort!
+  Clean Coder is your 2-in-1 AI Scrum Master and Developer. Equipped with most intelligent reasoning system and most andvanced codebase research tool, it makes your code written with absolute minimum time investment on your part!
   <br>
   <br>
     <h3>⭐️ Your star motivates us to introduce new cool features! ⭐️</h3>  
@@ -50,6 +50,12 @@ Create an entire web app ~~with~~ by Clean Coder:
 
 ## 📊 Why Clean Coder?
 
+Our dream is to create a fully autonomous programmer one day, letting you relax (or at least do another job 😜) while your coding job will be done by AI.
+
+That's why we care about making Clean Coder have top intelligence level and be equipped with most modern automation tools.
+
+Learn more about Clean Coder's idea [here](https://clean-coder.dev/faq/why_clean_coder/).
+
 | Feature | Clean Coder | Cline | Aider | Cursor |
 |---------|-------------|--------|-------|---------|
 | **Intelligence** | ✅ Two-step Planer agent for thinking only  | 🟡 One-step plan mode | 🟡 One-step Architect agent | ❌ No thinking agent |
@@ -61,7 +67,7 @@ Create an entire web app ~~with~~ by Clean Coder:
 
 ## ✨ Key advantages:
 
-- Get project supervised by [Manager agent](https://clean-coder.dev/usage/manager/) with thoroughly-described tasks organized in Todoist, just like with a human scrum master.
+- Get project supervised by [Manager agent](https://clean-coder.dev/usage/manager/) with tasks organized in Todoist, just like with a human scrum master.
 - Two-step planning module makes Clean Coder probably most intelligent [AI coder](https://clean-coder.dev/usage/programmer_pipeline/) available.
 - [Semantic search (RAG)](https://clean-coder.dev/advanced_features_installation/similarity_search_for_researcher/) for effective navigating even large codebases.
 - Allow AI to see frontend it creates with [frontend feedback feature](https://clean-coder.dev/features/frontend_feedback/). At the day of writing no other AI coder has that feature.
