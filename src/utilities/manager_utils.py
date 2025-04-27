@@ -297,19 +297,6 @@ def research_second_task(task) -> None:
 
     # Run researcher on task
     researcher = Researcher(silent=True, task_id=task.id)
-    files, image_paths = researcher.research_task(
+    researcher.research_task(
         f"{task.content}\n\n{task.description}"
-    )
-
-    # Format researched files
-    files_text = "\n".join(f"- {f.filename}" for f in files)
-    images_text = "\n".join(f"- {img}" for img in image_paths)
-    researched_files_text = f"Files to modify:\n{files_text}\n\nTemplate images:\n{images_text}"
-
-    # Update task description
-    new_description = task.description + f"\n\n<researched_files>\n{researched_files_text}\n</researched_files>"
-
-    todoist_api.update_task(
-        task_id=task.id,
-        description=new_description
     )

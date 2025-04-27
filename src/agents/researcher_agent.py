@@ -26,7 +26,7 @@ from src.utilities.langgraph_common_functions import (
     after_ask_human_condition,
     no_tools_msg,
 )
-from src.utilities.print_formatters import print_formatted, print_tool_message
+from src.utilities.print_formatters import print_formatted, print_tool_message, print_formatted_content
 from src.utilities.llms import init_llms_medium_intelligence
 
 import os
@@ -129,7 +129,7 @@ class Researcher:
         Handles the logic for uploading and confirming previous research session.
         Returns (result, updated_messages):
             - result: (text_files_saved, image_paths_saved) if approved, else None
-            - updated_messages: updated messages list if not approved, else None
+            - updated_messages: updated messages list with human response
         """
         messages = [system_message] + self.prev_messages
         # Find the last AI message with a final_response_researcher tool call
@@ -140,14 +140,14 @@ class Researcher:
                 break
 
         print_formatted("Uploading previous research session...", color="magenta")
-        args = final_resp_msg.tool_calls[0]["args"]
-        text_files_saved = set(CodeFile(f) for f in args["files_to_work_on"] + args["reference_files"])
-        image_paths_saved = args["template_images"]
-        print_tool_message("final_response_researcher", args)
+        tool_call_args = final_resp_msg.tool_calls[0]["args"]
+        text_files_saved = set(CodeFile(f) for f in tool_call_args["files_to_work_on"] + tool_call_args["reference_files"])
+        image_paths_saved = tool_call_args["template_images"]
+        print_formatted_content(final_resp_msg)
+
         state = {"messages": messages}
         state = ask_human(state)
-        approved = state["messages"][-1].content == "Approved by human"
-        return ((text_files_saved, image_paths_saved), None) if approved else (None, state["messages"])
+        return (text_files_saved, image_paths_saved), state["messages"]
 
     def research_task(self, task):
         if not self.silent:
@@ -159,14 +159,11 @@ class Researcher:
             content=system_prompt_template.format(task=task, project_rules=read_coderrules())
         )
 
+        # upload previous research or start brand new one
         if self.prev_messages:
-            result, updated_messages = self._start_from_previous_research(system_message)
-            if result is not None:
-                return result
-            if updated_messages is not None:
-                messages = updated_messages
-            else:
-                messages = [system_message] + self.prev_messages
+            research_result, messages = self._start_from_previous_research(system_message)
+            if messages[-1].content == "Approved by human":
+                return research_result
         else:
             messages = [system_message, HumanMessage(content=list_directory_tree(work_dir))]
 
