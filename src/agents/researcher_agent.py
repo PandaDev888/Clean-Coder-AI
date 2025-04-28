@@ -26,7 +26,7 @@ from src.utilities.langgraph_common_functions import (
     after_ask_human_condition,
     no_tools_msg,
 )
-from src.utilities.print_formatters import print_formatted, print_tool_message, print_formatted_content
+from src.utilities.print_formatters import print_formatted, print_formatted_content
 from src.utilities.llms import init_llms_medium_intelligence
 
 import os
@@ -73,7 +73,7 @@ class Researcher:
         # Try to load previous research session for this task (if any)
         self.prev_messages: List[BaseMessage] = []
         if task_id:
-            history_file = join_paths(work_dir, ".clean_coder", f"research_history_task_{task_id}.json")
+            history_file = join_paths(work_dir, ".clean_coder", "research_histories", f"research_history_task_{task_id}.json")
             if os.path.exists(history_file):
                 self.prev_messages = load_state_history_from_disk(history_file)
 
@@ -116,7 +116,7 @@ class Researcher:
             if self.silent:
                 state["messages"].append(HumanMessage(content="Approved automatically"))    # Dummy message to fullfil state, to align with "Approved by human" message in loun mode
                 # Save research history to file
-                history_file = os.path.join(work_dir, ".clean_coder", f"research_history_task_{self.task_id}.json")
+                history_file = join_paths(work_dir, ".clean_coder", "research_histories", f"research_history_task_{self.task_id}.json")
                 save_state_history_to_disk(state, history_file)
                 return END  # Skip human approval in silent mode
             return "human"
