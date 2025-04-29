@@ -116,13 +116,19 @@ class Researcher:
             if self.silent:
                 state["messages"].append(HumanMessage(content="Approved automatically"))    # Dummy message to fullfil state, to align with "Approved by human" message in loun mode
                 # Save research history to file
-                history_file = join_paths(work_dir, ".clean_coder", "research_histories", f"research_history_task_{self.task_id}.json")
+                history_file = join_paths(
+                    work_dir,
+                    ".clean_coder",
+                    "research_histories",
+                    f"research_history_task_{self.task_id}.json",
+                )
+                # Ensure the directory exists before writing
+                os.makedirs(os.path.dirname(history_file), exist_ok=True)
                 save_state_history_to_disk(state, history_file)
                 return END  # Skip human approval in silent mode
             return "human"
         else:
             return "agent"
-
     # just functions
     def _start_from_previous_research(self, system_message):
         """
