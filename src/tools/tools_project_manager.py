@@ -17,7 +17,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 load_dotenv(find_dotenv())
-load_dotenv()
 
 work_dir = os.getenv("WORK_DIR")
 load_dotenv(join_paths(work_dir, ".clean_coder/.env"))
