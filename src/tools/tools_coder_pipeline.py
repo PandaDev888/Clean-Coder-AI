@@ -49,7 +49,7 @@ def prepare_see_file_tool(work_dir):
     @tool
     def see_file(filename: Annotated[str, "Name and path of file to check."]):
         """
-        Check contents of file.
+        Check contents of code file.
         """
         try:
             if file_folder_ignored(filename):
@@ -65,6 +65,16 @@ def prepare_see_file_tool(work_dir):
             return f"{type(e).__name__}: {e}"
 
     return see_file
+
+@tool
+def see_image(filename: Annotated[str, "Name and path of image file to check."]):
+    """
+    Check contents of image file.
+    """
+    if file_folder_ignored(filename):
+        return "You are not allowed to work with this file."
+    return "Image added to context."
+
 
 
 @tool
