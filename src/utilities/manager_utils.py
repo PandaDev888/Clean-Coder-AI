@@ -120,6 +120,26 @@ def parse_project_tasks(tasks):
     return output_string
 
 
+def cleanup_research_histories() -> None:
+    """
+    Delete every file matching research_history_task_<id>.json inside
+    .clean_coder/research_histories when <id> is not among current
+    Todoist task IDs.
+    """
+    history_dir = join_paths(work_dir, ".clean_coder", "research_histories")
+    if not os.path.exists(history_dir):
+        return
+
+    active_ids = {str(t.id) for t in fetch_tasks()}
+
+    for fname in os.listdir(history_dir):
+        if fname.startswith("research_history_task_") and fname.endswith(".json"):
+            task_id = fname[len("research_history_task_") : -len(".json")]
+            if task_id not in active_ids:
+                os.remove(join_paths(history_dir, fname))
+
+
+
 def actualize_progress_description_file(task_name_description):
     progress_description = read_progress_description()
     actualize_description_prompt = PromptTemplate.from_template(actualize_progress_description_prompt_template)
@@ -297,19 +317,6 @@ def research_second_task(task) -> None:
 
     # Run researcher on task
     researcher = Researcher(silent=True, task_id=task.id)
-    files, image_paths = researcher.research_task(
+    researcher.research_task(
         f"{task.content}\n\n{task.description}"
-    )
-
-    # Format researched files
-    files_text = "\n".join(f"- {f.filename}" for f in files)
-    images_text = "\n".join(f"- {img}" for img in image_paths)
-    researched_files_text = f"Files to modify:\n{files_text}\n\nTemplate images:\n{images_text}"
-
-    # Update task description
-    new_description = task.description + f"\n\n<researched_files>\n{researched_files_text}\n</researched_files>"
-
-    todoist_api.update_task(
-        task_id=task.id,
-        description=new_description
     )
