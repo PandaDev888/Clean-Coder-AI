@@ -21,6 +21,7 @@ from src.utilities.util_functions import (
     read_coderrules,
     convert_images,
     list_directory_tree,
+    exchange_file_contents,
     TOOL_NOT_EXECUTED_WORD,
 )
 from src.utilities.llms import init_llms_medium_intelligence
@@ -122,6 +123,7 @@ class Debugger:
                 if analysis_result:
                     state["messages"].append(HumanMessage(content=analysis_result))
 
+        state = exchange_file_contents(state, self.files, self.work_dir)
 
         return state
 
