@@ -18,7 +18,7 @@ todoist_api = TodoistAPI(os.getenv("TODOIST_API_KEY"))
 PROJECT_ID = os.getenv("TODOIST_PROJECT_ID")
 
 
-TOOL_NOT_EXECUTED_WORD = "Tool not been executed. "
+TOOL_NOT_EXECUTED_WORD = "Tool haven't been executed. "
 WRONG_TOOL_CALL_WORD = "Wrong tool call. "
 
 storyfile_template = """<This is the story of your project for a frontend feedback agent. Modify it according to commentaries provided in <> brackets.>
