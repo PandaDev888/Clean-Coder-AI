@@ -102,6 +102,10 @@ class Manager:
 
     # just functions
     def cut_off_context(self, state):
+        """
+        Trims the message history in the state to keep only the most recent context for the agent.
+        Keeps the last ~30 messages, starting from the most recent 'ai' message, and always includes the system message at the beginning.
+        """
         approx_nr_msgs_to_save = 30
         if len(state["messages"]) > approx_nr_msgs_to_save:
             last_messages = state["messages"][-approx_nr_msgs_to_save:]
